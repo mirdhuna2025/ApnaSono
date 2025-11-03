@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirdhuna</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #FFFFE0; }
+    div { width: 100%; }
+  </style>
+</head>
+<body>
+
+ 
+  <div data-html="headerlogo.html"></div>
+  <div data-html="slider.html"></div>
+  <div data-html="offer.html"></div>
+  <div data-html="content.html"></div>
+  <div data-html="footer.html"></div>
+   <div data-html="stickybar.html"></div>
+
+
+
+  <script>
+    async function loadSection(div){
+      const file = div.getAttribute('data-html');
+      try{
+        const res = await fetch(file);
+        if(!res.ok) throw new Error(`Cannot load ${file}`);
+        const text = await res.text();
+
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+
+        // Append style tags to head
+        temp.querySelectorAll('style').forEach(s => document.head.appendChild(s));
+
+        // Insert HTML without styles
+        div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+
+        // Append JS file if exists
+        const jsFile = file.replace('.html', '.js');
+        fetch(jsFile).then(r=>{
+          if(r.ok){
+            const script = document.createElement('script');
+            script.type = 'module';  // Important for Firebase
+            script.src = jsFile;
+            document.body.appendChild(script);
+          }
+        }).catch(()=>{});
+
+      } catch(e){
+        console.error(e);
+      }
+    }
+
+    document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
+  </script>
+
+</body>
+</html>
