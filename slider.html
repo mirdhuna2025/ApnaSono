@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Slider</title>
+  <style>
+    .slider-container {
+      position: relative; top:10px;
+      height: 25vh;
+      overflow: hidden;
+      border-radius: 20px 20px 20px 20px;
+      background: #333;
+    }
+    .slider {
+      display: flex;
+      height: 100%;
+      transition: transform 0.5s ease-in-out;
+    }
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+    .slider-nav {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .slider-dot.active {
+      background: #fff;
+      transform: scale(1.2);
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.3);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slider-btn:hover {
+      background: rgba(255,255,255,0.5);
+    }
+    .prev { left: 10px; }
+    .next { right: 10px; }
+    @media (max-width: 600px) {
+      .slider-btn { width: 36px; height: 36px; font-size: 0.9rem; }
+      .slider-dot { width: 8px; height: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="slider-section">
+  <div class="slider-container">
+    <div class="slider" id="slider"></div>
+    <button class="slider-btn prev">&#10094;</button>
+    <button class="slider-btn next">&#10095;</button>
+    <div class="slider-nav" id="sliderNav"></div>
+  </div>
+</section>
+
+<script type="module" src="slider.js"></script>
+
+</body>
+</html>

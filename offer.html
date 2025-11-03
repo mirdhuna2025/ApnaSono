@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Offers</title>
+  <style>
+    .offer-slider-container {
+      position: relative; top: 20px;
+      height: 12.5vh;
+      overflow: hidden;
+      border-radius: 15px 15px 15px 15px;
+      background: #2c3e50;
+    }
+    .offer-slider {
+      display: flex;
+      height: 100%;
+      transition: transform 0.2s ease-in-out;
+    }
+    .offer-slide {
+      min-width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      opacity: 0.95;
+    }
+    .offer-slide:hover {
+      opacity: 1;
+    }
+    .offer-nav {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+    .offer-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .offer-dot.active {
+      background: #fff;
+      transform: scale(1.3);
+    }
+    .offer-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .offer-btn:hover {
+      background: rgba(255,255,255,0.4);
+    }
+  
+  </style>
+</head>
+<body>
+
+<section class="offer-section">
+  <div class="offer-slider-container">
+    <div class="offer-slider" id="offerSlider"></div>
+    <button class="offer-btn prev">&#10094;</button>
+    <button class="offer-btn next">&#10095;</button>
+    <div class="offer-nav" id="offerNav"></div>
+  </div>
+</section>
+
+<script type="module" src="offer.js"></script>
+
+</body>
+</html>

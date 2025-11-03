@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mirdhuna Ultra-Premium Footer</title>
+<style>
+  body {margin:0;font-family:Arial,sans-serif;background:#ffffe0;overflow-x:hidden;}
+  
+  /* Footer container */
+  .footer {
+    position: relative;
+    color: #fff;
+    padding: 30px 8%;
+    overflow: hidden;
+    z-index: 0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+
+  /* Animated Gradient Background */
+  .footer::before {
+    content: "";
+    position: absolute;
+    top:0; left:0; width:100%; height:100%;
+    background: linear-gradient(270deg,#ff6a00,#ee0979,#ffeb3b,#ff6a00);
+    background-size: 800% 800%;
+    animation: gradientMove 20s ease infinite;
+    z-index: -2;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  @keyframes gradientMove {
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
+  }
+
+  /* Floating Particles */
+  .particle {
+    position:absolute;
+    border-radius:50%;
+    opacity:0.6;
+    background:white;
+    animation: floatParticles linear infinite;
+    pointer-events:none;
+    z-index: -1;
+  }
+  @keyframes floatParticles {
+    0% {transform: translateY(0) translateX(0);}
+    50% {transform: translateY(-15px) translateX(10px);}
+    100% {transform: translateY(0) translateX(0);}
+  }
+
+  /* Footer Grid: 2 columns to reduce height */
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    position:relative; z-index:1;
+  }
+
+  .footer-left, .footer-right {
+    flex:1;
+    min-width:250px;
+  }
+
+  /* Neon headings & links */
+  .footer-section h2, .footer-section h3 {
+    text-shadow: 0 0 5px #fff, 0 0 10px #ffeb3b, 0 0 15px #ff6a00;
+  }
+  .footer-section h2 {font-size:22px;margin-bottom:6px;}
+  .footer-section h3 {font-size:16px;margin-bottom:4px;}
+  .footer-section p, .footer-section li {margin:3px 0;line-height:1.4;color:#f0f0f0;}
+
+  .footer-links ul {list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px;}
+  .footer-links ul li a {
+    color:#fff;text-decoration:none;transition:0.3s;
+    text-shadow:0 0 3px #fff;
+  }
+  .footer-links ul li a:hover {color:#ffe600;text-shadow:0 0 10px #fff,0 0 15px #ff6a00;}
+
+  .footer-contact a {color:#fff;text-decoration:none;}
+  .footer-contact a:hover {color:#ffe600;text-shadow:0 0 10px #fff,0 0 15px #ff6a00;}
+
+  .social-icons a {
+    margin-right:10px;display:inline-block;transition:0.3s;
+    filter: drop-shadow(0 0 3px #fff);
+  }
+  .social-icons a:hover {transform:scale(1.2) rotate(10deg);filter:drop-shadow(0 0 10px #ffe600);}
+
+  .newsletter-form {display:flex;gap:5px;margin-top:8px;}
+  .newsletter-form input {
+    padding:8px 12px;border:none;border-radius:25px;flex:1;
+  }
+  .newsletter-form button {
+    padding:8px 15px;border:none;border-radius:25px;
+    background:#fff;color:#ee0979;font-weight:bold;cursor:pointer;
+    transition:0.3s; box-shadow:0 0 10px #fff;
+  }
+  .newsletter-form button:hover {background:#ffe600;color:#ee0979; box-shadow:0 0 15px #fff;}
+
+  .footer-bottom {text-align:center;padding-top:10px;font-size:13px;color:#f0f0f0;}
+
+  @keyframes ripple {from {transform:scale(0);} to {transform:scale(2); opacity:0;}}
+
+  @media(max-width:700px){
+    .footer-container {flex-direction:column;align-items:center;text-align:center;}
+    .footer-links ul {justify-content:center;}
+    .newsletter-form {flex-direction:column;}
+    .newsletter-form input, .newsletter-form button {width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<footer class="footer">
+  <!-- Floating Particles -->
+  <div class="particle" style="width:6px;height:6px;top:10%;left:20%;animation-duration:12s;"></div>
+  <div class="particle" style="width:8px;height:8px;top:30%;left:50%;animation-duration:15s;"></div>
+  <div class="particle" style="width:5px;height:5px;top:70%;left:70%;animation-duration:10s;"></div>
+  <div class="particle" style="width:7px;height:7px;top:50%;left:30%;animation-duration:14s;"></div>
+  <div class="particle" style="width:4px;height:4px;top:80%;left:80%;animation-duration:18s;"></div>
+
+  <div class="footer-container">
+    <!-- Left column: Brand + Links -->
+    <div class="footer-left">
+      <div class="footer-section footer-brand">
+        <h2>MIRDHUNA</h2>
+        <p>Pizza, Burgers, Sandwiches & Shakes delivered fresh to your doorstep!</p>
+      </div>
+      <div class="footer-section footer-links">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/">Menu</a></li>
+          <li><a href="/">About</a></li>
+          <li><a href="/">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right column: Contact + Social + Newsletter -->
+    <div class="footer-right">
+      <div class="footer-section footer-contact">
+        <h3>Contact</h3>
+        <p>📞 +91 6303438082</p>
+        <p>📍 <a href="https://maps.app.goo.gl/vQDmiuM6aMZ2tmiv5" target="_blank">Google Maps</a></p>
+        <p>✉️ <a href="mailto:mirdhuna2025@gmail.com">mirdhuna2025@gmail.com</a></p>
+      </div>
+      <div class="footer-section footer-social">
+        <h3>Follow & Subscribe</h3>
+        <form class="newsletter-form">
+          <input type="MOBILE NUMBER" placeholder="YOUR MOBILE NUMBER" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="footer-bottom">
+    <p>© 2025 MIRDHUNA. All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- Cursor sparkle particles -->
+<script>
+  const body = document.body;
+  body.addEventListener('mousemove', e=>{
+    const sparkle = document.createElement('div');
+    sparkle.style.position='absolute';
+    sparkle.style.width='4px';
+    sparkle.style.height='4px';
+    sparkle.style.background='white';
+    sparkle.style.borderRadius='50%';
+    sparkle.style.top=(e.clientY)+'px';
+    sparkle.style.left=(e.clientX)+'px';
+    sparkle.style.opacity=Math.random();
+    sparkle.style.pointerEvents='none';
+    sparkle.style.transition='all 0.5s ease-out';
+    body.appendChild(sparkle);
+    setTimeout(()=>{sparkle.remove()},500);
+  });
+</script>
+
+</body>
+</html>
