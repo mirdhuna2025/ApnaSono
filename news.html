@@ -93,13 +93,13 @@
   <div id="empty" class="empty" style="display:none;">No matching news found.</div>
 
   <script>
-    // ✅ Your real GNews API key
+    // ⚠️ WARNING: This key is EXPOSED – regenerate it after testing!
     const API_KEY = '298e25c6c3d17c9ef06ae60341677255';
     const GRID = document.getElementById('grid');
     const STATUS = document.getElementById('status');
     const EMPTY = document.getElementById('empty');
 
-    let mode = 'all'; // all | past15 | future15
+    let mode = 'all';
 
     document.getElementById('btnAll').onclick = () => { mode = 'all'; load(); };
     document.getElementById('btnPast15').onclick = () => { mode = 'past15'; load(); };
@@ -112,14 +112,16 @@
       EMPTY.style.display = 'none';
 
       try {
-        // Use a broader query to increase chances of results
         const q = encodeURIComponent('SONO Bihar OR "Bihar village" OR Bihar');
-        const url = `https://gnews.io/api/v4/search?q=${q}&token=${API_KEY}&max=10&lang=en`;
+        // 🔁 Use a CORS proxy (for testing ONLY)
+        const proxyUrl = 'https://corsproxy.io/?';
+        const targetUrl = `https://gnews.io/api/v4/search?q=${q}&token=${API_KEY}&max=10&lang=en`;
+        const url = proxyUrl + encodeURIComponent(targetUrl);
         
         const res = await fetch(url);
         if (!res.ok) {
           const errorText = await res.text();
-          throw new Error(`API error: ${res.status} ${errorText}`);
+          throw new Error(`API returned: ${res.status} ${errorText}`);
         }
         const data = await res.json();
         const items = data.articles || [];
@@ -161,12 +163,11 @@
       }
       catch (err) {
         console.error('Error:', err);
-        STATUS.textContent = 'Error fetching news: ' + (err.message || 'Unknown error');
+        STATUS.textContent = 'Error: ' + (err.message || 'Failed to load news');
         EMPTY.style.display = 'block';
       }
     }
 
-    // Load news on page load
     load();
   </script>
 
