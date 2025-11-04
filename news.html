@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SONO Village News</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #f4f6f8; 
+      color: #333; 
+      padding: 20px; 
+      margin: 0; 
+    }
+    h1 { 
+      text-align: center; 
+      margin-top: 0; 
+    }
+    .controls { 
+      text-align: center; 
+      margin: 20px 0; 
+    }
+    button { 
+      padding: 10px 16px; 
+      margin: 0 8px; 
+      cursor: pointer; 
+      border: 1px solid #ccc; 
+      background: #fff; 
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button:hover { 
+      background: #e9ecef; 
+    }
+    #grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 16px; 
+    }
+    .card { 
+      background: #fff; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      padding: 16px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    }
+    .card h3 { 
+      margin: 0 0 8px; 
+      font-size: 18px; 
+    }
+    .card a { 
+      text-decoration: none; 
+      color: #1a73e8; 
+    }
+    .card a:hover { 
+      text-decoration: underline; 
+    }
+    .meta { 
+      font-size: 12px; 
+      color: #777; 
+      margin-bottom: 8px; 
+    }
+    .excerpt { 
+      font-size: 14px; 
+      color: #444; 
+    }
+    .empty { 
+      text-align: center; 
+      margin: 40px 0; 
+      color: #777; 
+    }
+    #status { 
+      text-align: center; 
+      font-style: italic; 
+      color: #555; 
+      margin: 10px 0; 
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SONO Village – Latest News</h1>
+
+  <div class="controls">
+    <button id="btnAll">All News</button>
+    <button id="btnPast15">Past 15 Days</button>
+    <button id="btnFuture15">Upcoming/Forecast</button>
+    <button id="btnRefresh">Refresh</button>
+  </div>
+
+  <div id="status">Loading news…</div>
+  <div id="grid"></div>
+  <div id="empty" class="empty" style="display:none;">No matching news found.</div>
+
+  <script>
+    // ✅ Your real GNews API key
+    const API_KEY = '298e25c6c3d17c9ef06ae60341677255';
+    const GRID = document.getElementById('grid');
+    const STATUS = document.getElementById('status');
+    const EMPTY = document.getElementById('empty');
+
+    let mode = 'all'; // all | past15 | future15
+
+    document.getElementById('btnAll').onclick = () => { mode = 'all'; load(); };
+    document.getElementById('btnPast15').onclick = () => { mode = 'past15'; load(); };
+    document.getElementById('btnFuture15').onclick = () => { mode = 'future15'; load(); };
+    document.getElementById('btnRefresh').onclick = () => load();
+
+    async function load() {
+      STATUS.textContent = 'Fetching news…';
+      GRID.innerHTML = '';
+      EMPTY.style.display = 'none';
+
+      try {
+        // Use a broader query to increase chances of results
+        const q = encodeURIComponent('SONO Bihar OR "Bihar village" OR Bihar');
+        const url = `https://gnews.io/api/v4/search?q=${q}&token=${API_KEY}&max=10&lang=en`;
+        
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`API error: ${res.status} ${errorText}`);
+        }
+        const data = await res.json();
+        const items = data.articles || [];
+
+        const now = new Date();
+        let filtered = items.filter(item => {
+          const d = new Date(item.publishedAt);
+          if (mode === 'past15') {
+            return d >= new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000) && d <= now;
+          } else if (mode === 'future15') {
+            return d > now && d <= new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
+          }
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          EMPTY.style.display = 'block';
+          STATUS.textContent = 'No matching news found.';
+          return;
+        }
+
+        filtered.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          const safeTitle = (item.title || 'No Title').replace(/</g, '<').replace(/>/g, '>');
+          const safeDesc = (item.description || '').replace(/</g, '<').replace(/>/g, '>');
+          const sourceName = item.source?.name || 'Unknown Source';
+          const pubDate = new Date(item.publishedAt).toLocaleDateString();
+
+          card.innerHTML = `
+            <h3><a href="${item.url}" target="_blank" rel="noopener noreferrer">${safeTitle}</a></h3>
+            <div class="meta">${sourceName} · ${pubDate}</div>
+            <div class="excerpt">${safeDesc}</div>
+          `;
+          GRID.appendChild(card);
+        });
+
+        STATUS.textContent = `Showing ${filtered.length} result(s)`;
+      }
+      catch (err) {
+        console.error('Error:', err);
+        STATUS.textContent = 'Error fetching news: ' + (err.message || 'Unknown error');
+        EMPTY.style.display = 'block';
+      }
+    }
+
+    // Load news on page load
+    load();
+  </script>
+
+</body>
+</html>
