@@ -1,203 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sono Weather Widget</title>
-<style>
-  *{box-sizing:border-box;font-family:'Poppins',sans-serif;}
-  body{background:transparent;margin:0;padding:10px;display:flex;justify-content:center;}
-  
-  .weather-widget{
-    width:140px; top: 120px;
-    background:linear-gradient(135deg,#4f8df5,#6bb6ff);
-    color:#fff;
-    border-radius:20px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.25);
-    overflow:hidden;
-    transition:all 0.4s ease;
-    cursor:pointer;
-    position:relative;
-  }
-  .header{
-    text-align:center;
-    padding:15px 10px;
-  }
-  .header h2{margin:0;font-size:17px;font-weight:600;}
-  .temp{font-size:36px;font-weight:700;margin:8px 0;}
-  .weather-icon{font-size:px;}
-  .more-btn{
-    background:rgba(255,255,255,0.2);
-    border:none;
-    padding:6px 14px;
-    border-radius:20px;
-    color:#fff;
-    cursor:pointer;
-    font-size:13px;
-    margin-top:5px;
-  }
-  .details{
-    max-height:0;
-    overflow:hidden;
-    background:rgba(255,255,255,0.1);
-    transition:max-height .6s ease;
-  }
-  .details.show{
-    max-height:650px;
-  }
-  .search-bar{
-    display:flex;
-    justify-content:center;
-    padding:8px;
-  }
-  .search-bar input{
-    width:70%;padding:6px 10px;border-radius:20px;border:none;outline:none;
-  }
-  .search-bar button{
-    margin-left:5px;border:none;background:#fff;color:#4f8df5;
-    border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;
-  }
-  .tabs{
-    display:flex;justify-content:center;gap:10px;margin:8px 0;
-  }
-  .tab-btn{
-    background:rgba(255,255,255,0.2);
-    border:none;padding:6px 12px;border-radius:20px;color:#fff;
-    cursor:pointer;transition:.3s;
-  }
-  .tab-btn.active,.tab-btn:hover{background:rgba(255,255,255,0.4);}
-  .forecast{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));
-    gap:8px;padding:8px 12px 15px;
-  }
-  .day-card{
-    background:rgba(255,255,255,0.25);
-    border-radius:12px;text-align:center;
-    padding:6px;transition:transform .2s;
-  }
-  .day-card:hover{transform:translateY(-3px);}
-  .day-card h4{margin:2px 0;font-size:12px;}
-  .day-card p{margin:2px 0;font-size:11px;}
-  .close-btn{
-    position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.3);
-    border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;
-    color:#fff;font-weight:bold;display:none;
-  }
-  .details.show ~ .close-btn{display:block;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather - Sono Bihar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { margin: 0; background: transparent; }
+
+    .weather-widget {
+      width: 260px;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      border-radius: 18px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .weather-widget:hover { transform: scale(1.03); }
+
+    .weather-main {
+      text-align: center;
+    }
+
+    .weather-temp {
+      font-size: 36px;
+      font-weight: 600;
+    }
+
+    .weather-city {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      height: 80vh;
+      background: #ffffff;
+      color: #333;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -55%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      background: #ff4b5c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .weather-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 50px;
+    }
+
+    .weather-item {
+      background: #f3f6fa;
+      border-radius: 12px;
+      text-align: center;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .search-box input {
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 70%;
+      font-size: 14px;
+    }
+
+    .search-box button {
+      padding: 8px 12px;
+      margin-left: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #00aaff;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .switch-btns {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .switch-btns button {
+      background: #00aaff;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-
-<div class="weather-widget" id="weatherWidget">
-  <div class="header">
-    <h2 id="city">Sono, Bihar</h2>
-    <div class="temp" id="temp">--°C</div>
-    <div class="weather-icon" id="icon">☀️</div>
-    <button class="more-btn" id="moreBtn">More</button>
-  </div>
-  <div class="details" id="details">
-    <div class="search-bar">
-      <input type="text" id="searchCity" placeholder="Search city...">
-      <button id="searchBtn">🔍</button>
+  <div class="weather-widget" id="weatherWidget">
+    <div class="weather-main">
+      <div class="weather-city" id="city">Sono, Bihar</div>
+      <div class="weather-temp" id="temp">--°C</div>
+      <div class="weather-desc" id="desc">Loading...</div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn active" id="pastBtn">Past 15 Days</button>
-      <button class="tab-btn" id="futureBtn">Next 15 Days</button>
-    </div>
-    <div class="forecast" id="forecast"></div>
   </div>
-  <button class="close-btn" id="closeBtn">✕</button>
-</div>
 
-<script>
-const widget=document.getElementById("weatherWidget");
-const details=document.getElementById("details");
-const moreBtn=document.getElementById("moreBtn");
-const closeBtn=document.getElementById("closeBtn");
-const cityEl=document.getElementById("city");
-const tempEl=document.getElementById("temp");
-const iconEl=document.getElementById("icon");
-const forecastEl=document.getElementById("forecast");
-const pastBtn=document.getElementById("pastBtn");
-const futureBtn=document.getElementById("futureBtn");
-const searchBtn=document.getElementById("searchBtn");
+  <div class="expanded" id="expandedWeather">
+    <button class="close-btn" id="closeBtn">×</button>
+    <div class="search-box">
+      <input type="text" id="cityInput" placeholder="Enter city...">
+      <button id="searchBtn">Search</button>
+    </div>
+    <div class="switch-btns">
+      <button id="pastBtn">Past 15 Days</button>
+      <button id="futureBtn">Future 15 Days</button>
+    </div>
+    <div class="weather-list" id="weatherList"></div>
+  </div>
 
-let lat=24.55, lon=86.41;
-let currentCity="Sono, Bihar";
-let dailyData={};
-
-function weatherIcon(code){
-  if(code<3)return"☀️";
-  if(code<45)return"🌤️";
-  if(code<60)return"🌦️";
-  if(code<80)return"🌧️";
-  return"⛈️";
-}
-
-async function getWeather(latitude=lat,longitude=lon,city=currentCity){
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&past_days=15&forecast_days=16&timezone=auto`;
-  const res=await fetch(url);
-  const data=await res.json();
-  const today=data.current_weather;
-  tempEl.innerHTML=`${today.temperature}°C`;
-  iconEl.innerHTML=weatherIcon(today.weathercode);
-  cityEl.innerHTML=city;
-  dailyData=data.daily;
-  showPast();
-}
-
-function showPast(){
-  pastBtn.classList.add("active");
-  futureBtn.classList.remove("active");
-  const days=dailyData.time.slice(0,15);
-  forecastEl.innerHTML=days.map((d,i)=>
-    `<div class="day-card">
-      <h4>${new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}</h4>
-      <div>${weatherIcon(dailyData.weathercode[i])}</div>
-      <p>${dailyData.temperature_2m_max[i]}° / ${dailyData.temperature_2m_min[i]}°</p>
-    </div>`
-  ).join("");
-}
-
-function showFuture(){
-  pastBtn.classList.remove("active");
-  futureBtn.classList.add("active");
-  const start=15;
-  const days=dailyData.time.slice(start);
-  forecastEl.innerHTML=days.map((d,i)=>
-    `<div class="day-card">
-      <h4>${new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}</h4>
-      <div>${weatherIcon(dailyData.weathercode[start+i])}</div>
-      <p>${dailyData.temperature_2m_max[start+i]}° / ${dailyData.temperature_2m_min[start+i]}°</p>
-    </div>`
-  ).join("");
-}
-
-searchBtn.onclick=async()=>{
-  const query=document.getElementById("searchCity").value;
-  if(!query)return;
-  const geo=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}`);
-  const data=await geo.json();
-  if(!data.results?.length){alert("City not found!");return;}
-  const {latitude,longitude,name,country}=data.results[0];
-  lat=latitude;lon=longitude;
-  currentCity=`${name}, ${country}`;
-  await getWeather(lat,lon,currentCity);
-};
-
-pastBtn.onclick=showPast;
-futureBtn.onclick=showFuture;
-
-moreBtn.onclick=()=>{
-  details.classList.add("show");
-  moreBtn.style.display="none";
-};
-closeBtn.onclick=()=>{
-  details.classList.remove("show");
-  moreBtn.style.display="inline-block";
-};
-
-getWeather();
-</script>
+  <script src="weather.js"></script>
 </body>
 </html>
+
