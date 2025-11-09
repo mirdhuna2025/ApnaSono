@@ -42,8 +42,8 @@
       padding: 0 16px;
     }
 
-    /* Google Search styles */
-    .gcse-search, .gcse-searchresults {
+    /* Google Search styling */
+    .gcse-searchresults-only {
       width: 100% !important;
     }
 
@@ -99,7 +99,7 @@
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-      z-index: 1000;
+      z-index: 9999;
       transition: all 0.3s ease;
     }
 
@@ -127,15 +127,16 @@
   </footer>
 
   <!-- Floating NEWS button -->
-  <button id="newsBtn" title="Go to News Page">NEWS</button>
+  <button id="newsBtn" onclick="goToNews()">NEWS</button>
 
+  <!-- Script -->
   <script>
-    // Redirect when NEWS button is clicked
-    document.getElementById("newsBtn").addEventListener("click", () => {
+    // ✅ Always works: redirect when button clicked
+    function goToNews() {
       window.location.href = "https://apnasono.in/news";
-    });
+    }
 
-    // Auto-run Google search for Sono Jhajha Jamui
+    // ✅ Auto-run Google search for "Sono Jhajha Jamui"
     function runSearch() {
       const query = "sono jhajha jamui";
       try {
@@ -152,13 +153,11 @@
       return false;
     }
 
-    // Retry for up to 5 seconds
+    // Retry until ready
     let attempts = 0;
     const maxAttempts = 17;
     const interval = setInterval(() => {
-      if (runSearch() || ++attempts >= maxAttempts) {
-        clearInterval(interval);
-      }
+      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
     }, 300);
   </script>
 </body>
