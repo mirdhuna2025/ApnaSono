@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Slide Admin</title>
+  <title>Sono Admin</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -80,7 +80,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🔥 Slide Admin Panel</h1>
+    <h1>🔥 Sono Admin Panel</h1>
 
     <div class="form-group">
       <label>Image URL</label>
@@ -91,12 +91,12 @@
       <input type="text" id="urlInput" placeholder="https://example.com/target" />
     </div>
     <div class="btn-group">
-      <button id="saveBtn" class="btn-primary">Add Slide</button>
+      <button id="saveBtn" class="btn-primary">Add Sono</button>
       <button id="cancelBtn" class="btn-cancel" style="display:none;">Cancel</button>
     </div>
 
     <div class="slide-list">
-      <h2>Current Slides</h2>
+      <h2>Current Sono Items</h2>
       <div id="slidesList">Loading...</div>
     </div>
   </div>
@@ -121,7 +121,7 @@
         firebase.initializeApp(firebaseConfig);
       }
       const db = firebase.database();
-      const slidesRef = db.ref('slides');
+      const sonoRef = db.ref('sono'); // ✅ CHANGED: 'slides' → 'sono'
 
       const imageInput = document.getElementById('imageInput');
       const urlInput = document.getElementById('urlInput');
@@ -131,24 +131,24 @@
 
       let editingKey = null;
 
-      // Load slides
-      slidesRef.on('value', (snapshot) => {
+      // Load sono items
+      sonoRef.on('value', (snapshot) => {
         const data = snapshot.val();
         slidesList.innerHTML = '';
         if (!data) {
-          slidesList.innerHTML = '<p>📭 No slides yet. Add one below!</p>';
+          slidesList.innerHTML = '<p>📭 No sono items yet. Add one below!</p>';
           return;
         }
 
-        Object.entries(data).forEach(([key, slide]) => {
+        Object.entries(data).forEach(([key, item]) => {
           const div = document.createElement('div');
           div.className = 'slide-item';
-          const imgSrc = slide.image || 'https://via.placeholder.com/80x50?text=No+Image';
+          const imgSrc = item.image || 'https://via.placeholder.com/80x50?text=No+Image';
           div.innerHTML = `
             <img src="${imgSrc}" class="slide-thumb" onerror="this.src='https://via.placeholder.com/80x50?text=Err'">
             <div class="slide-info">
-              <div><strong>Image:</strong> ${slide.image || '—'}</div>
-              <div class="slide-url"><strong>Link:</strong> ${slide.url || '—'}</div>
+              <div><strong>Image:</strong> ${item.image || '—'}</div>
+              <div class="slide-url"><strong>Link:</strong> ${item.url || '—'}</div>
             </div>
             <div class="actions">
               <button class="edit" data-key="${key}">Edit</button>
@@ -166,15 +166,15 @@
             imageInput.value = s.image || '';
             urlInput.value = s.url || '';
             editingKey = key;
-            saveBtn.textContent = 'Update Slide';
+            saveBtn.textContent = 'Update Sono';
             cancelBtn.style.display = 'inline-block';
           };
         });
 
         document.querySelectorAll('.delete').forEach(btn => {
           btn.onclick = (e) => {
-            if (confirm('⚠️ Delete this slide?')) {
-              db.ref('slides/' + e.target.dataset.key).remove();
+            if (confirm('⚠️ Delete this sono item?')) {
+              db.ref('sono/' + e.target.dataset.key).remove(); // ✅ 'slides' → 'sono'
             }
           };
         });
@@ -189,9 +189,9 @@
         }
         const payload = { image, url };
         if (editingKey) {
-          db.ref('slides/' + editingKey).set(payload).then(resetForm);
+          db.ref('sono/' + editingKey).set(payload).then(resetForm); // ✅ 'slides' → 'sono'
         } else {
-          slidesRef.push(payload).then(resetForm);
+          sonoRef.push(payload).then(resetForm); // ✅ uses sonoRef
         }
       };
 
@@ -201,7 +201,7 @@
         imageInput.value = '';
         urlInput.value = '';
         editingKey = null;
-        saveBtn.textContent = 'Add Slide';
+        saveBtn.textContent = 'Add Sono';
         cancelBtn.style.display = 'none';
       }
     });
