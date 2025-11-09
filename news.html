@@ -2,63 +2,183 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>News about Sono Village</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News from Sono Village, Bihar</title>
+  <meta name="description" content="Latest updates, news, and information about Sono village in Bihar, India." />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📣</text></svg>" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 0 15px;
-      background: #f9f9f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
       color: #333;
+      background-color: #fafafa;
+      padding: 20px;
     }
-    h1 {
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
       text-align: center;
-      color: #2c3e50;
+      margin-bottom: 30px;
+      padding: 20px 0;
     }
-    #news-container {
-      margin-top: 20px;
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #1a365d;
     }
-    .article {
+
+    .tagline {
+      font-size: 1rem;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    #google-search-results {
       background: white;
       border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 20px;
     }
-    .title {
-      font-size: 1.3em;
-      color: #1a0dab;
-      text-decoration: none;
-      font-weight: 600;
+
+    /* Google CSE custom styling */
+    .gsc-result {
+      margin-bottom: 1.5rem !important;
+      padding-bottom: 1.2rem !important;
+      border-bottom: 1px solid #eee !important;
     }
-    .title:hover {
-      text-decoration: underline;
+
+    .gsc-result:last-child {
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
     }
-    .description {
-      margin: 10px 0;
-      line-height: 1.5;
+
+    .gs-title a {
+      font-size: 1.15rem !important;
+      color: #1a0dab !important;
+      text-decoration: none !important;
+      font-weight: 500 !important;
     }
-    .meta {
-      font-size: 0.85em;
-      color: #666;
+
+    .gs-title a:hover {
+      text-decoration: underline !important;
     }
+
+    .gs-snippet {
+      color: #545454 !important;
+      font-size: 0.95rem !important;
+      margin: 6px 0 !important;
+    }
+
+    .gs-visibleUrl {
+      color: #006621 !important;
+      font-size: 0.85rem !important;
+    }
+
+    .gsc-webResult .gsc-url-top {
+      margin-top: 4px !important;
+    }
+
+    /* Hide Google branding (allowed under ToS if attribution remains) */
+    .gsc-branding {
+      display: none !important;
+    }
+
     .loading {
       text-align: center;
-      font-size: 1.1em;
-      color: #555;
+      padding: 30px;
+      color: #666;
+      font-style: italic;
     }
-    .error {
-      color: #e74c3c;
+
+    footer {
       text-align: center;
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      h1 { font-size: 1.5rem; }
+      #google-search-results { padding: 15px; }
     }
   </style>
 </head>
 <body>
-  <h1>News about Sono Village</h1>
-  <div id="news-container" class="loading">Loading news...</div>
+  <div class="container">
+    <header>
+      <h1>📢 News & Updates: Sono Village, Bihar</h1>
+      <p class="tagline">Automatically refreshed on every page load — sourced from Indian news, government portals, and local reports.</p>
+    </header>
 
-  <script src="news.js"></script>
+    <main>
+      <div id="google-search-results">
+        <div class="loading">🔍 Fetching latest news about <strong>Sono village, Bihar</strong>...</div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Powered by Google Programmable Search Engine | Updated in real-time</p>
+    </footer>
+  </div>
+
+  <!-- Google CSE Integration -->
+  <script>
+    // 🔴 REPLACE WITH YOUR OWN CSE ID FROM https://cse.google.com
+    const CSE_ID = "012345678901234567890:abcdefg"; // ←⚠️ MUST REPLACE!
+
+    // Fixed query — always "Sono village Bihar"
+    const DEFAULT_QUERY = "Sono village Bihar site:.in OR site:.gov.in OR dainikbhaskar.com OR prabhatkhabar.com OR jagran.com OR hindustan.com";
+
+    // Callback after Google CSE JS loads
+    window.__gcse = {
+      callback: function() {
+        const container = document.getElementById('google-search-results');
+        container.innerHTML = ''; // Clear loading text
+
+        // Create search results container
+        const searchElement = document.createElement('gcse:searchresults-only');
+        searchElement.setAttribute('queryParameterName', 'q');
+        container.appendChild(searchElement);
+
+        // Execute search
+        if (typeof google !== 'undefined' && google.search && google.search.CustomSearchControl) {
+          const search = new google.search.CustomSearchControl();
+          search.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+          search.draw('google-search-results');
+          search.execute(DEFAULT_QUERY);
+        } else {
+          container.innerHTML = '<p style="color:#d32f2f;">❌ Failed to load search. Please check your CSE ID or internet connection.</p>';
+        }
+      }
+    };
+
+    // Load Google CSE script
+    (function() {
+      const gcse = document.createElement('script');
+      gcse.type = 'text/javascript';
+      gcse.async = true;
+      gcse.src = `https://cse.google.com/cse.js?cx=${CSE_ID}`;
+      const s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
 </body>
 </html>
