@@ -53,7 +53,7 @@
   <div class="container">
     <header>
       <h1>🗞️ Today's News from Sono Village, Jamui (Bihar)</h1>
-      <p class="tagline">Live headlines — sourced from Google News (auto-updated on load)</p>
+      <p class="tagline">Sorted by latest date — sourced from Google News</p>
     </header>
 
     <main>
@@ -63,7 +63,7 @@
     </main>
 
     <footer>
-      <p>Data from Google News RSS • Updated on every page load</p>
+      <p>Data from Google News RSS • Auto-sorted by date • Updated on every load</p>
     </footer>
   </div>
 
@@ -74,7 +74,7 @@
       // ✅ Google News RSS URL (search: "Today Sono village Jamui Bihar")
       const rssUrl = 'https://news.google.com/rss/search?q=Today%20Sono%20village%20Jamui%20Bihar&hl=en-IN&gl=IN&ceid=IN:en';
 
-      // Using rss2json API (free, no backend needed)
+      // rss2json API proxy
       const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
       fetch(apiUrl)
@@ -87,18 +87,23 @@
             throw new Error('No articles found');
           }
 
+          // ✅ Sort articles by pubDate (latest first)
+          const sortedArticles = data.items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
           container.innerHTML = '';
-          const articles = data.items.slice(0, 12); // Show top 12 news
+          const articles = sortedArticles.slice(0, 12); // Top 12 latest news
 
           articles.forEach(item => {
             const title = item.title.replace(/<[^>]*>/g, '');
             const snippet = (item.description || '').replace(/<[^>]*>/g, '').substring(0, 200) + '…';
 
             const pubDate = new Date(item.pubDate);
-            const dateStr = pubDate.toLocaleDateString('en-IN', {
-              day: 'numeric',
+            const dateStr = pubDate.toLocaleString('en-IN', {
+              day: '2-digit',
               month: 'short',
-              year: 'numeric'
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
             });
 
             const articleEl = document.createElement('div');
@@ -106,7 +111,7 @@
             articleEl.innerHTML = `
               <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="title">${title}</a>
               <p class="snippet">${snippet}</p>
-              <p class="meta">Source: ${item.creator || 'Google News'} • ${dateStr}</p>
+              <p class="meta">🕒 ${dateStr} • ${item.creator || 'Google News'}</p>
             `;
             container.appendChild(articleEl);
           });
