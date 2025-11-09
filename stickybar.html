@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticky Bar Example</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Sticky bar styling */
+    #stickyBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #2c3e50;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    .bar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #ecf0f1;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 8px 16px;
+      transition: color 0.3s;
+    }
+
+    .bar-btn i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .bar-btn:hover {
+      color: #3498db;
+    }
+
+    /* Optional: push content down to avoid overlap */
+    body {
+      padding-bottom: 70px; /* height of sticky bar + some margin */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Bar -->
+  <nav id="stickyBar">
+    <a href="https://apnasono.in" class="bar-btn" id="homeBtn">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="login.html" class="bar-btn" id="loginBtn">
+      <i class="fas fa-user-circle"></i>
+      <span>Login</span>
+    </a>
+    <a href="https://apnasono.in/news" class="bar-btn" id="newsBtn">
+      <i class="fas fa-newspaper"></i>
+      <span>News</span>
+    </a>
+    
+    <!-- Add more buttons here later, e.g. -->
+    <!--
+    <a href="#" class="bar-btn" id="otherBtn">
+      <i class="fas fa-ellipsis-h"></i>
+      <span>More</span>
+    </a>
+    -->
+  </nav>
+
+  <script src="sticky-bar.js"></script>
+</body>
+</html>
