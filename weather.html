@@ -4,22 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Floating Weather Widget - Sono Bihar</title>
- 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      background: transparent;
+      background: #f5f7fa;
+      min-height: 100vh;
     }
 
-    /* Floating container */
+    /* Floating compact widget */
     #weatherWidget {
       position: fixed;
       top: 25px;
       right: 50px;
       z-index: 9999;
-      width: 50px; /* Reduced width for temp-only */
+      width: 50px;
       height: 30px;
       background: linear-gradient(135deg, #89f7fe, #66a6ff);
       border-radius: 50px;
@@ -42,52 +43,53 @@
     #weatherWidget.expanded {
       position: fixed;
       top: 50%;
-      right: 50%;
-      transform: translate(50%, -50%);
-      width: 95%;
-      height: 90vh;
-      cursor: default;
-      overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90vw;
+      max-width: 800px;
+      min-height: 60vh;
+      max-height: 90vh;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
       border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      overflow-y: auto;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 15px;
     }
 
+    /* Compact temp display */
     .today {
       text-align: center;
-      padding: 10px;
     }
 
-    .today p { 
-      margin: 0; 
+    .today p {
+      margin: 0;
       font-size: 18px;
       font-weight: bold;
     }
 
-    .forecast {
+    /* Expanded content visibility */
+    #weatherWidget:not(.expanded) #expandedContent {
       display: none;
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 10px;
-      margin: 10px;
     }
 
-    #weatherWidget.expanded .forecast {
+    #weatherWidget.expanded .today {
+      display: none;
+    }
+
+    #weatherWidget.expanded #expandedContent {
       display: block;
+      width: 100%;
     }
 
-    .forecast-day {
-      background: rgba(255,255,255,0.15);
-      margin: 6px 0;
-      padding: 8px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
+    /* Close button */
     #closeBtn {
       display: none;
       position: absolute;
-      top: 10px;
+      top: 15px;
       right: 15px;
       background: rgba(0,0,0,0.4);
       color: #fff;
@@ -100,39 +102,112 @@
       z-index: 10000;
     }
 
-    #weatherWidget.expanded #closeBtn { 
-      display: block; 
+    #weatherWidget.expanded #closeBtn {
+      display: block;
     }
 
-    #searchContainer {
-      display: none;
-      text-align: center;
-      margin: 10px;
+    /* Search section */
+    .search-section {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
     }
 
-    #weatherWidget.expanded #searchContainer { 
-      display: block; 
-    }
-
-    input {
+    .search-section input {
+      flex: 1;
+      padding: 10px 15px;
       border: none;
       border-radius: 8px;
-      padding: 6px 10px;
+      font-size: 16px;
       outline: none;
-      margin-right: 4px;
+      background: rgba(255,255,255,0.85);
+      color: #333;
     }
 
-    button {
+    .search-section button {
       background: #004aad;
       color: white;
       border: none;
-      padding: 6px 10px;
+      padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: bold;
     }
 
-    button:hover {
+    .search-section button:hover {
       background: #00327a;
+    }
+
+    /* Forecast section */
+    .forecast-section h3 {
+      text-align: center;
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    #forecastContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .forecast-day {
+      background: rgba(255,255,255,0.2);
+      padding: 12px 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      transition: background 0.2s ease;
+    }
+
+    .forecast-day:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .forecast-day span:first-child {
+      font-weight: bold;
+      min-width: 70px;
+    }
+
+    .forecast-day img {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      #weatherWidget {
+        top: 15px;
+        right: 15px;
+      }
+
+      #weatherWidget.expanded {
+        width: 95vw;
+        padding: 15px;
+      }
+
+      .search-section {
+        flex-direction: column;
+      }
+
+      .forecast-day {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 4px;
+      }
+
+      .forecast-day span:first-child {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -140,33 +215,26 @@
   <div id="weatherWidget">
     <button id="closeBtn">&times;</button>
 
+    <!-- Compact View (temp only) -->
     <div class="today" id="todayWeather">
-      <p>--°C</p> <!-- ✅ Only temp will appear here -->
+      <p>--°C</p>
     </div>
 
-    <div id="searchContainer">
-      <input type="text" id="cityInput" placeholder="Search city..." />
-      <button id="searchBtn">Search</button>
-    </div>
+    <!-- Expanded View (hidden by default) -->
+    <div id="expandedContent">
+      <div class="search-section">
+        <input type="text" id="cityInput" placeholder="Search city..." />
+        <button id="searchBtn">Search</button>
+      </div>
 
-    <div class="forecast" id="forecastContainer"></div>
+      <div class="forecast-section">
+        <h3 id="forecastTitle">Sono — Next 6 Days</h3>
+        <div id="forecastContainer">
+          <!-- Forecast loaded by JS -->
+        </div>
+      </div>
+    </div>
   </div>
-
-  <script>
-    const widget = document.getElementById("weatherWidget");
-    const closeBtn = document.getElementById("closeBtn");
-
-    widget.addEventListener("click", (e) => {
-      if (!widget.classList.contains("expanded") && e.target.id !== "closeBtn" && e.target.id !== "searchBtn" && e.target.id !== "cityInput") {
-        widget.classList.add("expanded");
-      }
-    });
-
-    closeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      widget.classList.remove("expanded");
-    });
-  </script>
 
   <script src="weather.js"></script>
 </body>
