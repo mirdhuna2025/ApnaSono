@@ -4,215 +4,131 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>News from Sono Village, Bihar</title>
-  <meta name="description" content="Latest updates, news, and information about Sono village in Bihar, India." />
-
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📣</text></svg>" />
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #fafafa;
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
       padding: 20px;
     }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding: 20px 0;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 600;
-      color: #1a365d;
-    }
-
-    .tagline {
-      font-size: 1rem;
-      color: #555;
-      margin-top: 8px;
-    }
-
-    #google-search-results {
+    .container { max-width: 800px; margin: 0 auto; }
+    header { text-align: center; margin: 20px 0; }
+    h1 { font-size: 1.8rem; color: #0f172a; }
+    .tagline { color: #64748b; margin-top: 8px; }
+    #news-container {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.03);
       padding: 20px;
-      min-height: 200px;
     }
-
-    /* Google CSE styling override */
-    .gsc-result-info-container,
-    .gsc-sort-filter-container {
-      display: none !important;
+    .article {
+      padding: 16px 0;
+      border-bottom: 1px solid #e2e8f0;
     }
-
-    .gsc-result {
-      margin-bottom: 1.5rem !important;
-      padding-bottom: 1.2rem !important;
-      border-bottom: 1px solid #eee !important;
+    .article:last-child { border-bottom: none; }
+    .title {
+      font-size: 1.15rem;
+      color: #0d5ab9;
+      text-decoration: none;
+      font-weight: 500;
     }
-
-    .gsc-result:last-child {
-      border-bottom: none !important;
-      margin-bottom: 0 !important;
+    .title:hover { text-decoration: underline; }
+    .snippet {
+      color: #475569;
+      margin: 8px 0;
+      font-size: 0.95rem;
     }
-
-    .gs-title a {
-      font-size: 1.15rem !important;
-      color: #1a0dab !important;
-      text-decoration: none !important;
-      font-weight: 500 !important;
-    }
-
-    .gs-title a:hover {
-      text-decoration: underline !important;
-    }
-
-    .gs-snippet {
-      color: #545454 !important;
-      font-size: 0.95rem !important;
-      margin: 6px 0 !important;
-    }
-
-    .gs-visibleUrl {
-      color: #006621 !important;
-      font-size: 0.85rem !important;
-    }
-
-    .gsc-webResult .gsc-url-top {
-      margin-top: 4px !important;
-    }
-
-    /* Hide Google branding (ToS-compliant — attribution remains small/visible) */
-    .gsc-branding {
-      margin-top: 20px !important;
-      font-size: 0.75rem !important;
-    }
-
-    .gsc-branding-text {
-      display: none !important;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 30px;
-      color: #1976d2;
-      font-style: italic;
-      font-size: 1.1rem;
-    }
-
-    .error {
-      padding: 20px;
-      background: #ffebee;
-      color: #c62828;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 30px;
+    .meta {
       font-size: 0.85rem;
-      color: #777;
+      color: #64748b;
     }
-
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      h1 { font-size: 1.5rem; }
-      #google-search-results { padding: 15px; }
-    }
+    .loading { text-align: center; padding: 30px; color: #3b82f6; }
+    .error { padding: 20px; background: #fee2e2; color: #b91c1c; border-radius: 6px; }
+    footer { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #94a3b8; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>📢 News & Updates: Sono Village, Bihar</h1>
-      <p class="tagline">Automatically refreshed on every page load — sourced from Indian news, government portals, and local reports.</p>
+      <h1>📢 News from Sono Village, Bihar</h1>
+      <p class="tagline">Latest updates — sourced from Google News (auto-refreshed on load)</p>
     </header>
 
     <main>
-      <div id="google-search-results">
-        <div class="loading">🔍 Fetching latest news about <strong>Sono village, Bihar</strong>...</div>
+      <div id="news-container">
+        <div class="loading">🔍 Loading news about <strong>Sono village, Bihar</strong>...</div>
       </div>
     </main>
 
     <footer>
-      <p>Powered by Google Search | Results include .in, .gov.in, and local Bihar news sites</p>
+      <p>Data from Google News RSS • Updated on every page load</p>
     </footer>
   </div>
 
-  <!-- Google CSE — Using a real, working public engine -->
   <script>
-    // ✅ REAL, WORKING CSE ID (Public, created for Sono village Bihar)
-    // You can replace this later with your own at https://cse.google.com
-    const CSE_ID = "a3bfb8e2e3f5c4b38";
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('news-container');
 
-    // Query: Prioritize Indian/local sources
-    const DEFAULT_QUERY = "Sono village Bihar site:.in OR site:.gov.in OR dainikbhaskar.com OR prabhatkhabar.com OR jagran.com";
+      // ✅ Google News RSS URL (search: "Sono village Bihar")
+      // Encoded query: Sono%20village%20Bihar
+      // hl=en-IN, gl=IN, ceid=IN:en → India-focused
+      const rssUrl = 'https://news.google.com/rss/search?q=Sono%20village%20Bihar&hl=en-IN&gl=IN&ceid=IN:en';
 
-    // Callback after Google CSE loads
-    window.__gcse = {
-      callback: function() {
-        const container = document.getElementById('google-search-results');
-        
-        // Check if Google search is ready
-        if (typeof google === 'undefined' || !google.search || !google.search.CustomSearchControl) {
+      // Free CORS proxy (rss2json.com) — no backend needed
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+      fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          if (data.status !== 'ok' || !data.items || data.items.length === 0) {
+            throw new Error('No articles found');
+          }
+
+          container.innerHTML = '';
+          const articles = data.items.slice(0, 12); // Top 12
+
+          articles.forEach(item => {
+            // Clean title & snippet
+            const title = item.title.replace(/<[^>]*>/g, '');
+            const snippet = (item.description || '').replace(/<[^>]*>/g, '').substring(0, 200) + '…';
+
+            // Parse date
+            const pubDate = new Date(item.pubDate);
+            const dateStr = pubDate.toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            });
+
+            const articleEl = document.createElement('div');
+            articleEl.className = 'article';
+            articleEl.innerHTML = `
+              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="title">${title}</a>
+              <p class="snippet">${snippet}</p>
+              <p class="meta">Source: ${item.creator || 'Google News'} • ${dateStr}</p>
+            `;
+            container.appendChild(articleEl);
+          });
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
           container.innerHTML = `
             <div class="error">
-              ❌ Failed to load Google Search.<br>
-              Please check your internet connection or disable ad blockers.
-            </div>`;
-          return;
-        }
-
-        try {
-          // Clear loader
-          container.innerHTML = '';
-
-          // Initialize search
-          const search = new google.search.CustomSearchControl();
-          search.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-          
-          // Draw into container
-          search.draw('google-search-results');
-          
-          // Execute search
-          search.execute(DEFAULT_QUERY);
-          
-        } catch (e) {
-          console.error("Search init error:", e);
-          container.innerHTML = `<div class="error">⚠️ Search error: ${e.message}</div>`;
-        }
-      }
-    };
-
-    // Load Google CSE script
-    (function() {
-      const gcse = document.createElement('script');
-      gcse.type = 'text/javascript';
-      gcse.async = true;
-      gcse.src = `https://cse.google.com/cse.js?cx=${CSE_ID}`;
-      const s = document.getElementsByTagName('script')[0];
-      s.parentNode.insertBefore(gcse, s);
-    })();
+              ❌ Could not load news.<br>
+              Possible reasons:<br>
+              • Temporary Google News downtime<br>
+              • Ad blocker blocking RSS (try disabling)<br>
+              • Very low connectivity<br><br>
+              <small>Error: ${err.message}</small>
+            </div>
+          `;
+        });
+    });
   </script>
 </body>
 </html>
