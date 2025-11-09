@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Chat Pro</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b0c10;
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #1f2833;
+      padding: 10px;
+      text-align: center;
+      color: #66fcf1;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      background: #1f2833;
+      border-radius: 12px;
+      padding: 10px;
+      max-width: 75%;
+      position: relative;
+    }
+    .msg img.profile {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #66fcf1;
+      margin-bottom: 4px;
+    }
+    .msg-content img, .msg-content video {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 5px;
+    }
+    .msg-actions {
+      margin-top: 5px;
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: #c5c6c7;
+    }
+    .msg-actions button {
+      background: none;
+      border: none;
+      color: #66fcf1;
+      cursor: pointer;
+    }
+    .reply-box {
+      margin-top: 10px;
+      padding-left: 20px;
+      border-left: 2px solid #45a29e;
+    }
+    form {
+      background: #1f2833;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    input[type="file"] {
+      color: #66fcf1;
+    }
+    button {
+      background: #66fcf1;
+      color: #0b0c10;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #login-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    #login-section input {
+      margin: 5px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <header>💬 Community Chat Pro</header>
+
+  <div id="login-section">
+    <h2>Enter your name & optional profile pic</h2>
+    <input type="text" id="username" placeholder="Your Name" required />
+    <input type="file" id="profilePic" accept="image/*" />
+    <button id="loginBtn">Enter Chat</button>
+  </div>
+
+  <div id="chat-box" style="display:none;"></div>
+
+  <form id="chat-form" style="display:none;">
+    <input type="text" id="messageInput" placeholder="Write a message..." required />
+    <input type="file" id="fileInput" accept="image/*,video/*" />
+    <button type="submit">Send</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // 🔥 Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+
+    const loginSection = document.getElementById("login-section");
+    const chatBox = document.getElementById("chat-box");
+    const chatForm = document.getElementById("chat-form");
+    const msgInput = document.getElementById("messageInput");
+    const fileInput = document.getElementById("fileInput");
+
+    let currentUser = null;
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const username = document.getElementById("username").value.trim();
+      const profileFile = document.getElementById("profilePic").files[0];
+      if (!username) return alert("Please enter a name!");
+
+      await signInAnonymously(auth);
+      let profileURL = "https://api.dicebear.com/7.x/thumbs/svg?seed=" + encodeURIComponent(username);
+
+      if (profileFile) {
+        const fileRef = sRef(storage, "profiles/" + Date.now() + "_" + profileFile.name);
+        await uploadBytes(fileRef, profileFile);
+        profileURL = await getDownloadURL(fileRef);
+      }
+
+      currentUser = { username, profileURL };
+
+      loginSection.style.display = "none";
+      chatBox.style.display = "flex";
+      chatForm.style.display = "flex";
+    });
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = msgInput.value.trim();
+      const file = fileInput.files[0];
+      let fileURL = null, fileType = null;
+
+      if (file) {
+        const fileRef = sRef(storage, "uploads/" + Date.now() + "_" + file.name);
+        await uploadBytes(fileRef, file);
+        fileURL = await getDownloadURL(fileRef);
+        fileType = file.type.startsWith("image") ? "image" : "video";
+      }
+
+      const msgRef = ref(db, "messages");
+      await push(msgRef, {
+        text,
+        fileURL,
+        fileType,
+        user: currentUser.username,
+        profile: currentUser.profileURL,
+        timestamp: Date.now(),
+        likes: 0,
+      });
+
+      msgInput.value = "";
+      fileInput.value = "";
+    });
+
+    const msgRef = ref(db, "messages");
+    onChildAdded(msgRef, (snap) => {
+      const msg = snap.val();
+      const key = snap.key;
+      renderMessage(msg, key);
+    });
+
+    function renderMessage(msg, key) {
+      const div = document.createElement("div");
+      div.classList.add("msg");
+
+      div.innerHTML = `
+        <div class="msg-header">
+          <img src="${msg.profile}" class="profile">
+          <strong>${msg.user}</strong>
+        </div>
+        <div class="msg-content">${msg.text || ""}</div>
+      `;
+
+      if (msg.fileURL) {
+        const media = msg.fileType === "image"
+          ? `<img src="${msg.fileURL}">`
+          : `<video controls src="${msg.fileURL}"></video>`;
+        div.querySelector(".msg-content").innerHTML += media;
+      }
+
+      const actions = document.createElement("div");
+      actions.classList.add("msg-actions");
+      actions.innerHTML = `
+        <button onclick="likeMessage('${key}', ${msg.likes || 0})">❤️ ${msg.likes || 0}</button>
+        <button onclick="replyMessage('${key}')">💬 Reply</button>
+        <button onclick="deleteMessage('${key}')">🗑️ Delete</button>
+      `;
+      div.appendChild(actions);
+
+      const repliesDiv = document.createElement("div");
+      repliesDiv.classList.add("reply-box");
+      div.appendChild(repliesDiv);
+
+      const replyRef = ref(db, "messages/" + key + "/replies");
+      onChildAdded(replyRef, (replySnap) => {
+        const r = replySnap.val();
+        const small = document.createElement("div");
+        small.style.fontSize = "13px";
+        small.innerHTML = `<b>${r.user}:</b> ${r.text}`;
+        repliesDiv.appendChild(small);
+      });
+
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    window.likeMessage = (key, currentLikes) => {
+      const msg = ref(db, "messages/" + key);
+      update(msg, { likes: currentLikes + 1 });
+    };
+
+    window.replyMessage = (key) => {
+      const text = prompt("Enter your reply:");
+      if (!text) return;
+      const replyRef = ref(db, "messages/" + key + "/replies");
+      push(replyRef, { user: currentUser.username, text });
+    };
+
+    window.deleteMessage = (key) => {
+      const adminName = "Admin"; // change if you want only you to delete
+      if (currentUser.username === adminName) {
+        if (confirm("Delete this message?")) remove(ref(db, "messages/" + key));
+      } else {
+        alert("Only admin can delete messages.");
+      }
+    };
+  </script>
+</body>
+</html>
