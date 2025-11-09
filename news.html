@@ -92,32 +92,16 @@
   </header>
 
   <div class="content">
-    <!-- Google CSE -->
+    <!-- Google Custom Search Element (CSE) -->
     <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-    <div class="gcse-searchresults-only" data-query=""></div>
+    <div class="gcse-searchresults-only" id="google-search-results"></div>
   </div>
 
   <footer>
     © 2025 Sono Smart News • Powered by Google Search
   </footer>
 
-  <script>
-    // Automatically run search for "Sono Village today news"
-    window.onload = function() {
-      const query = "sono jhajha jamui";
-      const searchBox = document.querySelector(".gcse-searchresults-only");
-      if (window.google && window.google.search && window.google.search.cse) {
-        google.search.cse.element.getElement('searchresults-only0').execute(query);
-      } else {
-        // If Google CSE not yet loaded, retry after small delay
-        const check = setInterval(() => {
-          if (window.google && window.google.search && window.google.search.cse) {
-            google.search.cse.element.getElement('searchresults-only0').execute(query);
-            clearInterval(check);
-          }
-        }, 500);
-      }
-    };
-  </script>
+  <!-- External JS -->
+  <script src="script.js"></script>
 </body>
 </html>
