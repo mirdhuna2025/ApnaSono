@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sono Village – All Results</title>
+  <title>Sono Village News Today</title>
 
   <style>
     body {
@@ -87,14 +87,14 @@
 </head>
 <body>
   <header>
-    <h1>Sono Village – Live Web Updates</h1>
-    <p>Showing results from all Google sections (Web, Images, Videos, etc.)</p>
+    <h1>Sono Village – Today’s News</h1>
+    <p>Latest news and updates fetched live from Google</p>
   </header>
 
   <div class="content">
-    <!-- Google Custom Search -->
+    <!-- Google CSE -->
     <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-    <div class="gcse-searchresults" data-query=""></div>
+    <div class="gcse-searchresults-only" data-query=""></div>
   </div>
 
   <footer>
@@ -102,16 +102,22 @@
   </footer>
 
   <script>
+    // Automatically run search for "Sono Village today news"
     window.onload = function() {
-      const query = "Sono Jhajha Jamui latest updates OR images OR videos OR blogs OR news";
-      const check = setInterval(() => {
-        if (window.google && window.google.search && window.google.search.cse) {
-          google.search.cse.element.getElement('searchresults0').execute(query);
-          clearInterval(check);
-        }
-      }, 500);
+      const query = "sono jhajha jamui";
+      const searchBox = document.querySelector(".gcse-searchresults-only");
+      if (window.google && window.google.search && window.google.search.cse) {
+        google.search.cse.element.getElement('searchresults-only0').execute(query);
+      } else {
+        // If Google CSE not yet loaded, retry after small delay
+        const check = setInterval(() => {
+          if (window.google && window.google.search && window.google.search.cse) {
+            google.search.cse.element.getElement('searchresults-only0').execute(query);
+            clearInterval(check);
+          }
+        }, 500);
+      }
     };
   </script>
 </body>
-</html>
-
+</html> 
