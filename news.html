@@ -42,7 +42,7 @@
       padding: 0 16px;
     }
 
-    /* Google Search styling */
+    /* Google Search appearance */
     .gcse-searchresults-only {
       width: 100% !important;
     }
@@ -127,38 +127,43 @@
   </footer>
 
   <!-- Floating NEWS button -->
-  <button id="newsBtn" onclick="goToNews()">NEWS</button>
+  <button id="newsBtn">NEWS</button>
 
-  <!-- Script -->
+  <!-- Scripts -->
   <script>
-    // ✅ Always works: redirect when button clicked
-    function goToNews() {
-      window.location.href = "https://apnasono.in/news";
-    }
-
-    // ✅ Auto-run Google search for "Sono Jhajha Jamui"
-    function runSearch() {
-      const query = "sono jhajha jamui";
-      try {
-        if (window.google && google.search && google.search.cse) {
-          const element = google.search.cse.element.getElement('searchresults-only0');
-          if (element) {
-            element.execute(query);
-            return true;
-          }
-        }
-      } catch (e) {
-        console.warn("CSE not ready yet:", e);
+    // ✅ Attach after DOM loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("newsBtn");
+      if (btn) {
+        btn.addEventListener("click", () => {
+          window.location.href = "https://apnasono.in/news";
+        });
       }
-      return false;
-    }
 
-    // Retry until ready
-    let attempts = 0;
-    const maxAttempts = 17;
-    const interval = setInterval(() => {
-      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
-    }, 300);
+      // Auto-run Google search for "Sono Jhajha Jamui"
+      function runSearch() {
+        const query = "sono jhajha jamui";
+        try {
+          if (window.google && google.search && google.search.cse) {
+            const element = google.search.cse.element.getElement('searchresults-only0');
+            if (element) {
+              element.execute(query);
+              return true;
+            }
+          }
+        } catch (e) {
+          console.warn("CSE not ready yet:", e);
+        }
+        return false;
+      }
+
+      // Retry until ready
+      let attempts = 0;
+      const maxAttempts = 17;
+      const interval = setInterval(() => {
+        if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
+      }, 300);
+    });
   </script>
 </body>
 </html>
