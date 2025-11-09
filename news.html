@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -84,28 +84,7 @@
       margin: 30px 0;
     }
 
-    /* Floating News Button */
-    #newsBtn {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: linear-gradient(135deg, #004aad, #007bff);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 14px 26px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-
-    #newsBtn:hover {
-      background: linear-gradient(135deg, #003a8c, #0066d3);
-      transform: scale(1.05);
-    }
+    /* ⚠️ Removed floating button styles — no #newsBtn CSS */
   </style>
 </head>
 
@@ -125,8 +104,7 @@
     © 2025 Sono Smart News • Powered by Google Search
   </footer>
 
-  <!-- Floating News Button -->
-  <button id="newsBtn">NEWS</button>
+  <!-- ✅ Button and its click handler removed -->
 
   <!-- Script Section -->
   <script>
@@ -153,16 +131,6 @@
     const interval = setInterval(() => {
       if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
     }, 300);
-
-    // Floating button click event
-    document.addEventListener("DOMContentLoaded", () => {
-      const btn = document.getElementById("newsBtn");
-      if (btn) {
-        btn.addEventListener("click", () => {
-          window.location.href = "https://apnasono.in/news";
-        });
-      }
-    });
   </script>
 </body>
 </html>
