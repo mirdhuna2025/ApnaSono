@@ -19,27 +19,31 @@
       top: 20px;
       right: 20px;
       z-index: 9999;
-      width: 140px;
+      width: 80px; /* Reduced width for temp-only */
+      height: 40px;
       background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      border-radius: 16px;
+      border-radius: 50px;
       color: #fff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.25);
       overflow: hidden;
       cursor: pointer;
       transition: all 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #weatherWidget:hover {
-      transform: translateY(-4px);
+      transform: scale(1.05);
       box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
 
     /* Expanded view */
     #weatherWidget.expanded {
       position: fixed;
-      bottom: 50%;
+      top: 50%;
       right: 50%;
-      transform: translate(50%, 50%);
+      transform: translate(50%, -50%);
       width: 95%;
       height: 90vh;
       cursor: default;
@@ -50,17 +54,13 @@
 
     .today {
       text-align: center;
-      padding: 20px;
-    }
-
-    .today h2 { 
-      margin: 5px 0; 
-      font-size: 20px; 
+      padding: 10px;
     }
 
     .today p { 
       margin: 0; 
-      font-size: 16px; 
+      font-size: 18px;
+      font-weight: bold;
     }
 
     .forecast {
@@ -134,7 +134,6 @@
     button:hover {
       background: #00327a;
     }
-
   </style>
 </head>
 <body>
@@ -142,8 +141,7 @@
     <button id="closeBtn">&times;</button>
 
     <div class="today" id="todayWeather">
-      <h2>Loading...</h2>
-      <p>Please wait</p>
+      <p>--°C</p> <!-- ✅ Only temp will appear here -->
     </div>
 
     <div id="searchContainer">
@@ -159,7 +157,7 @@
     const closeBtn = document.getElementById("closeBtn");
 
     widget.addEventListener("click", (e) => {
-      if (!widget.classList.contains("expanded") && e.target.id !== "closeBtn") {
+      if (!widget.classList.contains("expanded") && e.target.id !== "closeBtn" && e.target.id !== "searchBtn" && e.target.id !== "cityInput") {
         widget.classList.add("expanded");
       }
     });
