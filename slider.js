@@ -17,14 +17,14 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // DOM Elements
-const slider = document.getElementById("slider");
-const nav = document.getElementById("sliderNav");
+const slider = document.getElementById("sono");
+const nav = document.getElementById("sonoNav");
 let slides = [];
 let index = 0;
 let autoSlideInterval;
 
 // Load slides from Firebase
-onValue(ref(db, 'offers'), (snapshot) => {
+onValue(ref(db, 'sono'), (snapshot) => {
   const data = snapshot.val();
   
   // Cleanup previous state
@@ -40,7 +40,7 @@ onValue(ref(db, 'offers'), (snapshot) => {
     if (!item.image) return;
     
     const div = document.createElement('div');
-    div.classList.add('slide');
+    div.classList.add('sono');
     div.dataset.url = item.url || '';  // Store URL for click handler
     div.dataset.image = item.image;    // Store image for logging
     div.style.backgroundImage = `url('${item.image}')`;
@@ -51,7 +51,7 @@ onValue(ref(db, 'offers'), (snapshot) => {
 
   // Setup slider if we have slides
   if (slides.length > 0) {
-    setupSlider();
+    setupSono();
   }
 });
 
