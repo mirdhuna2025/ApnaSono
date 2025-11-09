@@ -3,60 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sono Village Search</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>Sono Village – All Results</title>
 
   <style>
-    :root {
-      --bg1: #030b18;
-      --bg2: #06172a;
-      --accent: #00d1ff;
-      --text: #eaf6ff;
-      --card: rgba(255,255,255,0.05);
-    }
-
-    * { box-sizing: border-box; }
-
     body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
       margin: 0;
-      font-family: "Inter", system-ui, sans-serif;
-      background: radial-gradient(circle at 20% 20%, var(--bg2), var(--bg1));
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 960px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 28px;
-      backdrop-filter: blur(8px) saturate(130%);
-      box-shadow: 0 0 50px rgba(0, 209, 255, 0.1);
+      padding: 0;
     }
 
     header {
       text-align: center;
-      margin-bottom: 25px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     h1 {
+      margin: 0;
       font-size: 1.8rem;
-      color: var(--accent);
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      color: #222;
     }
 
     p {
-      color: rgba(200, 230, 255, 0.75);
+      margin: 4px 0 0;
+      color: #666;
       font-size: 0.95rem;
     }
 
-    /* --- Google Search Engine Styling --- */
+    .content {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    /* Google Search appearance overrides */
     .gcse-search, .gcse-searchresults {
       width: 100% !important;
     }
@@ -67,109 +53,65 @@
       padding: 0 !important;
     }
 
-    input.gsc-input {
-      background: rgba(255,255,255,0.07) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      color: var(--text) !important;
-      border-radius: 12px !important;
-      padding: 10px 12px !important;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
-    }
-
-    input.gsc-input::placeholder {
-      color: rgba(255,255,255,0.6) !important;
-    }
-
-    .gsc-search-button {
-      background: linear-gradient(90deg, var(--accent), #48f0ff) !important;
-      border-radius: 12px !important;
-      border: none !important;
-      margin-left: 8px !important;
-      padding: 10px 14px !important;
-      box-shadow: 0 0 10px rgba(0,209,255,0.3);
-    }
-
-    .gsc-search-button:hover {
-      box-shadow: 0 0 20px rgba(0,209,255,0.6);
-      transform: scale(1.05);
-    }
-
-    /* --- Results Styling --- */
     .gsc-webResult.gsc-result {
-      background: rgba(255,255,255,0.03) !important;
-      border-radius: 10px !important;
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      border-radius: 8px !important;
       padding: 16px !important;
-      border: 1px solid rgba(255,255,255,0.05) !important;
-      margin: 12px 0 !important;
-      transition: all 0.25s ease;
-    }
-
-    .gsc-webResult.gsc-result:hover {
-      background: rgba(0, 209, 255, 0.08) !important;
-      transform: translateY(-2px);
+      margin-bottom: 12px !important;
     }
 
     .gs-title a {
-      color: #b8ecff !important;
-      font-weight: 600 !important;
+      color: #0056b3 !important;
       text-decoration: none !important;
+      font-weight: 600 !important;
     }
 
     .gs-title a:hover {
-      color: var(--accent) !important;
       text-decoration: underline !important;
     }
 
     .gs-snippet {
-      color: rgba(230, 250, 255, 0.8) !important;
-      font-size: 0.95rem !important;
+      color: #333 !important;
       line-height: 1.5 !important;
-    }
-
-    .gsc-cursor-box {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .gsc-cursor-page {
-      background: rgba(255,255,255,0.05) !important;
-      border-radius: 6px !important;
-      padding: 4px 8px !important;
-      margin: 0 4px !important;
-      color: #8ce9ff !important;
-      text-decoration: none !important;
-      font-weight: 500;
-    }
-
-    .gsc-cursor-current-page {
-      background: var(--accent) !important;
-      color: #002733 !important;
-      font-weight: 700 !important;
+      font-size: 0.95rem !important;
     }
 
     footer {
       text-align: center;
       font-size: 0.85rem;
-      margin-top: 24px;
-      color: rgba(190,220,255,0.5);
+      color: #888;
+      margin: 30px 0;
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <header>
-      <h1>🔍 Sono Village Smart Search</h1>
-      <p>Find the latest news, updates, and information — powered by Google Search</p>
-    </header>
+  <header>
+    <h1>Sono Village – Live Web Updates</h1>
+    <p>Showing results from all Google sections (Web, Images, Videos, etc.)</p>
+  </header>
 
-    <!-- Your Google Programmable Search Engine embed -->
+  <div class="content">
+    <!-- Google Custom Search -->
     <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-    <div class="gcse-search"></div>
-
-    <footer>
-      © 2025 Sono Smart Search • Powered by Google Programmable Search Engine
-    </footer>
+    <div class="gcse-searchresults" data-query=""></div>
   </div>
+
+  <footer>
+    © 2025 Sono Smart News • Powered by Google Search
+  </footer>
+
+  <script>
+    window.onload = function() {
+      const query = "Sono Jhajha Jamui latest updates OR images OR videos OR blogs OR news";
+      const check = setInterval(() => {
+        if (window.google && window.google.search && window.google.search.cse) {
+          google.search.cse.element.getElement('searchresults0').execute(query);
+          clearInterval(check);
+        }
+      }, 500);
+    };
+  </script>
 </body>
 </html>
+
