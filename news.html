@@ -1,135 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Today's Sono Village, Jamui News</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sono Village Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg1: #030b18;
+      --bg2: #06172a;
+      --accent: #00d1ff;
+      --text: #eaf6ff;
+      --card: rgba(255,255,255,0.05);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: 'Inter', sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, var(--bg2), var(--bg1));
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
       padding: 20px;
     }
-    .container { max-width: 800px; margin: 0 auto; }
-    header { text-align: center; margin: 20px 0; }
-    h1 { font-size: 1.8rem; color: #0f172a; }
-    .tagline { color: #64748b; margin-top: 8px; }
-    #news-container {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-      padding: 20px;
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 28px;
+      backdrop-filter: blur(8px) saturate(130%);
+      box-shadow: 0 0 50px rgba(0, 209, 255, 0.1);
     }
-    .article {
-      padding: 16px 0;
-      border-bottom: 1px solid #e2e8f0;
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
     }
-    .article:last-child { border-bottom: none; }
-    .title {
-      font-size: 1.15rem;
-      color: #0d5ab9;
-      text-decoration: none;
-      font-weight: 500;
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
-    .title:hover { text-decoration: underline; }
-    .snippet {
-      color: #475569;
-      margin: 8px 0;
+
+    p {
+      color: rgba(200, 230, 255, 0.75);
       font-size: 0.95rem;
     }
-    .meta {
-      font-size: 0.85rem;
-      color: #64748b;
+
+    /* --- Google Search Engine Styling --- */
+    .gcse-search, .gcse-searchresults {
+      width: 100% !important;
     }
-    .loading { text-align: center; padding: 30px; color: #3b82f6; }
-    .error { padding: 20px; background: #fee2e2; color: #b91c1c; border-radius: 6px; }
-    footer { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #94a3b8; }
+
+    .gsc-control-cse {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+
+    input.gsc-input {
+      background: rgba(255,255,255,0.07) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: var(--text) !important;
+      border-radius: 12px !important;
+      padding: 10px 12px !important;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+    }
+
+    input.gsc-input::placeholder {
+      color: rgba(255,255,255,0.6) !important;
+    }
+
+    .gsc-search-button {
+      background: linear-gradient(90deg, var(--accent), #48f0ff) !important;
+      border-radius: 12px !important;
+      border: none !important;
+      margin-left: 8px !important;
+      padding: 10px 14px !important;
+      box-shadow: 0 0 10px rgba(0,209,255,0.3);
+    }
+
+    .gsc-search-button:hover {
+      box-shadow: 0 0 20px rgba(0,209,255,0.6);
+      transform: scale(1.05);
+    }
+
+    /* --- Results Styling --- */
+    .gsc-webResult.gsc-result {
+      background: rgba(255,255,255,0.03) !important;
+      border-radius: 10px !important;
+      padding: 16px !important;
+      border: 1px solid rgba(255,255,255,0.05) !important;
+      margin: 12px 0 !important;
+      transition: all 0.25s ease;
+    }
+
+    .gsc-webResult.gsc-result:hover {
+      background: rgba(0, 209, 255, 0.08) !important;
+      transform: translateY(-2px);
+    }
+
+    .gs-title a {
+      color: #b8ecff !important;
+      font-weight: 600 !important;
+      text-decoration: none !important;
+    }
+
+    .gs-title a:hover {
+      color: var(--accent) !important;
+      text-decoration: underline !important;
+    }
+
+    .gs-snippet {
+      color: rgba(230, 250, 255, 0.8) !important;
+      font-size: 0.95rem !important;
+      line-height: 1.5 !important;
+    }
+
+    .gsc-cursor-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .gsc-cursor-page {
+      background: rgba(255,255,255,0.05) !important;
+      border-radius: 6px !important;
+      padding: 4px 8px !important;
+      margin: 0 4px !important;
+      color: #8ce9ff !important;
+      text-decoration: none !important;
+      font-weight: 500;
+    }
+
+    .gsc-cursor-current-page {
+      background: var(--accent) !important;
+      color: #002733 !important;
+      font-weight: 700 !important;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 24px;
+      color: rgba(190,220,255,0.5);
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
-      <h1>🗞️ Today's News from Sono Village, Jamui (Bihar)</h1>
-      <p class="tagline">Sorted by latest date — sourced from Google News</p>
+      <h1>🔍 Sono Village Smart Search</h1>
+      <p>Find the latest news, updates, and information — powered by Google Search</p>
     </header>
 
-    <main>
-      <div id="news-container">
-        <div class="loading">🔍 Fetching latest news about <strong>Sono village Jamui, Bihar</strong>...</div>
-      </div>
-    </main>
+    <!-- Your Google Programmable Search Engine embed -->
+    <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
+    <div class="gcse-search"></div>
 
     <footer>
-      <p>Data from Google News RSS • Auto-sorted by date • Updated on every load</p>
+      © 2025 Sono Smart Search • Powered by Google Programmable Search Engine
     </footer>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('news-container');
-
-      // ✅ Google News RSS URL (search: "Today Sono village Jamui Bihar")
-      const rssUrl = 'https://news.google.com/rss/search?q=Today%20Sono%20village%20Jamui%20Bihar&hl=en-IN&gl=IN&ceid=IN:en';
-
-      // rss2json API proxy
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-
-      fetch(apiUrl)
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          if (data.status !== 'ok' || !data.items || data.items.length === 0) {
-            throw new Error('No articles found');
-          }
-
-          // ✅ Sort articles by pubDate (latest first)
-          const sortedArticles = data.items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
-          container.innerHTML = '';
-          const articles = sortedArticles.slice(0, 12); // Top 12 latest news
-
-          articles.forEach(item => {
-            const title = item.title.replace(/<[^>]*>/g, '');
-            const snippet = (item.description || '').replace(/<[^>]*>/g, '').substring(0, 200) + '…';
-
-            const pubDate = new Date(item.pubDate);
-            const dateStr = pubDate.toLocaleString('en-IN', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-
-            const articleEl = document.createElement('div');
-            articleEl.className = 'article';
-            articleEl.innerHTML = `
-              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="title">${title}</a>
-              <p class="snippet">${snippet}</p>
-              <p class="meta">🕒 ${dateStr} • ${item.creator || 'Google News'}</p>
-            `;
-            container.appendChild(articleEl);
-          });
-        })
-        .catch(err => {
-          console.error('Fetch error:', err);
-          container.innerHTML = `
-            <div class="error">
-              ❌ Could not load today's Sono news.<br>
-              Possible reasons:<br>
-              • Google News temporary delay<br>
-              • Ad blocker interference<br>
-              • Weak network<br><br>
-              <small>Error: ${err.message}</small>
-            </div>
-          `;
-        });
-    });
-  </script>
 </body>
 </html>
