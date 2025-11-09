@@ -3,34 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Today's News from Sono Village, Bihar</title>
+  <title>Today's Sono Village, Jamui News</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #f0f9ff;
-      color: #0f172a;
+      background: #f8fafc;
+      color: #1e293b;
       padding: 20px;
     }
     .container { max-width: 800px; margin: 0 auto; }
     header { text-align: center; margin: 20px 0; }
-    h1 { 
-      font-size: 1.8rem; 
-      color: #0c4a6e; 
-      background: #dbeafe;
-      padding: 12px;
-      border-radius: 8px;
-    }
-    .tagline { 
-      color: #334155; 
-      margin-top: 8px; 
-      font-weight: 500;
-    }
+    h1 { font-size: 1.8rem; color: #0f172a; }
+    .tagline { color: #64748b; margin-top: 8px; }
     #news-container {
       background: white;
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.03);
       padding: 20px;
     }
     .article {
@@ -40,66 +30,40 @@
     .article:last-child { border-bottom: none; }
     .title {
       font-size: 1.15rem;
-      color: #1d4ed8;
+      color: #0d5ab9;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
     }
     .title:hover { text-decoration: underline; }
     .snippet {
       color: #475569;
       margin: 8px 0;
       font-size: 0.95rem;
-      line-height: 1.5;
     }
     .meta {
       font-size: 0.85rem;
       color: #64748b;
-      display: flex;
-      justify-content: space-between;
     }
-    .date { font-weight: 500; color: #0ea5e9; }
-    .loading { 
-      text-align: center; 
-      padding: 30px; 
-      color: #0284c7;
-      font-size: 1.1rem;
-    }
-    .error { 
-      padding: 20px; 
-      background: #fef2f2; 
-      color: #dc2626; 
-      border-radius: 6px; 
-      text-align: center;
-    }
-    .no-results {
-      text-align: center;
-      padding: 40px 20px;
-      color: #64748b;
-    }
-    .no-results h3 { margin-bottom: 10px; }
-    footer { 
-      text-align: center; 
-      margin-top: 30px; 
-      font-size: 0.85rem; 
-      color: #64748b;
-    }
+    .loading { text-align: center; padding: 30px; color: #3b82f6; }
+    .error { padding: 20px; background: #fee2e2; color: #b91c1c; border-radius: 6px; }
+    footer { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #94a3b8; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>📰 Sono Village — Today's News</h1>
-      <p class="tagline">Only news about <strong>Sono village</strong> (Jamui, Bihar) — published in the last 24 hours</p>
+      <h1>🗞️ Today's News from Sono Village, Jamui (Bihar)</h1>
+      <p class="tagline">Live headlines — sourced from Google News (auto-updated on load)</p>
     </header>
 
     <main>
       <div id="news-container">
-        <div class="loading">🔍 Searching for <strong>today's</strong> Sono village news...</div>
+        <div class="loading">🔍 Fetching latest news about <strong>Sono village Jamui, Bihar</strong>...</div>
       </div>
     </main>
 
     <footer>
-      <p>Updated live • Sources: Google News (India)</p>
+      <p>Data from Google News RSS • Updated on every page load</p>
     </footer>
   </div>
 
@@ -107,102 +71,59 @@
     document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
 
-      // ✅ PRECISION QUERY:
-      //   "Sono village" → exact phrase
-      //   Bihar OR Jamui → location context
-      //   -Sono+Japan -Sono+Group -Sono+Audio -Sony → exclude noise
-      //   &tbs=qdr:d → last 24 hours only
-      //   hl=en-IN&gl=IN&ceid=IN:en → India English
-      const query = encodeURIComponent(
-        '"Sono village" (Bihar OR Jamui) -"Sono Japan" -"Sono Group" -"Sono Audio" -Sony'
-      );
-      const rssUrl = `https://news.google.com/rss/search?q=${query}&tbs=qdr:d&hl=en-IN&gl=IN&ceid=IN:en`;
+      // ✅ Google News RSS URL (search: "Today Sono village Jamui Bihar")
+      const rssUrl = 'https://news.google.com/rss/search?q=Today%20Sono%20village%20Jamui%20Bihar&hl=en-IN&gl=IN&ceid=IN:en';
 
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&api_key=pub_63f5a6dca9693b1e3e2d5c3c0a4e9e2e0c9e5`;
+      // Using rss2json API (free, no backend needed)
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
       fetch(apiUrl)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
         .then(data => {
-          container.innerHTML = '';
-
           if (data.status !== 'ok' || !data.items || data.items.length === 0) {
-            // Try 7-day fallback if no 24h results
-            return fetch7DayNews();
+            throw new Error('No articles found');
           }
 
-          renderArticles(data.items.slice(0, 10), 'Today');
+          container.innerHTML = '';
+          const articles = data.items.slice(0, 12); // Show top 12 news
+
+          articles.forEach(item => {
+            const title = item.title.replace(/<[^>]*>/g, '');
+            const snippet = (item.description || '').replace(/<[^>]*>/g, '').substring(0, 200) + '…';
+
+            const pubDate = new Date(item.pubDate);
+            const dateStr = pubDate.toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            });
+
+            const articleEl = document.createElement('div');
+            articleEl.className = 'article';
+            articleEl.innerHTML = `
+              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="title">${title}</a>
+              <p class="snippet">${snippet}</p>
+              <p class="meta">Source: ${item.creator || 'Google News'} • ${dateStr}</p>
+            `;
+            container.appendChild(articleEl);
+          });
         })
         .catch(err => {
-          console.error('Error:', err);
-          container.innerHTML = `<div class="error">⚠️ Could not load today’s news. Trying last 7 days…</div>`;
-          setTimeout(fetch7DayNews, 2000);
-        });
-
-      // Fallback: last 7 days
-      function fetch7DayNews() {
-        const query7 = encodeURIComponent(
-          '"Sono village" (Bihar OR Jamui) -"Sono Japan" -"Sono Group" -"Sono Audio" -Sony'
-        );
-        const rssUrl7 = `https://news.google.com/rss/search?q=${query7}&tbs=qdr:w&hl=en-IN&gl=IN&ceid=IN:en`;
-        const apiUrl7 = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl7)}&api_key=pub_63f5a6dca9693b1e3e2d5c3c0a4e9e2e0c9e5`;
-
-        fetch(apiUrl7)
-          .then(r => r.json())
-          .then(data => {
-            container.innerHTML = '';
-            if (data.status === 'ok' && data.items && data.items.length > 0) {
-              renderArticles(data.items.slice(0, 10), 'Last 7 Days');
-            } else {
-              container.innerHTML = `
-                <div class="no-results">
-                  <h3>📭 No recent news found</h3>
-                  <p>There may be no published news about Sono village in the last 7 days.<br>
-                     Try checking again tomorrow, or share local updates manually.</p>
-                </div>
-              `;
-            }
-          })
-          .catch(() => {
-            container.innerHTML = `<div class="error">❌ Failed to load news. Please try again later.</div>`;
-          });
-      }
-
-      function renderArticles(items, period) {
-        if (items.length === 0) {
-          container.innerHTML = `<div class="no-results"><h3>No news from ${period}</h3></div>`;
-          return;
-        }
-
-        container.innerHTML = `<h3 style="margin-bottom:16px;color:#0c4a6e;">News from ${period}</h3>`;
-
-        items.forEach(item => {
-          const title = item.title.replace(/<[^>]*>/g, '').trim();
-          const snippet = (item.description || '')
-            .replace(/<[^>]*>/g, '')
-            .replace(/\s+/g, ' ')
-            .substring(0, 220) + '…';
-
-          const pubDate = new Date(item.pubDate);
-          const now = new Date();
-          const diffHours = Math.round((now - pubDate) / (1000 * 60 * 60));
-
-          let timeAgo = diffHours < 24 
-            ? `${diffHours}h ago` 
-            : pubDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-
-          const articleEl = document.createElement('div');
-          articleEl.className = 'article';
-          articleEl.innerHTML = `
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="title">${title}</a>
-            <p class="snippet">${snippet}</p>
-            <div class="meta">
-              <span>Source: ${item.creator || 'News'}</span>
-              <span class="date">${timeAgo}</span>
+          console.error('Fetch error:', err);
+          container.innerHTML = `
+            <div class="error">
+              ❌ Could not load today's Sono news.<br>
+              Possible reasons:<br>
+              • Google News temporary delay<br>
+              • Ad blocker interference<br>
+              • Weak network<br><br>
+              <small>Error: ${err.message}</small>
             </div>
           `;
-          container.appendChild(articleEl);
         });
-      }
     });
   </script>
 </body>
