@@ -92,16 +92,43 @@
   </header>
 
   <div class="content">
-    <!-- Google Custom Search Element (CSE) -->
+    <!-- Google CSE -->
     <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-    <div class="gcse-searchresults-only" id="google-search-results"></div>
+    <div class="gcse-searchresults-only" data-query=""></div>
   </div>
 
   <footer>
     © 2025 Sono Smart News • Powered by Google Search
   </footer>
 
-  <!-- External JS -->
-  <script src="script.js"></script>
+  <!-- ✅ FIXED: Inline script (no external file) -->
+  <script>
+    // Wait for DOM and Google CSE to be ready
+    function runSearch() {
+      const query = "sono jhajha jamui";
+      try {
+        // Google assigns default ID: 'searchresults-only0'
+        if (window.google && google.search && google.search.cse) {
+          const element = google.search.cse.element.getElement('searchresults-only0');
+          if (element) {
+            element.execute(query);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("CSE not ready yet:", e);
+      }
+      return false;
+    }
+
+    // Try immediately, then retry every 300ms up to 5 seconds
+    let attempts = 0;
+    const maxAttempts = 17; // ~5 sec
+    const interval = setInterval(() => {
+      if (runSearch() || ++attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, 300);
+  </script>
 </body>
 </html>
