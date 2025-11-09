@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -42,8 +42,8 @@
       padding: 0 16px;
     }
 
-    /* Google Search appearance */
-    .gcse-searchresults-only {
+    /* Google Search appearance overrides */
+    .gcse-search, .gcse-searchresults {
       width: 100% !important;
     }
 
@@ -84,32 +84,31 @@
       margin: 30px 0;
     }
 
-    /* Floating NEWS button */
+    /* Floating News Button */
     #newsBtn {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #007bff, #0056b3);
+      bottom: 25px;
+      right: 25px;
+      background: linear-gradient(135deg, #004aad, #007bff);
       color: white;
       border: none;
-      border-radius: 50%;
-      width: 70px;
-      height: 70px;
+      border-radius: 50px;
+      padding: 14px 26px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       transition: all 0.3s ease;
+      z-index: 1000;
     }
 
     #newsBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      background: linear-gradient(135deg, #0056b3, #003d80);
+      background: linear-gradient(135deg, #003a8c, #0066d3);
+      transform: scale(1.05);
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>Sono Village – Today’s News</h1>
@@ -126,12 +125,36 @@
     © 2025 Sono Smart News • Powered by Google Search
   </footer>
 
-  <!-- Floating NEWS button -->
+  <!-- Floating News Button -->
   <button id="newsBtn">NEWS</button>
 
-  <!-- Scripts -->
+  <!-- Script Section -->
   <script>
-    // ✅ Attach after DOM loaded
+    // Google CSE auto query
+    function runSearch() {
+      const query = "sono jhajha jamui";
+      try {
+        if (window.google && google.search && google.search.cse) {
+          const element = google.search.cse.element.getElement('searchresults-only0');
+          if (element) {
+            element.execute(query);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("CSE not ready yet:", e);
+      }
+      return false;
+    }
+
+    // Try every 300ms until CSE loads
+    let attempts = 0;
+    const maxAttempts = 17;
+    const interval = setInterval(() => {
+      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
+    }, 300);
+
+    // Floating button click event
     document.addEventListener("DOMContentLoaded", () => {
       const btn = document.getElementById("newsBtn");
       if (btn) {
@@ -139,30 +162,6 @@
           window.location.href = "https://apnasono.in/news";
         });
       }
-
-      // Auto-run Google search for "Sono Jhajha Jamui"
-      function runSearch() {
-        const query = "sono jhajha jamui";
-        try {
-          if (window.google && google.search && google.search.cse) {
-            const element = google.search.cse.element.getElement('searchresults-only0');
-            if (element) {
-              element.execute(query);
-              return true;
-            }
-          }
-        } catch (e) {
-          console.warn("CSE not ready yet:", e);
-        }
-        return false;
-      }
-
-      // Retry until ready
-      let attempts = 0;
-      const maxAttempts = 17;
-      const interval = setInterval(() => {
-        if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
-      }, 300);
     });
   </script>
 </body>
