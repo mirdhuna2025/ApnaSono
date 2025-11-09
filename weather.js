@@ -1,7 +1,7 @@
 const apiKey = "69ab39452b24e6dfd78fb82720ac6d71";
 let city = "Sono";
 
-const widget = document.getElementById("weatherWidget");
+
 const todayWeather = document.getElementById("todayWeather");
 const forecastContainer = document.getElementById("forecastContainer");
 const closeBtn = document.getElementById("closeBtn");
@@ -16,7 +16,7 @@ async function getTodayWeather(cityName) {
 
     if (!response.ok) throw new Error(data.message);
 
-    const icon = data.weather[0].icon;
+   
     const temp = data.main.temp.toFixed(1);
     const desc = data.weather[0].description;
 
