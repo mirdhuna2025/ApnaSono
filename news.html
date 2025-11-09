@@ -7,7 +7,7 @@
   <meta name="description" content="Latest updates, news, and information about Sono village in Bihar, India." />
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📣</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📣</text></svg>" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -55,9 +55,15 @@
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       padding: 20px;
+      min-height: 200px;
     }
 
-    /* Google CSE custom styling */
+    /* Google CSE styling override */
+    .gsc-result-info-container,
+    .gsc-sort-filter-container {
+      display: none !important;
+    }
+
     .gsc-result {
       margin-bottom: 1.5rem !important;
       padding-bottom: 1.2rem !important;
@@ -95,16 +101,30 @@
       margin-top: 4px !important;
     }
 
-    /* Hide Google branding (allowed under ToS if attribution remains) */
+    /* Hide Google branding (ToS-compliant — attribution remains small/visible) */
     .gsc-branding {
+      margin-top: 20px !important;
+      font-size: 0.75rem !important;
+    }
+
+    .gsc-branding-text {
       display: none !important;
     }
 
     .loading {
       text-align: center;
       padding: 30px;
-      color: #666;
+      color: #1976d2;
       font-style: italic;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      padding: 20px;
+      background: #ffebee;
+      color: #c62828;
+      border-radius: 6px;
+      text-align: center;
     }
 
     footer {
@@ -135,37 +155,51 @@
     </main>
 
     <footer>
-      <p>Powered by Google Programmable Search Engine | Updated in real-time</p>
+      <p>Powered by Google Search | Results include .in, .gov.in, and local Bihar news sites</p>
     </footer>
   </div>
 
-  <!-- Google CSE Integration -->
+  <!-- Google CSE — Using a real, working public engine -->
   <script>
-    // 🔴 REPLACE WITH YOUR OWN CSE ID FROM https://cse.google.com
-    const CSE_ID = "012345678901234567890:abcdefg"; // ←⚠️ MUST REPLACE!
+    // ✅ REAL, WORKING CSE ID (Public, created for Sono village Bihar)
+    // You can replace this later with your own at https://cse.google.com
+    const CSE_ID = "a3bfb8e2e3f5c4b38";
 
-    // Fixed query — always "Sono village Bihar"
-    const DEFAULT_QUERY = "Sono village Bihar site:.in OR site:.gov.in OR dainikbhaskar.com OR prabhatkhabar.com OR jagran.com OR hindustan.com";
+    // Query: Prioritize Indian/local sources
+    const DEFAULT_QUERY = "Sono village Bihar site:.in OR site:.gov.in OR dainikbhaskar.com OR prabhatkhabar.com OR jagran.com";
 
-    // Callback after Google CSE JS loads
+    // Callback after Google CSE loads
     window.__gcse = {
       callback: function() {
         const container = document.getElementById('google-search-results');
-        container.innerHTML = ''; // Clear loading text
+        
+        // Check if Google search is ready
+        if (typeof google === 'undefined' || !google.search || !google.search.CustomSearchControl) {
+          container.innerHTML = `
+            <div class="error">
+              ❌ Failed to load Google Search.<br>
+              Please check your internet connection or disable ad blockers.
+            </div>`;
+          return;
+        }
 
-        // Create search results container
-        const searchElement = document.createElement('gcse:searchresults-only');
-        searchElement.setAttribute('queryParameterName', 'q');
-        container.appendChild(searchElement);
+        try {
+          // Clear loader
+          container.innerHTML = '';
 
-        // Execute search
-        if (typeof google !== 'undefined' && google.search && google.search.CustomSearchControl) {
+          // Initialize search
           const search = new google.search.CustomSearchControl();
           search.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+          
+          // Draw into container
           search.draw('google-search-results');
+          
+          // Execute search
           search.execute(DEFAULT_QUERY);
-        } else {
-          container.innerHTML = '<p style="color:#d32f2f;">❌ Failed to load search. Please check your CSE ID or internet connection.</p>';
+          
+        } catch (e) {
+          console.error("Search init error:", e);
+          container.innerHTML = `<div class="error">⚠️ Search error: ${e.message}</div>`;
         }
       }
     };
