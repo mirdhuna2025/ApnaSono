@@ -15,6 +15,7 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
 /* Header */
 header {
   display: flex;
@@ -49,6 +50,7 @@ header {
   object-fit: cover;
   cursor: pointer;
 }
+
 /* Chat container */
 .chat-container {
   flex: 1;
@@ -68,6 +70,7 @@ header {
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 0 2px rgba(0,0,0,0.1);
+  position: relative;
 }
 .message .header {
   display: flex;
@@ -95,7 +98,15 @@ header {
 }
 .meta { font-size: 11px; color: #666; }
 .content { font-size: 14px; margin-top: 3px; }
-.reply { margin-left: 35px; font-size: 12px; color: #444; margin-top: 3px; padding-left: 5px; border-left: 2px solid #eee; }
+.reply { 
+  margin-left: 35px; 
+  font-size: 12px; 
+  color: #444; 
+  margin-top: 3px; 
+  padding-left: 5px; 
+  border-left: 2px solid #eee; 
+}
+
 /* Composer */
 .composer {
   display: flex;
@@ -137,6 +148,7 @@ header {
   cursor: pointer;
   font-size: 20px;
 }
+
 /* Popup */
 .popup {
   position: fixed;
@@ -154,8 +166,18 @@ header {
   width: 90%;
   max-width: 300px;
   text-align: center;
+  position: relative;
 }
 .popup-content input { width: 100%; margin-bottom: 10px; padding: 8px; border:1px solid #ccc; border-radius:6px; }
+.popup-content .closeBtn {
+  position: absolute;
+  top:5px;
+  right:10px;
+  cursor:pointer;
+  font-size:18px;
+  font-weight:bold;
+}
+
 /* Admin panel */
 #adminPanel {
   position: fixed;
@@ -180,6 +202,24 @@ header {
   justify-content: space-between;
 }
 .admin-message button { background: #dc3545; border:none; color:#fff; border-radius:4px; cursor:pointer; padding:2px 5px; font-size:12px; }
+
+/* Emoji picker */
+#emojiPicker {
+  position: absolute;
+  bottom: 60px;
+  left: 10px;
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:8px;
+  display:none;
+  padding:5px;
+  z-index: 150;
+}
+#emojiPicker span{
+  cursor:pointer;
+  font-size:20px;
+  margin:2px;
+}
 </style>
 </head>
 <body>
@@ -194,14 +234,19 @@ header {
   <div class="composer">
     <label class="file-label" for="file">📎</label>
     <input id="file" type="file"/>
+    <button id="emojiBtn">😊</button>
     <input id="msg" type="text" placeholder="Type a message..."/>
     <button id="send">➤</button>
   </div>
 </div>
 
+<!-- Emoji picker -->
+<div id="emojiPicker"></div>
+
 <!-- Profile popup -->
 <div class="popup" id="profilePopup">
   <div class="popup-content">
+    <span class="closeBtn" id="profileClose">×</span>
     <h3>Set Your Profile</h3>
     <input id="name" placeholder="Your Name"/>
     <input id="photo" type="file" accept="image/*"/>
@@ -212,6 +257,7 @@ header {
 <!-- Admin login popup -->
 <div class="popup" id="adminPopup">
   <div class="popup-content">
+    <span class="closeBtn" id="adminClose">×</span>
     <h3>Admin Login</h3>
     <input id="adminPass" type="password" placeholder="Password"/>
     <button id="adminLoginBtn">Login</button>
@@ -247,26 +293,30 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const fileInput = document.getElementById("file");
+const emojiBtn = document.getElementById("emojiBtn");
+const emojiPicker = document.getElementById("emojiPicker");
 
 const profileBtn = document.getElementById("profileBtn");
 const profilePopup = document.getElementById("profilePopup");
 const saveProfileBtn = document.getElementById("saveProfile");
 const nameInput = document.getElementById("name");
 const photoInput = document.getElementById("photo");
+document.getElementById("profileClose").onclick = ()=> profilePopup.style.display="none";
 
 const adminBtn = document.getElementById("adminBtn");
 const adminPopup = document.getElementById("adminPopup");
 const adminPassInput = document.getElementById("adminPass");
 const adminLoginBtn = document.getElementById("adminLoginBtn");
+document.getElementById("adminClose").onclick = ()=> adminPopup.style.display="none";
 
 const adminPanel = document.getElementById("adminPanel");
 const adminMessages = document.getElementById("adminMessages");
 
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
+let replyingTo = null; // Reply tracking
 
 if(!user) profilePopup.style.display="flex";
 if(user?.photoURL) profileBtn.src=user.photoURL;
-
 profileBtn.onclick = ()=> profilePopup.style.display="flex";
 
 saveProfileBtn.onclick = async()=>{
@@ -298,12 +348,21 @@ adminLoginBtn.onclick = ()=>{
   }else alert("Wrong password");
 }
 
+// Emoji picker
+const emojis = ["😀","😂","😅","😊","😍","😎","😭","😡","👍","🙏","🎉"];
+emojiPicker.innerHTML = emojis.map(e=>`<span>${e}</span>`).join("");
+emojiBtn.onclick = ()=> emojiPicker.style.display = emojiPicker.style.display==="flex"?"none":"flex";
+emojiPicker.querySelectorAll("span").forEach(span=>{
+  span.onclick = ()=> { msgInput.value += span.textContent; emojiPicker.style.display="none"; msgInput.focus();}
+});
+
 // Send message
 async function sendMessage(){
   if(!user) return profilePopup.style.display="flex";
   const text = msgInput.value.trim();
   const file=fileInput.files[0];
-  if(!text && !file) return;
+  if(!text && !file && !replyingTo) return;
+
   let mediaUrl="", mediaType="", mediaName="";
   if(file){
     const path = `uploads/${Date.now()}_${file.name}`;
@@ -313,7 +372,8 @@ async function sendMessage(){
     mediaType=file.type;
     mediaName=file.name;
   }
-  await push(ref(db,"messages"),{
+
+  const msgData = {
     user:user.name,
     photo:user.photoURL,
     isAdmin:user.isAdmin,
@@ -323,9 +383,13 @@ async function sendMessage(){
     mediaName,
     timestamp:Date.now(),
     likes:0
-  });
+  };
+  if(replyingTo) msgData.replyTo = replyingTo;
+
+  await push(ref(db,"messages"), msgData);
   msgInput.value="";
   fileInput.value="";
+  replyingTo = null;
 }
 sendBtn.onclick = sendMessage;
 msgInput.addEventListener("keydown", e=>{if(e.key==="Enter") sendMessage();});
@@ -336,9 +400,9 @@ function renderMessages(data){
   adminMessages.innerHTML="";
   const entries=Object.entries(data||{}).sort((a,b)=>(a[1].timestamp||0)-(b[1].timestamp||0));
   entries.forEach(([key,msg])=>{
-    // User chat
     const div=document.createElement("div");
     div.className="message";
+    let replyText = msg.replyTo?`<div class="reply">Replying to: ${msg.replyTo}</div>`:'';
     div.innerHTML=`
       <div class="header">
         <img class="profile" src="${msg.photo||'https://api.dicebear.com/7.x/thumbs/svg?seed='+msg.user}">
@@ -350,13 +414,16 @@ function renderMessages(data){
           <div class="meta">${new Date(msg.timestamp).toLocaleTimeString()}</div>
         </div>
       </div>
+      ${replyText}
       <div class="content">${msg.text||''}</div>
       ${msg.mediaUrl?renderMedia(msg):''}
-      ${user?.isAdmin?`<div class="actions"><button onclick="deleteMessage('${key}')">🗑️ Delete</button></div>`:''}
+      <div class="actions">
+        <button onclick="replyMessage('${msg.user}')">💬 Reply</button>
+        ${user?.isAdmin?`<button onclick="deleteMessage('${key}')">🗑️ Delete</button>`:''}
+      </div>
     `;
     chatBox.appendChild(div);
 
-    // Admin panel
     if(user?.isAdmin){
       const aDiv=document.createElement("div");
       aDiv.className="admin-message";
@@ -378,6 +445,11 @@ window.deleteMessage = async(key)=>{
   if(!user?.isAdmin) return alert("Only admin can delete messages");
   if(!confirm("Delete this message?")) return;
   await remove(ref(db,"messages/"+key));
+}
+
+window.replyMessage = (username)=> {
+  replyingTo = username;
+  msgInput.focus();
 }
 
 // Listen for messages
