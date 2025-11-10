@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const buttons = {
     homeBtn: () => currentHost === 'apnasono.in' && currentPath === '/',
     loginBtn: () => currentPath.includes('login.html'),
+    chatsBtn: () => currentHost === 'apnasono.in' && currentPath.startsWith('/chat')
     newsBtn: () => currentHost === 'apnasono.in' && currentPath.startsWith('/news')
   };
 
