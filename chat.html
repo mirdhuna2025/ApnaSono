@@ -6,7 +6,7 @@
 <title>Mirdhuna Chat</title>
 <style>
 body { font-family:'Inter',sans-serif; margin:0; background:#f5f5f5; display:flex; flex-direction:column; height:100vh; }
-header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#fff; border-bottom:1px solid #ddd; }
+header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#fff; border-bottom:1px solid #ddd; height:60px; box-sizing:border-box;}
 #adminBtn { background:#28a745; border:none; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
 #chatTitle { flex:1; text-align:center; font-weight:600; }
 #profileBtn { width:40px; height:40px; border-radius:50%; object-fit:cover; cursor:pointer; }
@@ -18,17 +18,25 @@ header { display:flex; justify-content:space-between; align-items:center; paddin
 .name-line { display:flex; align-items:center; gap:5px; font-size:13px; }
 .admin-tag { background:#007bff; color:#fff; font-size:10px; padding:1px 4px; border-radius:3px; }
 .meta { font-size:11px; color:#666; }
-.content { font-size:14px; margin-top:3px; }
+.content { font-size:14px; margin-top:3px; word-break: break-word; }
 .reply-inline { margin-top:5px; padding-left:8px; border-left:3px solid #ddd; font-size:13px; color:#555; background:#f1f1f1; border-radius:5px; }
 .composer { display:flex; align-items:center; gap:5px; padding:6px; background:#fff; border-top:1px solid #ddd; }
 .composer input[type=text] { flex:1; padding:10px 12px; border-radius:20px; border:1px solid #ddd; outline:none; }
 .composer button { background:#007bff; border:none; color:#fff; padding:10px 14px; border-radius:50%; cursor:pointer; font-size:16px; }
 .composer input[type=file] { display:none; }
 .file-label { display:flex; align-items:center; justify-content:center; width:40px; height:40px; background:#eee; border-radius:50%; cursor:pointer; font-size:20px; }
+
 .popup { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:100; }
 .popup-content { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:300px; text-align:center; position:relative; }
 .popup-content input { width:100%; margin-bottom:10px; padding:8px; border:1px solid #ccc; border-radius:6px; }
 .popup-content .closeBtn { position:absolute; top:5px; right:10px; cursor:pointer; font-size:18px; font-weight:bold; }
+
+#adminPanel { position:fixed; top:60px; right:5px; width:300px; max-height:400px; overflow-y:auto; background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; display:none; z-index:200; }
+#adminPanel h4 { text-align:center; margin:0 0 10px 0; }
+
+.media-content { max-width:150px; max-height:150px; object-fit:cover; border-radius:8px; margin-top:5px; cursor:pointer; }
+.media-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:300; }
+.media-modal img, .media-modal video { max-width:95%; max-height:95%; border-radius:10px; }
 </style>
 </head>
 <body>
@@ -58,6 +66,39 @@ header { display:flex; justify-content:space-between; align-items:center; paddin
   </div>
 </div>
 
+<!-- Profile popup -->
+<div class="popup" id="profilePopup">
+  <div class="popup-content">
+    <span class="closeBtn" id="profileClose">×</span>
+    <h3>Set Profile</h3>
+    <input id="name" placeholder="Your Name"/>
+    <input id="photo" type="file"/>
+    <button id="saveProfile">Save</button>
+  </div>
+</div>
+
+<!-- Admin popup -->
+<div class="popup" id="adminPopup">
+  <div class="popup-content">
+    <span class="closeBtn" id="adminClose">×</span>
+    <h3>Admin Login</h3>
+    <input id="adminPass" type="password" placeholder="Password"/>
+    <button id="adminLoginBtn">Login</button>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="adminPanel">
+  <h4>Admin Panel</h4>
+  <div id="adminMessages"></div>
+</div>
+
+<!-- Media Modal -->
+<div class="media-modal" id="mediaModal">
+  <span class="closeBtn" id="mediaClose">×</span>
+  <div id="mediaContent"></div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -72,35 +113,88 @@ const firebaseConfig = {
   messagingSenderId:"575924409876",
   appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-let user = {name:"User", photoURL:"", isAdmin:false};
-let replyTo = null;
+let user = JSON.parse(localStorage.getItem("chatUser")) || null;
+let replyToMsg = null;
 
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const fileInput = document.getElementById("file");
+
+const profilePopup = document.getElementById("profilePopup");
+const profileBtn = document.getElementById("profileBtn");
+const nameInput = document.getElementById("name");
+const photoInput = document.getElementById("photo");
+document.getElementById("profileClose").onclick = ()=>profilePopup.style.display="none";
+
+const adminPopup = document.getElementById("adminPopup");
+document.getElementById("adminClose").onclick = ()=>adminPopup.style.display="none";
+const adminBtn = document.getElementById("adminBtn");
+const adminLoginBtn = document.getElementById("adminLoginBtn");
+const adminPassInput = document.getElementById("adminPass");
+const adminPanel = document.getElementById("adminPanel");
+const adminMessages = document.getElementById("adminMessages");
+
 const replyPopup = document.getElementById("replyPopup");
 const replyText = document.getElementById("replyText");
+document.getElementById("replyClose").onclick = ()=>{replyPopup.style.display="none"; replyToMsg=null;}
 
-document.getElementById("replyClose").onclick=()=>{replyPopup.style.display="none"; replyTo=null;}
+const mediaModal = document.getElementById("mediaModal");
+const mediaContent = document.getElementById("mediaContent");
+document.getElementById("mediaClose").onclick=()=>{mediaModal.style.display="none"; mediaContent.innerHTML="";}
+
+if(!user) profilePopup.style.display="flex";
+if(user?.photoURL) profileBtn.src=user.photoURL;
+profileBtn.onclick = ()=>profilePopup.style.display="flex";
+
+document.getElementById("saveProfile").onclick = async()=>{
+  const name=nameInput.value.trim();
+  if(!name) return alert("Enter your name");
+  let photoURL="";
+  if(photoInput.files[0]){
+    const file = photoInput.files[0];
+    const path = `profiles/${Date.now()}_${file.name}`;
+    const sref = sRef(storage,path);
+    await uploadBytes(sref,file);
+    photoURL = await getDownloadURL(sref);
+  }
+  user={name,photoURL,isAdmin:false};
+  localStorage.setItem("chatUser",JSON.stringify(user));
+  profilePopup.style.display="none";
+  if(photoURL) profileBtn.src=photoURL;
+}
+
+// Admin login
+adminBtn.onclick = ()=>adminPopup.style.display="flex";
+adminLoginBtn.onclick = ()=>{
+  if(adminPassInput.value==="sanu0000"){
+    user={name:"Admin",photoURL:"",isAdmin:true};
+    localStorage.setItem("chatUser",JSON.stringify(user));
+    adminPopup.style.display="none";
+    adminPanel.style.display="block";
+    alert("Admin login successful");
+  }else alert("Wrong password");
+}
 
 // Send main message
 sendBtn.onclick = async ()=>{
+  if(!user) {profilePopup.style.display="flex"; return;}
   const text = msgInput.value.trim();
   if(!text && !fileInput.files[0]) return;
   let mediaUrl="", mediaType="", mediaName="";
   if(fileInput.files[0]){
-    const file=fileInput.files[0];
+    const file = fileInput.files[0];
     const path=`uploads/${Date.now()}_${file.name}`;
     const sref=sRef(storage,path);
     await uploadBytes(sref,file);
-    mediaUrl=await getDownloadURL(sref);
-    mediaType=file.type;
-    mediaName=file.name;
+    mediaUrl = await getDownloadURL(sref);
+    mediaType = file.type;
+    mediaName = file.name;
   }
   await push(ref(db,"messages"),{
     user:user.name, photo:user.photoURL, isAdmin:user.isAdmin, text,
@@ -109,22 +203,13 @@ sendBtn.onclick = async ()=>{
   msgInput.value=""; fileInput.value="";
 };
 
-// Open reply popup
-window.replyMessage=(key)=>{
-  replyTo = key;
-  replyPopup.style.display="flex";
-  replyText.value="";
-  replyText.focus();
-};
-
-// Send reply
+// Reply
+window.replyMessage = (key)=>{replyToMsg=key; replyPopup.style.display="flex"; replyText.value=""; replyText.focus();}
 document.getElementById("sendReply").onclick = async()=>{
-  const text = replyText.value.trim();
-  if(!text || !replyTo) return;
-  const replyRef = ref(db, `messages/${replyTo}/replies`);
-  await push(replyRef, {user:user.name, text, timestamp:Date.now()});
-  replyPopup.style.display="none";
-  replyTo=null;
+  if(!replyText.value.trim() || !replyToMsg) return;
+  const replyRef = ref(db,`messages/${replyToMsg}/replies`);
+  await push(replyRef,{user:user.name,text:replyText.value,timestamp:Date.now()});
+  replyPopup.style.display="none"; replyToMsg=null;
 };
 
 // Like/Dislike
@@ -141,25 +226,26 @@ window.dislikeMessage = async(key)=>{
   await update(msgRef,{dislikes:(val.dislikes||0)+1});
 };
 
-// Render
-function renderMedia(msg){
-  if(msg.mediaType?.startsWith("image")) return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:5px">`;
-  if(msg.mediaType?.startsWith("video")) return `<video controls style="max-width:100%;border-radius:8px;margin-top:5px"><source src="${msg.mediaUrl}"></video>`;
-  if(msg.mediaUrl) return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
-  return '';
-}
-
+// Render messages
 function renderMessages(data){
-  chatBox.innerHTML="";
+  chatBox.innerHTML=""; adminMessages.innerHTML="";
   Object.entries(data||{}).sort((a,b)=>a[1].timestamp-b[1].timestamp).forEach(([key,msg])=>{
-    const div=document.createElement("div");
-    div.className="message";
+    const div=document.createElement("div"); div.className="message";
     let repliesHTML="";
     if(msg.replies){
       Object.values(msg.replies).forEach(r=>{
         repliesHTML+=`<div class="reply-inline"><strong>${r.user}</strong>: ${r.text}</div>`;
       });
     }
+
+    let mediaHTML="";
+    if(msg.mediaUrl){
+      mediaHTML=`<img class="media-content" src="${msg.mediaUrl}" ${msg.mediaType?.startsWith("video")?`style="display:none;"`:''} onclick="showMedia('${msg.mediaUrl}','${msg.mediaType}')">`;
+      if(msg.mediaType?.startsWith("video")){
+        mediaHTML=`<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}','${msg.mediaType}')"></video>`;
+      }
+    }
+
     div.innerHTML=`
       <div class="header">
         <img class="profile" src="${msg.photo||'https://api.dicebear.com/7.x/thumbs/svg?seed='+msg.user}">
@@ -172,12 +258,13 @@ function renderMessages(data){
         </div>
       </div>
       <div class="content">${msg.text||''}</div>
-      ${renderMedia(msg)}
+      ${mediaHTML}
       ${repliesHTML}
       <div class="actions">
         <button onclick="replyMessage('${key}')">💬 Reply</button>
         <button onclick="likeMessage('${key}')">👍 ${msg.likes||0}</button>
         <button onclick="dislikeMessage('${key}')">👎 ${msg.dislikes||0}</button>
+        ${user?.isAdmin?`<button onclick="deleteMessage('${key}')">🗑️ Delete</button>`:''}
       </div>
     `;
     chatBox.appendChild(div);
@@ -185,9 +272,15 @@ function renderMessages(data){
   chatBox.scrollTop=chatBox.scrollHeight;
 }
 
-// Listen to messages
-onValue(ref(db,"messages"), snapshot=>renderMessages(snapshot.val()));
+window.showMedia=(url,type)=>{
+  mediaContent.innerHTML="";
+  if(type?.startsWith("image")) mediaContent.innerHTML=`<img src="${url}"/>`;
+  else if(type?.startsWith("video")) mediaContent.innerHTML=`<video src="${url}" controls autoplay></video>`;
+  mediaModal.style.display="flex";
+}
 
+// Listen messages
+onValue(ref(db,"messages"), snapshot=>renderMessages(snapshot.val()));
 </script>
 </body>
 </html>
