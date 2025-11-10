@@ -126,18 +126,36 @@ header {
   border-top: 1px solid #ccc;
   box-shadow: 0 -3px 10px rgba(0,0,0,0.05);
   border-radius: 15px 15px 0 0;
+  flex-wrap: wrap; /* wrap buttons on small screens */
 }
+
 .composer input[type=text] {
-  flex: 1;
+  flex: 1 1 100%; /* full width on mobile */
   padding: 10px 14px;
   border-radius: 25px;
   border: 1px solid #ccc;
   outline: none;
   font-size: 13px;
   transition: all 0.3s;
+  order: 2; /* input below buttons on mobile wrap */
 }
+
 .composer input[type=text]:focus { border-color: #8e2de2; box-shadow: 0 0 8px rgba(142,45,226,0.4); }
-.composer button { background: linear-gradient(135deg, #8e2de2, #4a00e0); border: none; color: #fff; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+.composer button {
+  flex: 1 1 auto;
+  min-width: 48px;
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
 .composer button:hover { transform: scale(1.15); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
 
 /* ---------- POPUPS ---------- */
@@ -159,8 +177,8 @@ header {
 @media (max-width: 480px) {
   header { flex-direction: row; justify-content: space-between; height: 55px; padding: 8px 10px; }
   #chatTitle { font-size: 16px; gap: 6px; }
-  .composer { padding: 6px; gap: 4px; }
-  .composer input[type=text] { padding: 8px 10px; font-size: 12px; }
+  .composer { gap: 4px; padding: 6px; }
+  .composer input[type=text] { font-size: 12px; padding: 8px 10px; }
   .composer button { padding: 8px; font-size: 16px; }
   #adminPanel { width: 90%; right: 5%; top: 60px; }
 }
