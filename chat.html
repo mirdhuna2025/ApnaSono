@@ -3,29 +3,31 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Mirdhuna Chat (No Rules Required)</title>
+  <title>Mirdhuna Chat</title>
   <style>
     body {
       font-family: 'Inter', system-ui, sans-serif;
       margin: 0;
       background: #fff;
       color: #111;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
     header {
       padding: 12px 16px;
       border-bottom: 1px solid #ddd;
       font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 16px;
+    .chat-container {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      height: 90vh;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 10px;
     }
     .chat-box {
       flex: 1;
@@ -52,6 +54,18 @@
       height: 40px;
       border-radius: 8px;
       object-fit: cover;
+    }
+    .name-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-tag {
+      background: #007bff;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 5px;
+      border-radius: 4px;
     }
     .meta {
       font-size: 12px;
@@ -102,24 +116,32 @@
       border-radius: 8px;
       cursor: pointer;
     }
+    .profile-setup {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .profile-setup input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div>Mirdhuna Community Chat</div>
-    <div style="font-size:13px;color:#555">Admin: sanjiv</div>
-  </header>
+  <header>Mirdhuna Community Chat</header>
 
-  <div class="container">
-    <div id="login" style="margin-bottom:10px">
-      <input id="name" placeholder="Enter your name" style="padding:8px;border:1px solid #ccc;border-radius:6px">
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox"></div>
+
+    <div class="profile-setup">
+      <input id="name" placeholder="Your name">
       <input id="photo" type="file" accept="image/*">
-      <button id="join" class="btn">Enter Chat</button>
     </div>
 
-    <div id="chatBox" class="chat-box"></div>
-
-    <div class="composer" id="composer" style="display:none">
+    <div class="composer">
       <input id="msg" type="text" placeholder="Write a message...">
       <input id="file" type="file">
       <button id="send" class="btn">Send</button>
@@ -151,34 +173,35 @@
     const chatBox = document.getElementById("chatBox");
     const msgInput = document.getElementById("msg");
     const sendBtn = document.getElementById("send");
-    const joinBtn = document.getElementById("join");
     const nameInput = document.getElementById("name");
     const photoInput = document.getElementById("photo");
-    const composer = document.getElementById("composer");
     const fileInput = document.getElementById("file");
 
     let user = null;
 
-    joinBtn.onclick = async () => {
+    async function getUserProfile() {
       const name = nameInput.value.trim();
-      if (!name) return alert("Enter your name");
-
+      if (!name) {
+        alert("Please enter your name before sending a message");
+        return null;
+      }
       let photoURL = "";
       const file = photoInput.files[0];
-      if (file) {
+      if (file && !user?.photoURL) {
         const path = `profiles/${Date.now()}_${file.name}`;
         const sref = sRef(storage, path);
         await uploadBytes(sref, file);
         photoURL = await getDownloadURL(sref);
+      } else if (user?.photoURL) {
+        photoURL = user.photoURL;
       }
-
       user = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN.toLowerCase() };
-      document.getElementById("login").style.display = "none";
-      composer.style.display = "flex";
-      listenMessages();
-    };
+      return user;
+    }
 
     async function sendMessage() {
+      const u = await getUserProfile();
+      if (!u) return;
       const text = msgInput.value.trim();
       const file = fileInput.files[0];
       if (!text && !file) return;
@@ -197,8 +220,9 @@
       }
 
       await push(ref(db, "messages"), {
-        user: user.name,
-        photo: user.photoURL,
+        user: u.name,
+        photo: u.photoURL,
+        isAdmin: u.isAdmin,
         text,
         mediaUrl,
         mediaType,
@@ -224,7 +248,10 @@
           <div class="header">
             <img class="profile" src="${msg.photo || "https://api.dicebear.com/7.x/thumbs/svg?seed=" + msg.user}">
             <div>
-              <div><strong>${msg.user}</strong></div>
+              <div class="name-line">
+                <strong>${msg.user}</strong>
+                ${msg.isAdmin ? `<span class="admin-tag">Admin</span>` : ""}
+              </div>
               <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
             </div>
           </div>
@@ -239,7 +266,6 @@
         `;
         chatBox.appendChild(div);
 
-        // render replies if any
         if (msg.replies) {
           Object.values(msg.replies).forEach(r => {
             const rdiv = document.createElement("div");
@@ -265,32 +291,33 @@
     window.likeMessage = async (key) => {
       const snap = await get(child(ref(db), "messages/" + key));
       const val = snap.val() || {};
-      const newLikes = (val.likes || 0) + 1;
-      await update(ref(db, "messages/" + key), { likes: newLikes });
+      await update(ref(db, "messages/" + key), { likes: (val.likes || 0) + 1 });
     };
 
     window.replyMessage = async (key) => {
+      const u = await getUserProfile();
+      if (!u) return;
       const text = prompt("Enter reply:");
       if (!text) return;
       await push(ref(db, `messages/${key}/replies`), {
-        user: user.name,
+        user: u.name,
         text,
         timestamp: Date.now()
       });
     };
 
     window.deleteMessage = async (key) => {
-      if (!user.isAdmin) return alert("Only admin can delete messages");
+      if (!user?.isAdmin) return alert("Only admin can delete messages");
       if (!confirm("Delete this message?")) return;
       await remove(ref(db, "messages/" + key));
     };
 
     function listenMessages() {
       const msgRef = ref(db, "messages");
-      onValue(msgRef, (snapshot) => {
-        renderMessages(snapshot.val());
-      });
+      onValue(msgRef, (snapshot) => renderMessages(snapshot.val()));
     }
+
+    listenMessages();
   </script>
 </body>
 </html>
