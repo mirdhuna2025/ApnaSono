@@ -1,127 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mirdhuna — Community Chat (Fast)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirdhuna Community Chat</title>
   <style>
-    :root{
-      --bg:#ffffff; --card:#fafafa; --muted:#6b7280; --accent:#2563eb; --border:#e6e6e6;
-      --text:#111827;
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh;
+    .chat-container {
+      width: 95%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      height: 90%;
     }
-    header{padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px}
-    header h1{font-size:18px; margin:0}
-    main{display:flex; flex:1; gap:18px; padding:16px; align-items:stretch}
-    /* left: chat column */
-    .chat-col{flex:1; display:flex; flex-direction:column; height:100%}
-    #chat-box{flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:12px}
-    .msg{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px; max-width:820px}
-    .msg-head{display:flex; gap:10px; align-items:center}
-    .profile{width:36px;height:36px;border-radius:8px;object-fit:cover}
-    .meta{font-size:13px;color:var(--muted)}
-    .content{margin-top:8px; font-size:15px; color:var(--text)}
-    .content img{max-width:100%; border-radius:8px; display:block; margin-top:8px}
-    .content video{max-width:100%; border-radius:8px; display:block; margin-top:8px}
-    .actions{margin-top:8px; display:flex; gap:8px; align-items:center; font-size:13px; color:var(--muted)}
-    .actions button{background:transparent;border:1px solid var(--border); padding:6px 8px;border-radius:8px; cursor:pointer;}
-    .reply-box{margin-top:10px; margin-left:46px; padding-left:10px;border-left:2px solid var(--border)}
-    .reply-item{font-size:13px; color:var(--muted); padding:6px 0}
-    /* input area */
-    .composer{display:flex; gap:10px; padding:12px; border-top:1px solid var(--border); background:var(--card)}
-    .composer input[type=text]{flex:1; padding:10px; border:1px solid var(--border); border-radius:8px}
-    .composer input[type=file]{font-size:13px}
-    .btn{background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer}
-    /* right: controls */
-    .side{width:320px; border-left:1px solid var(--border); padding-left:16px; display:flex; flex-direction:column; gap:12px}
-    .card{background:var(--card); border:1px solid var(--border); padding:12px; border-radius:8px}
-    .small{font-size:13px; color:var(--muted)}
-    #loadMore{width:100%; padding:10px; border-radius:8px; border:1px dashed var(--border); background:transparent; cursor:pointer}
-    /* responsive */
-    @media (max-width:900px){
-      main{flex-direction:column}
-      .side{width:100%; border-left:none; border-top:1px solid var(--border); padding-top:12px}
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    input, button {
+      font-size: 15px;
+      padding: 8px;
+    }
+    input {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { background: #0056b3; }
+    .message {
+      background: #f1f1f1;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    .message .header {
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .reply {
+      margin-left: 25px;
+      margin-top: 6px;
+      background: #fafafa;
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
+      border-radius: 4px;
+    }
+    #login-section {
+      text-align: center;
+      margin-top: 100px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Mirdhuna — Community Chat (Fast)</h1>
-    <div style="margin-left:auto" class="small">Light · Minimal</div>
-  </header>
+  <div id="login-section">
+    <h2>Enter Chat</h2>
+    <input id="username" placeholder="Enter your name" />
+    <input id="profile" placeholder="Profile picture URL (optional)" />
+    <button id="enterChat">Enter Chat</button>
+  </div>
 
-  <main>
-    <div class="chat-col">
-      <div id="chat-box" aria-live="polite"></div>
-
-      <div class="composer card" id="composer" style="display:none">
-        <input id="messageInput" type="text" placeholder="Write something... (text, images, videos allowed)">
-        <input id="fileInput" type="file" accept="image/*,video/*">
-        <button id="sendBtn" class="btn">Send</button>
-      </div>
+  <div class="chat-container" id="chat-container" style="display:none;">
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input">
+      <input id="messageInput" placeholder="Type your message..." />
+      <button id="sendBtn">Send</button>
     </div>
+  </div>
 
-    <aside class="side">
-      <div class="card">
-        <div style="font-weight:600">Enter chat</div>
-        <div class="small" style="margin-top:6px">Pick a display name and optional profile image. Provide admin password if you're admin.</div>
-
-        <div style="margin-top:10px; display:flex; gap:8px; flex-direction:column">
-          <input id="username" type="text" placeholder="Your name">
-          <input id="profilePic" type="file" accept="image/*">
-          <input id="adminPass" type="password" placeholder="Admin password (optional)">
-          <button id="enterBtn" class="btn">Enter Chat</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div style="font-weight:600">Controls</div>
-          <div class="small">Fast settings</div>
-        </div>
-
-        <div style="margin-top:8px" class="small">
-          <label><input id="liveToggle" type="checkbox" checked> Live updates</label>
-        </div>
-
-        <div style="margin-top:8px" class="small">
-          <label><input id="cacheToggle" type="checkbox" checked> Use local cache</label>
-        </div>
-
-        <div style="margin-top:8px">
-          <button id="loadMore" >Load older messages</button>
-        </div>
-
-        <div class="small" style="margin-top:10px; color:var(--muted)">
-          <div><strong>Page size:</strong> <span id="pageSizeLabel">50</span></div>
-          <div style="margin-top:6px">Tip: compress images before upload (done automatically).</div>
-        </div>
-      </div>
-
-      <div class="card small">
-        <div style="font-weight:600">Admin note</div>
-        <div style="margin-top:8px">
-          Admin delete is protected by a client-side password (set in code). For production, use server-side auth.
-        </div>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Firebase (modular v10) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getDatabase, ref, push, onChildAdded, onChildChanged, onChildRemoved,
-      query, limitToLast, orderByChild, endAt, startAt, get, update, remove
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getDatabase, ref, push, onChildAdded, set, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    /***** ======= CONFIG ======= *****/
-    // Replace with your Firebase config if needed:
     const firebaseConfig = {
       apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
       authDomain: "mirdhuna-25542.firebaseapp.com",
@@ -133,484 +120,101 @@
       measurementId: "G-YB7LDKHBPV"
     };
 
-    // Admin password (client-side). Change this to your own admin password.
-    // For real security, use Firebase Auth + server verification.
-    const ADMIN_PASSWORD = "change-me-to-a-strong-password";
-
-    /***** ======= APP INIT ======= *****/
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const storage = getStorage(app);
 
-    /***** ======= UI ELEMENTS ======= *****/
-    const chatBox = document.getElementById("chat-box");
-    const enterBtn = document.getElementById("enterBtn");
-    const usernameInput = document.getElementById("username");
-    const profileInput = document.getElementById("profilePic");
-    const adminPassInput = document.getElementById("adminPass");
-    const composer = document.getElementById("composer");
-    const messageInput = document.getElementById("messageInput");
-    const fileInput = document.getElementById("fileInput");
+    const chatBox = document.getElementById("chatBox");
     const sendBtn = document.getElementById("sendBtn");
-    const liveToggle = document.getElementById("liveToggle");
-    const cacheToggle = document.getElementById("cacheToggle");
-    const loadMoreBtn = document.getElementById("loadMore");
-    const pageSizeLabel = document.getElementById("pageSizeLabel");
+    const msgInput = document.getElementById("messageInput");
+    const enterChatBtn = document.getElementById("enterChat");
 
-    /***** ======= STATE ======= *****/
-    let currentUser = null;      // {name, profileURL, isAdmin}
-    let pageSize = 50;           // messages per page
-    pageSizeLabel.textContent = pageSize;
-    let latestQuery = null;      // reference to active query
-    let lastLoadedTimestamp = null; // for pagination (oldest loaded message timestamp)
-    let listening = false;
-    let messageElements = new Map(); // key -> DOM element for quick updates
-    const CACHE_KEY = "mirdhuna_chat_cache_v1"; // cached messages
-    let useCache = true;
+    let currentUser = null;
+    const ADMIN_NAME = "Admin"; // your admin name for delete rights
 
-    /***** ======= UTIL: compress image using canvas ======= *****/
-    async function compressImageFile(file, maxWidth = 1280, quality = 0.7) {
-      if (!file.type.startsWith("image/")) return file;
-      // if small, return original
-      if (file.size < 200 * 1024) return file; // <200KB no compress
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          const scale = Math.min(1, maxWidth / img.width);
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(blob => {
-            if (!blob) resolve(file);
-            else resolve(new File([blob], file.name, { type: blob.type }));
-          }, "image/jpeg", quality);
-          URL.revokeObjectURL(url);
-        };
-        img.onerror = (e) => { URL.revokeObjectURL(url); resolve(file); };
-        img.src = url;
+    enterChatBtn.addEventListener("click", () => {
+      const name = document.getElementById("username").value.trim();
+      const profile = document.getElementById("profile").value.trim();
+      if (!name) return alert("Please enter your name!");
+
+      currentUser = { name, profile };
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("chat-container").style.display = "flex";
+      loadMessages();
+    });
+
+    function loadMessages() {
+      const msgRef = query(ref(db, "messages"), limitToLast(50));
+      onChildAdded(msgRef, (snap) => {
+        const msg = snap.val();
+        renderMessage(msg, snap.key);
       });
     }
 
-    /***** ======= RENDER HELPERS ======= *****/
-    function formatTime(ts) {
-      const d = new Date(ts);
-      return d.toLocaleString();
-    }
+    sendBtn.addEventListener("click", sendMessage);
+    msgInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
 
-    function createMessageElement(key, data) {
-      const div = document.createElement("div");
-      div.className = "msg";
-      div.dataset.key = key;
-
-      const header = document.createElement("div");
-      header.className = "msg-head";
-      const img = document.createElement("img");
-      img.className = "profile";
-      img.src = data.profile || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.user || "guest")}`;
-      img.loading = "lazy";
-      const meta = document.createElement("div");
-      meta.innerHTML = `<div style="font-weight:600">${escapeHtml(data.user || "Anonymous")}</div>
-                        <div class="meta">${formatTime(data.timestamp || Date.now())}</div>`;
-      header.appendChild(img); header.appendChild(meta);
-
-      const content = document.createElement("div");
-      content.className = "content";
-      content.innerHTML = `<div>${escapeHtml(data.text || "")}</div>`;
-
-      if (data.fileURL) {
-        if (data.fileType === "image") {
-          const im = document.createElement("img");
-          im.src = data.fileURL;
-          im.loading = "lazy";
-          content.appendChild(im);
-        } else {
-          const v = document.createElement("video");
-          v.src = data.fileURL;
-          v.controls = true;
-          v.preload = "metadata";
-          content.appendChild(v);
-        }
-      }
-
-      const actions = document.createElement("div");
-      actions.className = "actions";
-      const likeBtn = document.createElement("button");
-      likeBtn.innerHTML = `❤️ <span class="like-count">${data.likes || 0}</span>`;
-      likeBtn.onclick = () => doLike(key);
-
-      const replyBtn = document.createElement("button");
-      replyBtn.textContent = "💬 Reply";
-      replyBtn.onclick = () => doReply(key);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️ Delete";
-      deleteBtn.onclick = () => doDelete(key);
-
-      actions.appendChild(likeBtn);
-      actions.appendChild(replyBtn);
-      actions.appendChild(deleteBtn);
-
-      // replies container
-      const replies = document.createElement("div");
-      replies.className = "reply-box";
-      replies.dataset.for = key;
-
-      div.appendChild(header);
-      div.appendChild(content);
-      div.appendChild(actions);
-      div.appendChild(replies);
-
-      // store for updates
-      messageElements.set(key, { el: div, likeBtn, replies });
-
-      return div;
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    /***** ======= CACHE LAYER ======= *****/
-    function loadCache() {
-      if (!useCache) return [];
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        return Array.isArray(arr) ? arr : [];
-      } catch(e){ return [];}
-    }
-    function saveCache(arr) {
-      if (!useCache) return;
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(arr.slice(-pageSize))); } catch(e){}
-    }
-
-    /***** ======= LISTENERS: realtime (fast) ======= *****/
-    function attachRealtimeListeners() {
-      if (listening) return;
-      listening = true;
-
-      // initial query: last pageSize messages
-      const msgsRef = ref(db, "messages");
-      latestQuery = query(msgsRef, orderByChild("timestamp"), limitToLast(pageSize));
-
-      // child added (new or initial)
-      onChildAdded(latestQuery, (snap) => {
-        const key = snap.key;
-        const data = snap.val();
-        // ignore if already rendered (we may get duplicates from cache)
-        if (messageElements.has(key)) {
-          // but update values if changed
-          updateMessageUI(key, data);
-          return;
-        }
-
-        // create element and append
-        const el = createMessageElement(key, data);
-        chatBox.appendChild(el);
-        // load replies for this message
-        attachRepliesListener(key);
-        // update lastLoadedTimestamp
-        if (!lastLoadedTimestamp || data.timestamp < lastLoadedTimestamp) lastLoadedTimestamp = data.timestamp;
-
-        // save cache
-        cachePush({ key, data });
-      });
-
-      // child changed -> likes or content changed
-      onChildChanged(latestQuery, (snap) => {
-        const key = snap.key;
-        const data = snap.val();
-        updateMessageUI(key, data);
-      });
-
-      // child removed -> delete from UI
-      onChildRemoved(latestQuery, (snap) => {
-        const key = snap.key;
-        const me = messageElements.get(key);
-        if (me) {
-          me.el.remove();
-          messageElements.delete(key);
-          pruneCacheByKey(key);
-        }
-      });
-    }
-
-    function detachRealtime() {
-      // Realtime DB modular does not return a handle to remove specific listeners easily in this style;
-      // For simplicity we reload page to re-enable listening state toggles, or you can track references.
-      // Here we'll just set flag so we won't re-attach.
-      listening = false;
-    }
-
-    /***** ======= REPLIES LISTENERS ======= *****/
-    function attachRepliesListener(messageKey) {
-      const rRef = ref(db, `messages/${messageKey}/replies`);
-      onChildAdded(rRef, (snap) => {
-        const r = snap.val();
-        const me = messageElements.get(messageKey);
-        if (!me) return;
-        const rItem = document.createElement("div");
-        rItem.className = "reply-item";
-        rItem.innerHTML = `<strong>${escapeHtml(r.user)}</strong>: ${escapeHtml(r.text)}`;
-        me.replies.appendChild(rItem);
-        // also update cache copy
-        cacheAddReply(messageKey, snap.key, r);
-      });
-    }
-
-    /***** ======= UI UPDATE HELPERS ======= *****/
-    function updateMessageUI(key, data) {
-      const me = messageElements.get(key);
-      if (!me) return;
-      // update likes
-      const likeCountSpan = me.likeBtn.querySelector(".like-count");
-      if (likeCountSpan) likeCountSpan.textContent = data.likes || 0;
-      // update text or profile if needed
-      const contentDiv = me.el.querySelector(".content > div");
-      if (contentDiv) contentDiv.innerHTML = escapeHtml(data.text || "");
-      const prof = me.el.querySelector(".profile");
-      if (prof && data.profile) prof.src = data.profile;
-    }
-
-    /***** ======= SENDING, LIKES, REPLY, DELETE ======= *****/
-    async function doSend() {
-      const text = messageInput.value.trim();
-      const file = fileInput.files[0];
-      if (!text && !file) return alert("Enter a message or attach a file");
-
-      let fileURL = null, fileType = null;
-      if (file) {
-        if (file.type.startsWith("image/")) {
-          const compressed = await compressImageFile(file, 1280, 0.7);
-          const refPath = `uploads/${Date.now()}_${compressed.name}`;
-          const s = sRef(storage, refPath);
-          await uploadBytes(s, compressed);
-          fileURL = await getDownloadURL(s);
-          fileType = "image";
-        } else {
-          // video or other
-          const refPath = `uploads/${Date.now()}_${file.name}`;
-          const s = sRef(storage, refPath);
-          await uploadBytes(s, file);
-          fileURL = await getDownloadURL(s);
-          fileType = file.type.startsWith("video") ? "video" : "file";
-        }
-      }
-
-      const msg = {
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      const msgRef = ref(db, "messages");
+      const newMsg = push(msgRef);
+      set(newMsg, {
+        name: currentUser.name,
+        profile: currentUser.profile,
         text,
-        fileURL: fileURL || null,
-        fileType: fileType || null,
-        user: currentUser.name,
-        profile: currentUser.profileURL || null,
         timestamp: Date.now(),
         likes: 0
-      };
-
-      await push(ref(db, "messages"), msg);
-      messageInput.value = "";
-      fileInput.value = "";
-    }
-
-    async function doLike(key) {
-      const msgRef = ref(db, `messages/${key}`);
-      // read current likes (small race possible; for production use a transaction)
-      const snap = await get(msgRef);
-      const val = snap.val() || {};
-      const currentLikes = val.likes || 0;
-      await update(msgRef, { likes: currentLikes + 1 });
-    }
-
-    async function doReply(key) {
-      const text = prompt("Enter your reply:");
-      if (!text) return;
-      const r = { user: currentUser.name, text, timestamp: Date.now() };
-      await push(ref(db, `messages/${key}/replies`), r);
-    }
-
-    async function doDelete(key) {
-      if (!currentUser.isAdmin) return alert("Only admin can delete messages.");
-      if (!confirm("Delete this message permanently?")) return;
-      await remove(ref(db, `messages/${key}`));
-      // onChildRemoved listener will remove UI and cache
-    }
-
-    /***** ======= CACHING HELPERS (localStorage) ======= *****/
-    function cachePush(item) {
-      if (!useCache) return;
-      const arr = loadCache();
-      // keep structure [{key, data, replies:[]}, ...]
-      const existingIdx = arr.findIndex(x => x.key === item.key);
-      if (existingIdx >= 0) arr[existingIdx] = { key: item.key, data: item.data, replies: arr[existingIdx].replies || [] };
-      else arr.push({ key: item.key, data: item.data, replies: [] });
-      // keep only last pageSize for cache
-      if (arr.length > pageSize) arr.splice(0, arr.length - pageSize);
-      saveCache(arr);
-    }
-
-    function cacheAddReply(messageKey, replyKey, r) {
-      if (!useCache) return;
-      const arr = loadCache();
-      const item = arr.find(x => x.key === messageKey);
-      if (item) {
-        item.replies = item.replies || [];
-        item.replies.push({ key: replyKey, data: r });
-        saveCache(arr);
-      }
-    }
-
-    function pruneCacheByKey(key) {
-      if (!useCache) return;
-      const arr = loadCache().filter(x => x.key !== key);
-      saveCache(arr);
-    }
-
-    /***** ======= PAGINATION: load older messages ======= *****/
-    async function loadOlder() {
-      // if no lastLoadedTimestamp, compute from currently in DOM
-      let oldestTs = lastLoadedTimestamp;
-      if (!oldestTs) {
-        // compute from messageElements
-        const all = Array.from(messageElements.values()).map(x => {
-          const ts = x.el.querySelector(".meta")?.textContent;
-          return x;
-        });
-      }
-      // build query: messages with timestamp < oldestTs, limitToLast(pageSize)
-      if (!oldestTs) {
-        // fallback: query last pageSize (handled by attachRealtimeListeners)
-        alert("No older messages available in this session.");
-        return;
-      }
-      const q = query(ref(db, "messages"), orderByChild("timestamp"), endAt(oldestTs - 1), limitToLast(pageSize));
-      const snap = await get(q);
-      if (!snap.exists()) return alert("No older messages.");
-      const result = snap.val();
-      // result is object keyed by message id
-      const entries = Object.entries(result).sort((a,b) => a[1].timestamp - b[1].timestamp);
-      // prepend each entry to top of chatBox
-      for (const [key, data] of entries) {
-        if (messageElements.has(key)) continue;
-        const el = createMessageElement(key, data);
-        // insert at top
-        chatBox.insertBefore(el, chatBox.firstChild);
-        attachRepliesListener(key);
-        cachePush({ key, data });
-        lastLoadedTimestamp = data.timestamp < (lastLoadedTimestamp || Infinity) ? data.timestamp : lastLoadedTimestamp;
-      }
-    }
-
-    /***** ======= INITIAL RENDER FROM CACHE (fast feel) ======= *****/
-    function renderCacheFast() {
-      const arr = loadCache();
-      if (!arr || !arr.length) return;
-      // clear UI
-      chatBox.innerHTML = "";
-      messageElements.clear();
-      // render each cached message in order
-      arr.forEach(item => {
-        const el = createMessageElement(item.key, item.data);
-        chatBox.appendChild(el);
-        // render cached replies (if any)
-        if (item.replies && item.replies.length) {
-          item.replies.forEach(r => {
-            const me = messageElements.get(item.key);
-            if (me) {
-              const rItem = document.createElement("div");
-              rItem.className = "reply-item";
-              rItem.innerHTML = `<strong>${escapeHtml(r.data.user)}</strong>: ${escapeHtml(r.data.text)}`;
-              me.replies.appendChild(rItem);
-            }
-          });
-        }
       });
+      msgInput.value = "";
     }
 
-    /***** ======= UI / EVENTS BINDING ======= *****/
-    enterBtn.addEventListener("click", async () => {
-      const name = (usernameInput.value || "").trim();
-      if (!name) return alert("Enter your name");
-      // upload profile if present
-      let profileURL = null;
-      const file = profileInput.files[0];
-      if (file) {
-        try {
-          const compressed = await compressImageFile(file, 800, 0.8);
-          const s = sRef(storage, `profiles/${Date.now()}_${compressed.name}`);
-          await uploadBytes(s, compressed);
-          profileURL = await getDownloadURL(s);
-        } catch(e){
-          console.error("Profile upload failed", e);
-        }
-      } else {
-        profileURL = `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(name)}`;
-      }
+    function renderMessage(msg, key) {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.id = "msg-" + key;
 
-      const isAdmin = adminPassInput.value === ADMIN_PASSWORD;
-      currentUser = { name, profileURL, isAdmin };
-
-      // show composer
-      composer.style.display = "flex";
-      // hide enter box
-      document.querySelector('.card').style.display = 'none'; // hide the leftmost Enter Chat card
-      // render cache first for instant feel
-      useCache = cacheToggle.checked;
-      if (useCache) renderCacheFast();
-
-      // attach realtime listeners if liveToggle checked
-      if (liveToggle.checked) attachRealtimeListeners();
-
-      // ensure that messages once loaded will be visible
+      div.innerHTML = `
+        <div class="header">
+          <span>${msg.profile ? `<img src="${msg.profile}" width="25" height="25" style="border-radius:50%;vertical-align:middle;margin-right:5px;">` : ""}${msg.name}</span>
+          <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+        <div>${msg.text}</div>
+        <div class="actions">
+          <span style="cursor:pointer;color:#007bff;" onclick="likeMsg('${key}', ${msg.likes||0})">❤️ ${msg.likes||0}</span>
+          <span style="cursor:pointer;color:#28a745;" onclick="replyMsg('${key}')">💬 Reply</span>
+          ${currentUser.name === '${ADMIN_NAME}' ? `<span style="cursor:pointer;color:red;" onclick="deleteMsg('${key}')">🗑 Delete</span>` : ""}
+        </div>
+        <div class="replies" id="replies-${key}"></div>
+      `;
+      chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
-    });
+    }
 
-    sendBtn.addEventListener("click", doSend);
-    messageInput.addEventListener("keydown", (e)=> { if (e.key === "Enter") doSend(); });
+    window.likeMsg = function(key, likes) {
+      const msgRef = ref(db, "messages/" + key);
+      update(msgRef, { likes: likes + 1 });
+    };
 
-    liveToggle.addEventListener("change", () => {
-      if (liveToggle.checked) attachRealtimeListeners();
-      else detachRealtime();
-    });
+    window.replyMsg = function(key) {
+      const replyText = prompt("Your reply:");
+      if (!replyText) return;
+      const replyRef = ref(db, `messages/${key}/replies`);
+      const newReply = push(replyRef);
+      set(newReply, {
+        name: currentUser.name,
+        text: replyText,
+        timestamp: Date.now()
+      });
+    };
 
-    cacheToggle.addEventListener("change", () => { useCache = cacheToggle.checked; if (!useCache) localStorage.removeItem(CACHE_KEY); });
-
-    loadMoreBtn.addEventListener("click", loadOlder);
-
-    // when page loads, try to prefill cache state quickly (don't need user logged in)
-    (function prefillCacheIfAny(){
-      const arr = loadCache();
-      if (arr && arr.length) {
-        // show cached messages so page doesn't feel empty
-        arr.forEach(item => {
-          const placeholder = createMessageElement(item.key, item.data);
-          chatBox.appendChild(placeholder);
-          // we do not attach replies listeners until user enters (save listeners)
-        });
+    window.deleteMsg = function(key) {
+      if (currentUser.name !== ADMIN_NAME) return alert("Only admin can delete messages!");
+      if (confirm("Delete this message?")) {
+        remove(ref(db, "messages/" + key));
+        const el = document.getElementById("msg-" + key);
+        if (el) el.remove();
       }
-    })();
-
-    // Accessibility: keep newest visible
-    const obs = new MutationObserver(() => {
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-    obs.observe(chatBox, { childList: true, subtree: false });
-
-    // Utility: ensure page size variable can be tuned later (not UI-editable now)
-    // You can change pageSize variable near top to tune.
-
-    /***** ======= FIN (helper: transaction note) ======= *****/
-    // Note: likes increment is implemented with a read+update - which can have a small race condition
-    // For production with heavy concurrency, use runTransaction on Realtime DB to increment atomically.
-
+    };
   </script>
 </body>
 </html>
