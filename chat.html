@@ -1,164 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mirdhuna — Feature Chat</title>
-<!--
-INSTRUCTIONS:
-1) Save as mirdhuna_full_features.html
-2) Serve from a web server (VSCode Live Server / Firebase Hosting). Loading via file:// may block Firebase modules.
-3) Uses Realtime Database + Storage. No db rules changes required.
-4) Admin identity: name "sanjiv" (case-insensitive). Change ADMIN_NAME below if needed.
--->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mirdhuna — Community Chat</title>
 <style>
-  :root{
-    --bg:#ffffff; --card:#fbfbfb; --muted:#6b7280; --accent:#2563eb; --danger:#e11d48; --text:#111;
-    --bubble:#fff; --border:#e6e6e6;
-  }
-  [data-theme="dark"]{
-    --bg:#0b0c10; --card:#0f1720; --muted:#94a3b8; --accent:#60a5fa; --danger:#f87171; --text:#e6eef8;
-    --bubble:#111827; --border:#1f2937;
-  }
+  :root{--bg:#ffffff;--muted:#6b7280;--accent:#2563eb;--card:#fbfbfb;--border:#e6e6e6;--text:#111827}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto;height:100vh;display:flex;flex-direction:column}
-  header{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border)}
+  body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center}
   header h1{margin:0;font-size:18px}
-  .app{display:flex;flex:1;gap:12px;padding:12px;height:calc(100vh - 60px)}
-  .left{flex:1;display:flex;flex-direction:column;gap:8px}
-  .rooms{display:flex;gap:8px;overflow:auto;padding-bottom:6px}
-  .room-btn{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer}
-  .main-card{flex:1;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card)}
-  .top-area{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--border)}
-  .messages{flex:1;overflow:auto;padding:12px;background:transparent}
+  .main{flex:1;display:flex;justify-content:center;align-items:stretch;padding:12px}
+  .app{width:100%;max-width:920px;border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:calc(100vh - 110px);overflow:hidden;background:#fff}
+  /* chat area */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border)}
+  .chat-area{flex:1;display:flex;gap:12px;padding:12px;overflow:hidden}
+  .left{flex:1;display:flex;flex-direction:column}
+  .messages{flex:1;overflow:auto;padding:8px;border:1px solid #f0f0f0;border-radius:10px;background:var(--card)}
   .composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);align-items:center}
-  input.msg{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border)}
-  input.file{padding:6px}
-  button.btn{background:var(--accent);color:white;padding:10px 12px;border-radius:8px;border:none;cursor:pointer}
-  .right{width:320px;display:flex;flex-direction:column;gap:12px}
-  .card{padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--card)}
-  .small{font-size:13px;color:var(--muted)}
-  /* message bubble */
-  .msg-row{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+  input[type=text].msg{flex:1;padding:10px;border:1px solid var(--border);border-radius:8px}
+  input[type=file]{padding:6px}
+  .btn{background:var(--accent);color:#fff;border:none;padding:9px 12px;border-radius:8px;cursor:pointer}
+  /* message styles */
+  .msg-wrap{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
   .avatar{width:44px;height:44px;border-radius:8px;object-fit:cover}
-  .bubble{background:var(--bubble);border:1px solid var(--border);padding:10px;border-radius:10px;max-width:75%}
+  .bubble{background:#fff;border:1px solid var(--border);padding:10px;border-radius:10px;max-width:78%}
   .meta{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
-  .admin-badge{background:var(--accent);color:white;font-size:11px;padding:2px 6px;border-radius:6px;margin-left:6px}
-  .content img{max-width:100%;border-radius:8px;margin-top:8px}
-  .content video{max-width:100%;border-radius:8px;margin-top:8px}
-  .file-link{display:inline-flex;align-items:center;padding:8px;border-radius:8px;border:1px dashed var(--border);margin-top:8px;text-decoration:none;color:var(--text)}
+  .admin-badge{background:var(--accent);color:#fff;font-size:11px;padding:2px 6px;border-radius:6px;margin-left:6px}
+  .content img{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+  .content video{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+  .file-link{display:inline-block;margin-top:8px;padding:8px;border:1px dashed var(--border);border-radius:8px;text-decoration:none;color:var(--text)}
   .actions{margin-top:8px;display:flex;gap:8px;font-size:13px;color:var(--muted);align-items:center}
-  .reply-item{margin-left:54px;margin-top:6px;padding-left:8px;border-left:2px solid var(--border);font-size:13px}
-  .editor-note{font-size:12px;color:var(--muted);margin-left:6px}
+  .reply-item{margin-top:6px;margin-left:50px;padding-left:8px;border-left:2px solid #f0f0f0;font-size:13px;color:#444}
+  /* right side controls */
+  .right{width:300px;padding-left:12px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid var(--border)}
+  .small{font-size:13px;color:var(--muted)}
   /* modal */
   .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999}
-  .modal{background:var(--card);padding:16px;border-radius:10px;width:360px;box-shadow:0 10px 30px rgba(0,0,0,0.15)}
+  .modal{background:#fff;padding:18px;border-radius:10px;width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.15)}
   .modal h3{margin:0 0 8px 0}
-  .modal input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
-  .modal input[type=file]{margin-bottom:8px}
-  /* admin panel table */
-  .table{width:100%;border-collapse:collapse;font-size:13px}
-  .table th, .table td{padding:8px;border-bottom:1px solid var(--border);text-align:left}
-  /* small screens */
-  @media (max-width:900px){.app{flex-direction:column}.right{width:100%}}
+  .modal input[type=text]{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end}
+  /* responsive */
+  @media (max-width:900px){.chat-area{flex-direction:column}.right{width:100%;border-left:none;border-top:1px solid var(--border);padding-top:12px}}
 </style>
 </head>
-<body data-theme="">
+<body>
+
 <header>
-  <h1>Mirdhuna — Full Chat</h1>
-  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <label class="small"><input id="darkToggle" type="checkbox"> Dark</label>
-    <button id="profileBtn" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Profile</button>
-  </div>
+  <h1>Mirdhuna Community Chat</h1>
+  <div style="margin-left:auto"><button id="changeProfileBtn" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Change Profile</button></div>
 </header>
 
-<div class="app">
-  <div class="left">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-weight:600">Rooms</div>
-        <div class="small">Create or join rooms</div>
-      </div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <input id="newRoomName" type="text" placeholder="room name (e.g. general)" style="padding:8px;border-radius:8px;border:1px solid var(--border)">
-        <button id="createRoom" class="btn">Create</button>
-      </div>
-      <div id="rooms" class="rooms" style="margin-top:8px"></div>
+<div class="main">
+  <div class="app" role="application">
+    <div class="topbar">
+      <div class="small">Public community wall — share thoughts & files</div>
+      <div class="small">Admin controls limited to admin user</div>
     </div>
 
-    <div class="main-card">
-      <div class="top-area">
-        <div>
-          <strong id="roomTitle">#general</strong>
-          <span class="small" id="roomDesc" style="margin-left:8px">Public room</span>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="small">Typing: <span id="typingIndicator">—</span></div>
-          <div class="small">Online: <span id="onlineCount">0</span></div>
+    <div class="chat-area">
+      <div class="left">
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <div class="composer">
+          <input id="messageText" class="msg" type="text" placeholder="Write a message... (text or attach a file)">
+          <input id="messageFile" type="file">
+          <button id="sendBtn" class="btn">Send</button>
         </div>
       </div>
 
-      <div id="messages" class="messages" ></div>
-
-      <div class="composer">
-        <input id="messageText" class="msg" type="text" placeholder="Write a message... (Markdown supported)">
-        <input id="messageFile" class="file" type="file">
-        <button id="emojiBtn" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">😊</button>
-        <button id="sendBtn" class="btn">Send</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="right">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:600">Profile</div>
-      </div>
-      <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
-        <img id="avatarPreview" src="" class="avatar" alt="avatar" style="width:64px;height:64px">
-        <div>
-          <div id="namePreview" style="font-weight:700">Guest</div>
-          <div id="rolePreview" class="small">Member</div>
-          <div style="margin-top:8px">
-            <button id="editProfile" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Edit</button>
+      <div class="right">
+        <div class="card">
+          <div style="font-weight:600">Your profile</div>
+          <div id="profilePreview" style="margin-top:8px;display:flex;gap:10px;align-items:center">
+            <img id="previewAvatar" src="" alt="avatar" class="avatar" style="width:56px;height:56px;border-radius:8px;object-fit:cover">
+            <div>
+              <div id="previewName" style="font-weight:600">Guest</div>
+              <div class="small" id="previewRole">—</div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div style="font-weight:600">Controls</div>
-      <div style="margin-top:8px" class="small">
-        <label><input id="liveToggle" type="checkbox" checked> Live updates</label><br/>
-        <label><input id="cacheToggle" type="checkbox" checked> Use local cache</label>
-      </div>
-      <div style="margin-top:8px">
-        <div class="small">Page size</div>
-        <select id="pageSize">
-          <option value="20">20</option>
-          <option value="50" selected>50</option>
-          <option value="100">100</option>
-        </select>
-        <div style="margin-top:8px">
-          <button id="loadOlder" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Load older</button>
+        <div class="card">
+          <div style="font-weight:600">Controls</div>
+          <div class="small" style="margin-top:8px">Live updates, cache & page size</div>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+            <label><input id="liveToggle" type="checkbox" checked> Live updates</label>
+            <label><input id="cacheToggle" type="checkbox" checked> Use local cache</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="small">Page size</div>
+              <select id="pageSize">
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <button id="loadMore" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Load older</button>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="card" id="adminPanel" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:700">Admin Panel</div>
-        <div class="small">sanjiv</div>
-      </div>
-      <div style="margin-top:8px">
-        <div class="small">Analytics</div>
-        <div id="analytics" style="margin-top:8px;font-size:13px"></div>
-      </div>
-      <div style="margin-top:8px">
-        <div class="small">Moderation</div>
-        <div style="margin-top:8px">
-          <button id="scanSpam" class="btn" style="background:#fff;color:var(--danger);border:1px solid var(--danger)">Scan Spam</button>
-          <button id="viewAllMsg" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">View Messages</button>
+        <div class="card small">
+          Messages and files are stored in Firebase. For strong security use Firebase Auth + server rules.
         </div>
       </div>
     </div>
@@ -167,671 +111,377 @@ INSTRUCTIONS:
 
 <!-- profile modal -->
 <div id="profileModal" class="modal-back" style="display:none">
-  <div class="modal">
-    <h3>Set profile</h3>
-    <input id="modalName" type="text" placeholder="Display name" />
-    <input id="modalFile" type="file" accept="image/*" />
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Set your name & profile photo</h3>
+    <input id="modalName" type="text" placeholder="Display name">
+    <input id="modalFile" type="file" accept="image/*">
+    <div class="actions" style="margin-top:10px">
       <button id="modalCancel" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Cancel</button>
       <button id="modalSave" class="btn">Save</button>
     </div>
   </div>
 </div>
 
-<!-- emoji popup (very small) -->
-<div id="emojiPopup" class="modal-back" style="display:none;background:transparent;align-items:flex-end;justify-content:flex-end;pointer-events:none;z-index:900">
-  <div style="background:var(--card);border:1px solid var(--border);padding:8px;border-radius:8px;margin:12px;pointer-events:auto">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;max-width:260px">
-      <!-- small set -->
-      <button class="emoji">😀</button><button class="emoji">😄</button><button class="emoji">😉</button><button class="emoji">😮</button><button class="emoji">😂</button>
-      <button class="emoji">👍</button><button class="emoji">🔥</button><button class="emoji">🎉</button><button class="emoji">💡</button><button class="emoji">❤️</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
-/* ===============================
-   Mirdhuna Full Features Chat
-   - Realtime Database + Storage
-   - All features (no Firestore)
-   - Admin: 'sanjiv' (case-insensitive)
-   =============================== */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getDatabase, ref, push, onValue, remove, update, get, child, runTransaction
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase, ref, push, onValue, get, child, update, remove, runTransaction
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  // Your Firebase config (same as before)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+    authDomain: "mirdhuna-25542.firebaseapp.com",
+    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+    projectId: "mirdhuna-25542",
+    storageBucket: "mirdhuna-25542.firebasestorage.app",
+    messagingSenderId: "575924409876",
+    appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
+    measurementId: "G-YB7LDKHBPV"
+  };
 
-/* ---------- CONFIG ---------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain: "mirdhuna-25542.firebaseapp.com",
-  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-  projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.firebasestorage.app",
-  messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-  measurementId: "G-YB7LDKHBPV"
-};
-const ADMIN_NAME = "sanjiv";
+  const ADMIN_NAME = "sanjiv";
 
-/* ---------- INIT ---------- */
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const storage = getStorage(app);
 
-/* ---------- UI Refs ---------- */
-const roomsEl = document.getElementById('rooms');
-const createRoomBtn = document.getElementById('createRoom');
-const newRoomNameInput = document.getElementById('newRoomName');
+  // UI refs
+  const messagesEl = document.getElementById('messages');
+  const messageText = document.getElementById('messageText');
+  const messageFile = document.getElementById('messageFile');
+  const sendBtn = document.getElementById('sendBtn');
+  const previewAvatar = document.getElementById('previewAvatar');
+  const previewName = document.getElementById('previewName');
+  const previewRole = document.getElementById('previewRole');
+  const changeProfileBtn = document.getElementById('changeProfileBtn');
 
-const messagesEl = document.getElementById('messages');
-const messageText = document.getElementById('messageText');
-const messageFile = document.getElementById('messageFile');
-const sendBtn = document.getElementById('sendBtn');
-const emojiBtn = document.getElementById('emojiBtn');
-const emojiPopup = document.getElementById('emojiPopup');
+  const modal = document.getElementById('profileModal');
+  const modalName = document.getElementById('modalName');
+  const modalFile = document.getElementById('modalFile');
+  const modalSave = document.getElementById('modalSave');
+  const modalCancel = document.getElementById('modalCancel');
 
-const pageSizeSelect = document.getElementById('pageSize');
-const loadOlderBtn = document.getElementById('loadOlder');
-const liveToggle = document.getElementById('liveToggle');
-const cacheToggle = document.getElementById('cacheToggle');
+  const liveToggle = document.getElementById('liveToggle');
+  const cacheToggle = document.getElementById('cacheToggle');
+  const pageSizeSelect = document.getElementById('pageSize');
+  const loadMoreBtn = document.getElementById('loadMore');
 
-const profileBtn = document.getElementById('profileBtn');
-const profileModal = document.getElementById('profileModal');
-const modalName = document.getElementById('modalName');
-const modalFile = document.getElementById('modalFile');
-const modalSave = document.getElementById('modalSave');
-const modalCancel = document.getElementById('modalCancel');
+  // state
+  const CACHE_KEY = 'mirdhuna_profile_v1';
+  const MESSAGES_CACHE = 'mirdhuna_msgs_v1';
+  let currentUser = null; // {name, photoURL, isAdmin}
+  let listening = false;
+  let pageSize = parseInt(pageSizeSelect.value, 10) || 50;
+  let oldestTimestamp = null; // for pagination
+  let cachedMessages = [];
 
-const avatarPreview = document.getElementById('avatarPreview');
-const namePreview = document.getElementById('namePreview');
-const rolePreview = document.getElementById('rolePreview');
-const editProfileBtn = document.getElementById('editProfile');
+  // helpers
+  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+  function fmt(ts){ return new Date(ts).toLocaleString(); }
 
-const typingIndicatorEl = document.getElementById('typingIndicator');
-const onlineCountEl = document.getElementById('onlineCount');
-
-const roomTitle = document.getElementById('roomTitle');
-const roomDesc = document.getElementById('roomDesc');
-
-const adminPanelEl = document.getElementById('adminPanel');
-const analyticsEl = document.getElementById('analytics');
-const scanSpamBtn = document.getElementById('scanSpam');
-const viewAllMsgBtn = document.getElementById('viewAllMsg');
-
-const darkToggle = document.getElementById('darkToggle');
-
-/* ---------- State ---------- */
-let currentRoom = 'general';
-let roomsList = ['general'];
-let listenersAttached = false;
-let currentUser = null; // {name, photoURL, isAdmin}
-const PROFILE_KEY = 'mirdhuna_profile_v2';
-const MSG_CACHE_KEY = 'mirdhuna_msgs_v2';
-let pageSize = parseInt(pageSizeSelect.value,10) || 50;
-let oldestTimestamp = null; // for pagination
-let typingTimeout = null;
-let onlineUsers = {}; // {room: {user: timestamp}}
-let useCache = cacheToggle.checked;
-
-/* ---------- Helpers ---------- */
-const escapeHtml = s => String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-const prettyTime = ts => new Date(ts).toLocaleString();
-
-/* ---------- Profile (modal + persistence) ---------- */
-function loadProfile(){
-  try{
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(e){ return null; }
-}
-function saveProfile(p){
-  try{ localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }catch(e){}
-}
-function clearProfile(){
-  try{ localStorage.removeItem(PROFILE_KEY); }catch(e){}
-}
-
-/* upload profile image to storage */
-async function uploadProfileFile(file){
-  const path = `profiles/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-  const s = sRef(storage, path);
-  await uploadBytes(s, file);
-  return await getDownloadURL(s);
-}
-
-/* show profile modal */
-async function openProfileModal(prefill=''){
-  profileModal.style.display = 'flex';
-  modalName.value = prefill || '';
-  modalFile.value = '';
-  return new Promise(resolve => {
-    const onSave = async () => {
-      const name = modalName.value.trim();
-      if(!name){ alert('Enter name'); return; }
-      let photoURL = null;
-      if(modalFile.files && modalFile.files[0]){
-        try{ photoURL = await uploadProfileFile(modalFile.files[0]); }catch(e){ console.error(e); alert('Upload failed'); }
-      } else {
-        const existing = loadProfile();
-        photoURL = existing?.photoURL || null;
-      }
-      currentUser = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN_NAME.toLowerCase() };
-      saveProfile(currentUser);
-      updateProfileUI();
-      profileModal.style.display = 'none';
-      modalSave.removeEventListener('click', onSave);
-      modalCancel.removeEventListener('click', onCancel);
-      resolve(currentUser);
-    };
-    const onCancel = () => {
-      profileModal.style.display = 'none';
-      modalSave.removeEventListener('click', onSave);
-      modalCancel.removeEventListener('click', onCancel);
-      resolve(null);
-    };
-    modalSave.addEventListener('click', onSave);
-    modalCancel.addEventListener('click', onCancel);
-  });
-}
-function updateProfileUI(){
-  if(!currentUser) {
-    avatarPreview.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=guest`;
-    namePreview.textContent = 'Guest';
-    rolePreview.textContent = 'Member';
-  } else {
-    avatarPreview.src = currentUser.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(currentUser.name)}`;
-    namePreview.textContent = currentUser.name;
-    rolePreview.textContent = currentUser.isAdmin ? 'Admin' : 'Member';
-    adminPanelEl.style.display = currentUser.isAdmin ? 'block':'none';
-  }
-}
-
-/* init profile from storage */
-(function initProfile(){
-  const p = loadProfile();
-  if(p && p.name){
-    currentUser = p;
-    updateProfileUI();
-  } else {
-    // quick show small hint to set profile: we open modal on first message send
-    updateProfileUI();
-  }
-})();
-
-/* ---------- Rooms ---------- */
-function renderRooms(){
-  roomsEl.innerHTML = '';
-  roomsList.forEach(r=>{
-    const btn = document.createElement('button'); btn.className='room-btn';
-    btn.textContent = r === currentRoom ? `# ${r} •` : `# ${r}`;
-    btn.onclick = ()=>{ joinRoom(r); };
-    roomsEl.appendChild(btn);
-  });
-}
-function joinRoom(name){
-  currentRoom = name;
-  roomTitle.textContent = `#${name}`;
-  roomDesc.textContent = name.startsWith('dm_') ? 'Private' : 'Public room';
-  // clear messages area and reattach listeners
-  messagesEl.innerHTML = '';
-  attachMessagesListener();
-}
-
-/* create room */
-document.getElementById('createRoom').addEventListener('click', ()=>{
-  const nm = newRoomNameInput.value.trim();
-  if(!nm){ alert('enter room name'); return; }
-  if(roomsList.includes(nm)){ alert('room exists'); return; }
-  roomsList.push(nm);
-  renderRooms();
-  newRoomNameInput.value = '';
-});
-
-/* ---------- Emoji picker ---------- */
-emojiBtn.addEventListener('click', ()=> {
-  emojiPopup.style.display = 'flex';
-});
-document.querySelectorAll('.emoji').forEach(b=>{
-  b.addEventListener('click', ()=> {
-    messageText.value += b.textContent;
-    emojiPopup.style.display = 'none';
-    messageText.focus();
-  });
-});
-
-/* close emoji when clicking outside */
-document.addEventListener('click', (e)=> {
-  if(!emojiPopup.contains(e.target) && e.target !== emojiBtn) emojiPopup.style.display = 'none';
-});
-
-/* ---------- Typing indicator & presence ---------- */
-let typingRef = null;
-let presenceRef = null;
-function setTyping(isTyping){
-  if(!currentUser) return;
-  const tRef = ref(db, `typing/${currentRoom}/${encodeURIComponent(currentUser.name)}`);
-  if(isTyping){
-    update(tRef, { ts: Date.now() });
-    // schedule cleanup after 3s of no typing
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(()=>{ setTyping(false); }, 3000);
-  } else {
-    remove(tRef).catch(()=>{});
-  }
-}
-
-/* messageText typing */
-messageText.addEventListener('input', ()=>{
-  const val = messageText.value.trim();
-  setTyping(!!val);
-});
-
-/* listen typing for room */
-function attachTypingListener(){
-  const tRef = ref(db, `typing/${currentRoom}`);
-  onValue(tRef, snap => {
-    const val = snap.val() || {};
-    const names = Object.keys(val).map(d => decodeURIComponent(d)).filter(n=>n !== (currentUser?.name||''));
-    typingIndicatorEl.textContent = names.length ? names.join(', ') : '—';
-  });
-}
-
-/* presence: mark online when app open, remove on unload */
-function setPresence(active=true){
-  if(!currentUser) return;
-  const pRef = ref(db, `presence/${currentRoom}/${encodeURIComponent(currentUser.name)}`);
-  if(active){
-    update(pRef, { ts: Date.now() });
-    // keep updating every 30s
-    setInterval(()=> update(pRef, { ts: Date.now() }), 30000);
-  } else {
-    remove(pRef).catch(()=>{});
-  }
-}
-function attachPresenceListener(){
-  const pRef = ref(db, `presence/${currentRoom}`);
-  onValue(pRef, snap=>{
-    const val = snap.val() || {};
-    const count = Object.keys(val).length;
-    onlineCountEl.textContent = count;
-  });
-}
-
-/* ---------- Message rendering ---------- */
-function messageNode(id,msg){
-  const row = document.createElement('div'); row.className='msg-row';
-  const avatar = document.createElement('img'); avatar.className='avatar';
-  avatar.src = msg.photo || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(msg.user||'guest')}`;
-  const bubble = document.createElement('div'); bubble.className='bubble';
-  const header = document.createElement('div'); header.className='meta';
-
-  header.innerHTML = `<strong>${escapeHtml(msg.user||'Anonymous')}</strong> ${msg.isAdmin?'<span class="admin-badge">Admin</span>':''} <span class="small" style="margin-left:8px">${prettyTime(msg.timestamp)}</span>`;
-  const content = document.createElement('div'); content.className='content';
-  // basic markdown: **bold**, _italic_, links auto
-  const formatted = formatMessage(msg.text || '');
-  content.innerHTML = formatted;
-
-  if(msg.mediaUrl){
-    if(msg.mediaType && msg.mediaType.startsWith('image')) {
-      const im = document.createElement('img'); im.src = msg.mediaUrl; im.loading='lazy'; content.appendChild(im);
-    } else if(msg.mediaType && msg.mediaType.startsWith('video')){
-      const v = document.createElement('video'); v.src = msg.mediaUrl; v.controls=true; v.preload='metadata'; content.appendChild(v);
-    } else {
-      const a = document.createElement('a'); a.href = msg.mediaUrl; a.target='_blank'; a.className='file-link'; a.textContent = msg.mediaName || 'Download file';
-      content.appendChild(a);
+  // profile modal + persistence
+  function loadProfileFromStorage(){
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch(e){
+      return null;
     }
   }
-
-  const actions = document.createElement('div'); actions.className='actions';
-  const likeBtn = document.createElement('button'); likeBtn.textContent = `❤️ ${msg.likes||0}`;
-  likeBtn.onclick = ()=> likeMessage(id);
-  const replyBtn = document.createElement('button'); replyBtn.textContent = '💬 Reply';
-  replyBtn.onclick = ()=> replyToMessage(id);
-  const editBtn = document.createElement('button'); editBtn.textContent = '✏️ Edit';
-  editBtn.onclick = ()=> editMessage(id, msg);
-  const delBtn = document.createElement('button'); delBtn.textContent = '🗑 Delete';
-  delBtn.onclick = ()=> deleteMessage(id);
-
-  actions.appendChild(likeBtn); actions.appendChild(replyBtn);
-  // editing rights: author or admin
-  if(currentUser && (currentUser.name === msg.user || currentUser.isAdmin)) actions.appendChild(editBtn);
-  if(currentUser && currentUser.isAdmin) actions.appendChild(delBtn);
-  if(currentUser && (currentUser.name === msg.user)) {
-    const selfDel = document.createElement('button'); selfDel.textContent='🗑 MyDel';
-    selfDel.onclick = ()=> deleteMessage(id, true);
-    actions.appendChild(selfDel);
+  function saveProfileToStorage(profile){
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(profile)); } catch(e){}
+  }
+  function clearProfileStorage(){
+    try { localStorage.removeItem(CACHE_KEY); } catch(e){}
   }
 
-  bubble.appendChild(header); bubble.appendChild(content); bubble.appendChild(actions);
-  row.appendChild(avatar); row.appendChild(bubble);
+  async function uploadProfileFile(file){
+    const path = `profiles/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+    const s = sRef(storage, path);
+    await uploadBytes(s, file);
+    return await getDownloadURL(s);
+  }
 
-  // replies list
-  if(msg.replies){
-    Object.entries(msg.replies).forEach(([rk,rv])=>{
-      const rnode = document.createElement('div'); rnode.className='reply-item';
-      rnode.textContent = `${rv.user}: ${rv.text}`;
-      row.appendChild(rnode);
+  async function openProfileModal(prefillName = '', prefillPhoto = null){
+    modal.style.display = 'flex';
+    modalName.value = prefillName || '';
+    modalFile.value = '';
+  }
+  function closeProfileModal(){ modal.style.display = 'none'; }
+
+  // initialize profile from storage or ask
+  (async function initProfile(){
+    const p = loadProfileFromStorage();
+    if(p && p.name){
+      currentUser = p;
+      updateProfilePreview();
+    } else {
+      // show modal on first visit
+      await openProfileModal();
+    }
+  })();
+
+  changeProfileBtn.addEventListener('click', async () => {
+    // let user change; prefill modal
+    const p = loadProfileFromStorage() || {};
+    await openProfileModal(p.name || '', p.photoURL || null);
+  });
+
+  modalCancel.addEventListener('click', () => {
+    closeProfileModal();
+    const p = loadProfileFromStorage();
+    if(!p || !p.name){
+      // if still no profile, keep modal open by focusing name (user must set before sending). do nothing.
+    }
+  });
+
+  modalSave.addEventListener('click', async () => {
+    const name = (modalName.value || '').trim();
+    if(!name){ alert('Please enter a name'); return; }
+    let photoURL = null;
+    if(modalFile.files && modalFile.files[0]){
+      try {
+        photoURL = await uploadProfileFile(modalFile.files[0]);
+      } catch(e){ console.error('profile upload failed', e); alert('Profile upload failed'); }
+    }
+    currentUser = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN_NAME.toLowerCase() };
+    saveProfileToStorage(currentUser);
+    updateProfilePreview();
+    closeProfileModal();
+  });
+
+  function updateProfilePreview(){
+    previewName.textContent = currentUser.name;
+    previewRole.textContent = currentUser.isAdmin ? 'Admin' : 'Member';
+    previewAvatar.src = currentUser.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(currentUser.name)}`;
+  }
+
+  // message rendering & realtime (no .indexOn rules)
+  function renderAllMessages(obj){
+    // obj is object of messages keyed by id
+    messagesEl = messagesEl || document.getElementById('messages');
+    messagesEl.innerHTML = '';
+    const arr = obj ? Object.entries(obj) : [];
+    // sort by timestamp ascending (client-side)
+    arr.sort((a,b) => (a[1].timestamp||0) - (b[1].timestamp||0));
+    // remember oldest timestamp for pagination
+    if(arr.length) oldestTimestamp = arr[0][1].timestamp;
+    arr.forEach(([key, msg]) => {
+      const node = messageNode(key, msg);
+      messagesEl.appendChild(node);
+      // append replies if any
+      if(msg.replies){
+        Object.values(msg.replies).forEach(r => {
+          const rnode = document.createElement('div');
+          rnode.className = 'reply-item';
+          rnode.textContent = `${r.user}: ${r.text}`;
+          node.appendChild(rnode);
+        });
+      }
+    });
+    // cache messages locally for faster reload
+    try { localStorage.setItem(MESSAGES_CACHE, JSON.stringify(arr.slice(-pageSize))); } catch(e){}
+    // scroll to bottom
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function messageNode(key, msg){
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap';
+    const avatar = document.createElement('img');
+    avatar.className = 'avatar';
+    avatar.src = msg.photo || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(msg.user||'guest')}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const header = document.createElement('div');
+    header.className = 'meta';
+    header.innerHTML = `<span style="font-weight:700">${escapeHtml(msg.user||'Anonymous')}</span> ${msg.isAdmin ? '<span class="admin-badge">Admin</span>' : ''} <span style="margin-left:8px;color:var(--muted);font-size:12px">${fmt(msg.timestamp)}</span>`;
+
+    const content = document.createElement('div');
+    content.className = 'content';
+    content.innerHTML = `<div>${escapeHtml(msg.text||'')}</div>`;
+
+    if(msg.mediaUrl){
+      if(msg.mediaType && msg.mediaType.startsWith('image')){
+        const im = document.createElement('img'); im.src = msg.mediaUrl; im.loading='lazy'; content.appendChild(im);
+      } else if(msg.mediaType && msg.mediaType.startsWith('video')){
+        const v = document.createElement('video'); v.src = msg.mediaUrl; v.controls=true; v.preload='metadata'; content.appendChild(v);
+      } else {
+        const a = document.createElement('a'); a.href = msg.mediaUrl; a.target = '_blank'; a.className='file-link';
+        a.textContent = msg.mediaName || 'Download file';
+        content.appendChild(a);
+      }
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const likeBtn = document.createElement('button'); likeBtn.textContent = `❤️ ${msg.likes||0}`; likeBtn.onclick = () => likeMessage(key);
+    const replyBtn = document.createElement('button'); replyBtn.textContent = '💬 Reply'; replyBtn.onclick = () => replyMessage(key);
+    const delBtn = document.createElement('button'); delBtn.textContent = '🗑️ Delete'; delBtn.onclick = () => deleteMessage(key);
+
+    actions.appendChild(likeBtn); actions.appendChild(replyBtn);
+    if(currentUser && currentUser.isAdmin) actions.appendChild(delBtn);
+
+    bubble.appendChild(header); bubble.appendChild(content); bubble.appendChild(actions);
+
+    wrap.appendChild(avatar); wrap.appendChild(bubble);
+    return wrap;
+  }
+
+  // attach listener for entire messages node (onValue)
+  function attachMessagesListener(){
+    if (listening) return;
+    listening = true;
+    const msgsRef = ref(db, 'messages');
+    onValue(msgsRef, snapshot => {
+      const val = snapshot.val();
+      renderAllMessages(val);
     });
   }
 
-  // edited badge
-  if(msg.edited) {
-    const editNote = document.createElement('div'); editNote.className='editor-note'; editNote.textContent='(edited)';
-    bubble.appendChild(editNote);
-  }
-
-  return row;
-}
-
-/* format text: basic markdown and linkify */
-function formatMessage(text){
-  let s = escapeHtml(text);
-  // bold **text**
-  s = s.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-  // italic _text_
-  s = s.replace(/_(.*?)_/g,'<em>$1</em>');
-  // linkify URLs
-  s = s.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>');
-  return s;
-}
-
-/* ---------- Spam filter (simple) ---------- */
-const BANNED_WORDS = ['spamdomain.com','buy-now','free-money'];
-function isSpam(text){
-  if(!text) return false;
-  const lower = text.toLowerCase();
-  // multiple links
-  const linkCount = (text.match(/https?:\/\//g) || []).length;
-  if(linkCount > 3) return true;
-  // banned words
-  for(const w of BANNED_WORDS) if(lower.includes(w)) return true;
-  // too short nonsense
-  if(text.length < 2) return true;
-  return false;
-}
-
-/* ---------- Send message ---------- */
-sendBtn.addEventListener('click', sendMessage);
-messageText.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMessage(); });
-
-async function sendMessage(){
-  // ensure profile
-  if(!currentUser || !currentUser.name){
-    const p = await openProfileModal('');
-    if(!p) return;
-  }
-  const text = messageText.value.trim();
-  const file = messageFile.files[0];
-  if(!text && !file) return;
-
-  // spam check
-  if(isSpam(text)){
-    alert('Message flagged as spam. Edit and try again.');
-    return;
-  }
-
-  let mediaUrl=null, mediaType=null, mediaName=null;
-  if(file){
-    const path = `uploads/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-    const s = sRef(storage, path);
-    await uploadBytes(s, file);
-    mediaUrl = await getDownloadURL(s);
-    mediaType = file.type || 'file';
-    mediaName = file.name;
-  }
-
-  const payload = {
-    user: currentUser.name,
-    photo: currentUser.photoURL || null,
-    isAdmin: currentUser.isAdmin || false,
-    text: text || '',
-    mediaUrl,
-    mediaType,
-    mediaName,
-    timestamp: Date.now(),
-    likes: 0,
-    edited: false
-  };
-
-  // Messages stored under /rooms/{room}/{msgId}
-  await push(ref(db, `rooms/${currentRoom}`), payload);
-
-  // simple analytics: increment message count (day)
-  const dayKey = new Date().toISOString().slice(0,10);
-  const statRef = ref(db, `analytics/messagesPerDay/${dayKey}`);
-  await runTransaction(statRef, cur => (cur||0) + 1);
-
-  // clear inputs
-  messageText.value = '';
-  messageFile.value = '';
-}
-
-/* ---------- Likes (transaction) ---------- */
-async function likeMessage(msgId){
-  const likesRef = ref(db, `rooms/${currentRoom}/${msgId}/likes`);
-  await runTransaction(likesRef, cur => (cur||0) + 1);
-}
-
-/* ---------- Reply ---------- */
-async function replyToMessage(msgId){
-  if(!currentUser || !currentUser.name){
-    await openProfileModal('');
-    if(!currentUser) return;
-  }
-  const txt = prompt('Enter reply:');
-  if(!txt) return;
-  await push(ref(db, `rooms/${currentRoom}/${msgId}/replies`), { user: currentUser.name, text: txt, timestamp: Date.now() });
-  // notify (browser) if reply to someone else: notify when it's not me
-  // Basic in-page notification
-  if(currentUser) {
-    // store notification in local DB node for toast? For now use Notification API
-    if(Notification.permission === 'granted'){
-      new Notification('Reply sent', { body: `You replied in #${currentRoom}` });
-    } else if(Notification.permission !== 'denied'){
-      Notification.requestPermission();
+  // send message (ensures profile saved)
+  async function sendMessage(){
+    // ensure profile
+    if(!currentUser || !currentUser.name){
+      // open modal and require save
+      await openProfileModal(currentUser?.name||'');
+      // modalSave will set currentUser
+      return;
     }
-  }
-}
+    const text = (messageText.value || '').trim();
+    const file = messageFile.files[0];
+    if(!text && !file) return;
 
-/* ---------- Edit message ---------- */
-async function editMessage(msgId, msg){
-  if(!currentUser || !(currentUser.name===msg.user || currentUser.isAdmin)){
-    alert('No permission to edit');
-    return;
-  }
-  const newText = prompt('Edit message:', msg.text || '');
-  if(newText === null) return;
-  await update(ref(db, `rooms/${currentRoom}/${msgId}`), { text: newText, edited: true, editedAt: Date.now() });
-}
-
-/* ---------- Delete message ---------- */
-async function deleteMessage(msgId, selfOnly=false){
-  // selfOnly if user wants to delete their own message; admin can delete always
-  const snap = await get(ref(db, `rooms/${currentRoom}/${msgId}`));
-  if(!snap.exists()) return;
-  const data = snap.val();
-  if(!(currentUser && (currentUser.isAdmin || currentUser.name === data.user))){
-    alert('Only the author or admin can delete');
-    return;
-  }
-  if(!confirm('Delete this message?')) return;
-  await remove(ref(db, `rooms/${currentRoom}/${msgId}`));
-}
-
-/* ---------- Messages listener (per room) ---------- */
-let currentListenerRef = null;
-function attachMessagesListener(){
-  // remove previous listener by just switching ref (onValue attaches new)
-  const r = ref(db, `rooms/${currentRoom}`);
-  onValue(r, snapshot=>{
-    const val = snapshot.val() || {};
-    renderMessages(val);
-  });
-  // typing & presence
-  attachTypingListener();
-  attachPresenceListener();
-  // mark presence
-  if(currentUser) setPresence(true);
-}
-
-/* render messages (sorted client-side) */
-function renderMessages(obj){
-  messagesEl.innerHTML = '';
-  const entries = Object.entries(obj || {});
-  entries.sort((a,b)=> (a[1].timestamp||0) - (b[1].timestamp||0));
-  if(entries.length) oldestTimestamp = entries[0][1].timestamp;
-  // cache last N for quicker reload (if using cache)
-  try { if(useCache) localStorage.setItem(MSG_CACHE_KEY, JSON.stringify(entries.slice(-pageSize))); } catch(e){}
-  entries.forEach(([id, msg])=>{
-    const node = messageNode(id,msg);
-    messagesEl.appendChild(node);
-  });
-  // auto-scroll to bottom
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  // update analytics & admin view
-  updateAnalyticsUI();
-}
-
-/* ---------- Pagination: load older ---------- */
-loadOlderBtn.addEventListener('click', async ()=>{
-  // get all messages and filter older than oldestTimestamp
-  const snap = await get(ref(db, `rooms/${currentRoom}`));
-  if(!snap.exists()){ alert('No messages'); return; }
-  const all = snap.val();
-  const list = Object.entries(all).map(([k,v])=>({key:k,data:v}));
-  const older = list.filter(x => !oldestTimestamp || x.data.timestamp < oldestTimestamp);
-  if(!older.length) return alert('No older messages');
-  older.sort((a,b)=> a.data.timestamp - b.data.timestamp);
-  const take = older.slice(0, parseInt(pageSizeSelect.value,10) || 50);
-  const frag = document.createDocumentFragment();
-  take.forEach(item => {
-    const node = messageNode(item.key, item.data);
-    frag.appendChild(node);
-  });
-  messagesEl.insertBefore(frag, messagesEl.firstChild);
-  oldestTimestamp = take.length ? take[take.length-1].data.timestamp : oldestTimestamp;
-});
-
-/* ---------- Presence (online) ---------- */
-async function setPresence(active=true){
-  if(!currentUser) return;
-  const pRef = ref(db, `presence/${currentRoom}/${encodeURIComponent(currentUser.name)}`);
-  if(active){
-    await update(pRef, { ts: Date.now() });
-    // keep alive
-    setInterval(()=> update(pRef, { ts: Date.now() }), 30000);
-  } else {
-    await remove(pRef).catch(()=>{});
-  }
-}
-function attachPresenceListener(){
-  const pRef = ref(db, `presence/${currentRoom}`);
-  onValue(pRef, snap=>{
-    const val = snap.val() || {};
-    const cnt = Object.keys(val).length;
-    onlineCountEl.textContent = cnt;
-  });
-}
-
-/* ---------- Analytics UI ---------- */
-async function updateAnalyticsUI(){
-  try{
-    const dayKey = new Date().toISOString().slice(0,10);
-    const snap = await get(ref(db, `analytics/messagesPerDay/${dayKey}`));
-    const today = snap.exists() ? snap.val() : 0;
-    analyticsEl.innerHTML = `<div>Messages today: <strong>${today}</strong></div>`;
-  }catch(e){ console.error(e); }
-}
-
-/* ---------- Admin Actions: scan spam & view messages ---------- */
-scanSpamBtn.addEventListener('click', async ()=>{
-  if(!currentUser || !currentUser.isAdmin) return alert('Admin only');
-  const snap = await get(ref(db, `rooms/${currentRoom}`));
-  if(!snap.exists()) return alert('No messages');
-  const list = Object.entries(snap.val());
-  // find suspected spam using isSpam
-  const suspects = list.filter(([k,v]) => isSpam(v.text || ''));
-  if(!suspects.length) return alert('No spam found');
-  // show first 10 with delete option
-  let msg = 'Suspected spam messages:\n';
-  suspects.slice(0,20).forEach(([k,v])=> msg += `- ${v.user}: ${v.text}\n`);
-  if(confirm(msg + '\nDelete these messages?')) {
-    for(const [k,v] of suspects) await remove(ref(db, `rooms/${currentRoom}/${k}`));
-    alert('Deleted suspects');
-  }
-});
-viewAllMsgBtn.addEventListener('click', async ()=>{
-  if(!currentUser || !currentUser.isAdmin) return alert('Admin only');
-  const snap = await get(ref(db, `rooms/${currentRoom}`));
-  if(!snap.exists()) return alert('No messages');
-  const items = Object.entries(snap.val()).map(([k,v])=>`${v.user}: ${v.text}`).slice(0,200).join('\n');
-  alert(`Messages:\n${items}`);
-});
-
-/* ---------- Profile button actions ---------- */
-profileBtn.addEventListener('click', async ()=>{
-  await openProfileModal(currentUser?.name || '');
-});
-editProfileBtn.addEventListener('click', async ()=>{ await openProfileModal(currentUser?.name || ''); });
-
-/* ---------- Dark mode ---------- */
-darkToggle.addEventListener('change', ()=>{
-  if(darkToggle.checked){ document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('mirdhuna_theme','dark'); }
-  else { document.documentElement.setAttribute('data-theme',''); localStorage.removeItem('mirdhuna_theme'); }
-});
-(function initTheme(){
-  const t = localStorage.getItem('mirdhuna_theme');
-  if(t==='dark'){ darkToggle.checked = true; document.documentElement.setAttribute('data-theme','dark'); }
-})();
-
-/* ---------- Notifications permission ---------- */
-if("Notification" in window){
-  if(Notification.permission === 'default') Notification.requestPermission();
-}
-
-/* ---------- Storage cleanup helper (admin only) ---------- */
-async function cleanupUploads(folder='uploads'){
-  if(!currentUser || !currentUser.isAdmin) return alert('Admin only');
-  const l = sRef(storage, folder);
-  try{
-    const list = await listAll(l);
-    for(const item of list.items) await deleteObject(item);
-    alert('Storage cleaned');
-  }catch(e){ console.error(e); alert('Cleanup failed'); }
-}
-
-/* ---------- Auto-join default room and render rooms ---------- */
-roomsList = ['general','ideas','off-topic'];
-renderRooms();
-joinRoom('general');
-
-/* ---------- Load cached messages if present (fast feel) ---------- */
-(function prefillCache(){
-  try{
-    if(useCache){
-      const raw = localStorage.getItem(MSG_CACHE_KEY);
-      if(!raw) return;
-      const arr = JSON.parse(raw);
-      arr.forEach(([k,[id,val]]) => {}); // not used; we'll fetch live instead
+    let mediaUrl = null, mediaType = null, mediaName = null;
+    if(file){
+      const path = `uploads/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+      const s = sRef(storage, path);
+      await uploadBytes(s, file);
+      mediaUrl = await getDownloadURL(s);
+      mediaType = file.type || 'file';
+      mediaName = file.name;
     }
-  }catch(e){}
-})();
 
-/* ---------- Attach messages when room changes ---------- */
-attachMessagesListener();
+    const payload = {
+      user: currentUser.name,
+      photo: currentUser.photoURL || null,
+      isAdmin: currentUser.isAdmin || false,
+      text: text || '',
+      mediaUrl: mediaUrl || null,
+      mediaType: mediaType || null,
+      mediaName: mediaName || null,
+      timestamp: Date.now(),
+      likes: 0
+    };
 
-/* ---------- Utility: global exposure for links in bubble actions (not strictly needed) ---------- */
-window.likeMessage = likeMessage;
-window.replyToMessage = replyToMessage;
-window.editMessage = editMessage;
-window.deleteMessage = deleteMessage;
+    await push(ref(db, 'messages'), payload);
+    messageText.value = '';
+    messageFile.value = null;
+  }
 
-/* ---------- END of main script ---------- */
-console.log('Mirdhuna full features loaded');
+  // like using transaction to avoid races
+  async function likeMessage(key){
+    const nodeRef = ref(db, `messages/${key}/likes`);
+    await runTransaction(nodeRef, cur => (cur || 0) + 1);
+  }
+
+  async function replyMessage(key){
+    if(!currentUser || !currentUser.name){
+      await openProfileModal();
+      return;
+    }
+    const text = prompt('Enter reply:');
+    if(!text) return;
+    await push(ref(db, `messages/${key}/replies`), { user: currentUser.name, text, timestamp: Date.now() });
+  }
+
+  async function deleteMessage(key){
+    if(!currentUser || !currentUser.isAdmin){ alert('Only admin can delete'); return; }
+    if(!confirm('Delete this message permanently?')) return;
+    await remove(ref(db, `messages/${key}`));
+  }
+
+  // load older messages (client-side sorted without index)
+  async function loadOlder(){
+    // get all messages, pick those older than current oldestTimestamp
+    const snap = await get(ref(db, 'messages'));
+    if(!snap.exists()) return alert('No messages');
+    const all = snap.val();
+    const entries = Object.entries(all || {}).map(([k,v]) => ({ key:k, data:v }));
+    // filter older than oldestTimestamp (if set)
+    const older = entries.filter(e => !oldestTimestamp || (e.data.timestamp < oldestTimestamp));
+    if(!older.length) return alert('No older messages');
+    // sort ascending and take pageSize
+    older.sort((a,b) => a.data.timestamp - b.data.timestamp);
+    const take = older.slice(0, parseInt(pageSizeSelect.value,10) || 50);
+    // prepend to messages container
+    const container = document.getElementById('messages');
+    take.forEach(item => {
+      const node = messageNode(item.key, item.data);
+      container.insertBefore(node, container.firstChild);
+    });
+    // update oldestTimestamp
+    oldestTimestamp = take.length ? take[take.length-1].data.timestamp : oldestTimestamp;
+  }
+
+  // wire UI
+  sendBtn.addEventListener('click', sendMessage);
+  messageText.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
+  changeProfileBtn.addEventListener('click', async ()=>{ await openProfileModal(currentUser?.name||''); });
+
+  // modal open helpers adapted for flow (re-implement to return Promise resolve after save)
+  function openProfileModal(prefill=''){
+    return new Promise(res => {
+      modal.style.display = 'flex';
+      modalName.value = prefill || '';
+      modalFile.value = '';
+      // temporary save handler
+      const onSave = async () => {
+        const name = (modalName.value||'').trim();
+        if(!name){ alert('Name required'); return; }
+        let photoURL = null;
+        if(modalFile.files && modalFile.files[0]){
+          try { photoURL = await uploadProfileFile(modalFile.files[0]); } catch(e){ console.error(e); alert('Upload failed'); }
+        } else {
+          const existing = loadProfileFromStorage();
+          photoURL = existing?.photoURL || null;
+        }
+        currentUser = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN_NAME.toLowerCase() };
+        saveProfileToStorage(currentUser);
+        updateProfilePreview();
+        modal.style.display = 'none';
+        cleanup();
+        res(currentUser);
+      };
+      const onCancel = () => { modal.style.display = 'none'; cleanup(); res(null); };
+      modalSave.addEventListener('click', onSave, { once: true });
+      modalCancel.addEventListener('click', onCancel, { once: true });
+      function cleanup(){ /* nothing extra */ }
+    });
+  }
+
+  // on load: set preview from storage if present
+  const stored = loadProfileFromStorage();
+  if(stored){ currentUser = stored; updateProfilePreview(); }
+  // start listening if live enabled
+  if(liveToggle.checked) attachMessagesListener();
+
+  // page controls
+  loadMoreBtn.addEventListener('click', loadOlder);
+  liveToggle.addEventListener('change', ()=>{ if(liveToggle.checked) attachMessagesListener(); else listening=false; });
+  cacheToggle.addEventListener('change', ()=>{ if(!cacheToggle.checked) localStorage.removeItem(MESSAGES_CACHE); });
+
+  // expose functions for buttons created earlier (global access for inline handlers if any)
+  window.likeMessage = likeMessage;
+  window.replyMessage = replyMessage;
+  window.deleteMessage = deleteMessage;
+
+  // ready
+  console.log('Mirdhuna chat loaded');
 </script>
 </body>
 </html>
