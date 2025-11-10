@@ -1,349 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Mirdhuna Chat</title>
-  <style>
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      margin: 0;
-      background: #fff;
-      color: #111;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mirdhuna Chat with Admin</title>
+<style>
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    background: #fff;
+    color: #111;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+  }
+  #profileBtn, #adminBtn {
+    position: absolute;
+    top: 8px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #profileBtn { right: 90px; }
+  #adminBtn { right: 10px; }
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    height: 100%;
+  }
+  .chat-box {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fafafa;
+    margin-bottom: 70px;
+  }
+  .message {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+    margin-bottom: 10px;
+  }
+  .message .header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .message img.profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .name-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .admin-tag {
+    background: #007bff;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  .meta { font-size: 12px; color: #666; }
+  .content { margin-top: 6px; font-size: 14px; }
+  .reply { margin-left: 45px; font-size: 13px; color: #444; margin-top: 5px; padding-left: 5px; border-left: 2px solid #eee; }
 
-    header {
-      padding: 12px 16px;
-      border-bottom: 1px solid #ddd;
-      font-weight: 600;
-      text-align: center;
-      position: relative;
-    }
+  /* Composer fixed at bottom */
+  .composer {
+    display: flex;
+    gap: 8px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    box-sizing: border-box;
+  }
+  .composer input[type=text] { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+  .composer input[type=file] { width: 90px; }
+  .btn { background: #007bff; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
 
-    #profileBtn {
-      position: absolute;
-      right: 10px;
-      top: 8px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      max-width: 800px;
-      margin: 0 auto;
-      width: 100%;
-      position: relative;
-      height: 100%;
-    }
-
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      background: #fafafa;
-      margin-bottom: 70px; /* leave space for composer */
-    }
-
-    .message {
-      border: 1px solid #eee;
-      border-radius: 10px;
-      padding: 10px;
-      background: #fff;
-      margin-bottom: 10px;
-    }
-
-    .message .header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .message img.profile {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      object-fit: cover;
-    }
-
-    .name-line {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .admin-tag {
-      background: #007bff;
-      color: #fff;
-      font-size: 11px;
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: #666;
-    }
-
-    .content {
-      margin-top: 6px;
-      font-size: 14px;
-    }
-
-    .reply {
-      margin-left: 45px;
-      font-size: 13px;
-      color: #444;
-      margin-top: 5px;
-      padding-left: 5px;
-      border-left: 2px solid #eee;
-    }
-
-    /* ✅ Fixed composer at bottom */
-    .composer {
-      display: flex;
-      gap: 8px;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      box-sizing: border-box;
-    }
-
-    .composer input[type=text] {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    .composer input[type=file] {
-      width: 90px;
-    }
-
-    .btn {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    /* ✅ Popup style for profile setup */
-    .profile-popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .profile-popup-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      width: 90%;
-      max-width: 300px;
-    }
-
-    .profile-popup-content input {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    @media (max-width: 600px) {
-      .composer {
-        padding: 8px;
-        gap: 6px;
-      }
-      .composer input[type=file] {
-        width: 70px;
-      }
-      .btn {
-        padding: 8px 12px;
-      }
-    }
-  </style>
+  /* Popup styles */
+  .popup {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none; justify-content: center; align-items: center; z-index: 100;
+  }
+  .popup-content {
+    background: #fff; padding: 20px; border-radius: 10px; text-align: center; width: 90%; max-width: 300px;
+  }
+  .popup-content input { width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+</style>
 </head>
 <body>
-  <header>
-    Mirdhuna Community Chat
-    <button id="profileBtn">Profile</button>
-  </header>
+<header>
+  Mirdhuna Community Chat
+  <button id="profileBtn">Profile</button>
+  <button id="adminBtn">Admin</button>
+</header>
 
-  <div class="chat-container">
-    <div class="chat-box" id="chatBox"></div>
+<div class="chat-container">
+  <div class="chat-box" id="chatBox"></div>
 
-    <div class="composer">
-      <input id="msg" type="text" placeholder="Write a message...">
-      <input id="file" type="file">
-      <button id="send" class="btn">Send</button>
-    </div>
+  <div class="composer">
+    <input id="msg" type="text" placeholder="Write a message...">
+    <input id="file" type="file">
+    <button id="send" class="btn">Send</button>
   </div>
+</div>
 
-  <!-- ✅ Popup for Profile -->
-  <div class="profile-popup" id="profilePopup">
-    <div class="profile-popup-content">
-      <h3>Set Your Profile</h3>
-      <input id="name" placeholder="Your name">
-      <input id="photo" type="file" accept="image/*">
-      <button id="saveProfile" class="btn">Save</button>
-    </div>
+<!-- Profile popup -->
+<div class="popup" id="profilePopup">
+  <div class="popup-content">
+    <h3>Set Your Profile</h3>
+    <input id="name" placeholder="Your name">
+    <input id="photo" type="file" accept="image/*">
+    <button id="saveProfile" class="btn">Save</button>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+<!-- Admin login popup -->
+<div class="popup" id="adminPopup">
+  <div class="popup-content">
+    <h3>Admin Login</h3>
+    <input id="adminPass" type="password" placeholder="Password">
+    <button id="adminLoginBtn" class="btn">Login</button>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-      authDomain: "mirdhuna-25542.firebaseapp.com",
-      databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-      projectId: "mirdhuna-25542",
-      storageBucket: "mirdhuna-25542.firebasestorage.app",
-      messagingSenderId: "575924409876",
-      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
-    };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain: "mirdhuna-25542.firebaseapp.com",
+  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+  projectId: "mirdhuna-25542",
+  storageBucket: "mirdhuna-25542.firebasestorage.app",
+  messagingSenderId: "575924409876",
+  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+};
 
-    const ADMIN = "sanjiv";
-    const chatBox = document.getElementById("chatBox");
-    const msgInput = document.getElementById("msg");
-    const sendBtn = document.getElementById("send");
-    const nameInput = document.getElementById("name");
-    const photoInput = document.getElementById("photo");
-    const fileInput = document.getElementById("file");
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-    const profilePopup = document.getElementById("profilePopup");
-    const profileBtn = document.getElementById("profileBtn");
-    const saveProfileBtn = document.getElementById("saveProfile");
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("msg");
+const sendBtn = document.getElementById("send");
+const fileInput = document.getElementById("file");
+const profileBtn = document.getElementById("profileBtn");
+const adminBtn = document.getElementById("adminBtn");
 
-    let user = JSON.parse(localStorage.getItem("chatUser")) || null;
+const profilePopup = document.getElementById("profilePopup");
+const saveProfileBtn = document.getElementById("saveProfile");
+const nameInput = document.getElementById("name");
+const photoInput = document.getElementById("photo");
 
-    profileBtn.onclick = () => profilePopup.style.display = "flex";
+const adminPopup = document.getElementById("adminPopup");
+const adminPassInput = document.getElementById("adminPass");
+const adminLoginBtn = document.getElementById("adminLoginBtn");
 
-    saveProfileBtn.onclick = async () => {
-      const name = nameInput.value.trim();
-      if (!name) return alert("Please enter your name");
+let user = JSON.parse(localStorage.getItem("chatUser")) || null;
+let isAdminSession = false;
 
-      let photoURL = "";
-      const file = photoInput.files[0];
-      if (file) {
-        const path = `profiles/${Date.now()}_${file.name}`;
-        const sref = sRef(storage, path);
-        await uploadBytes(sref, file);
-        photoURL = await getDownloadURL(sref);
-      }
+// Show profile popup if user not set
+if (!user) profilePopup.style.display = "flex";
 
-      user = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN.toLowerCase() };
-      localStorage.setItem("chatUser", JSON.stringify(user));
-      profilePopup.style.display = "none";
-    };
+profileBtn.onclick = () => profilePopup.style.display = "flex";
+saveProfileBtn.onclick = async () => {
+  const name = nameInput.value.trim();
+  if (!name) return alert("Enter your name");
+  let photoURL = "";
+  const file = photoInput.files[0];
+  if (file) {
+    const path = `profiles/${Date.now()}_${file.name}`;
+    const sref = sRef(storage, path);
+    await uploadBytes(sref, file);
+    photoURL = await getDownloadURL(sref);
+  }
+  user = { name, photoURL, isAdmin: false };
+  localStorage.setItem("chatUser", JSON.stringify(user));
+  profilePopup.style.display = "none";
+};
 
-    async function sendMessage() {
-      if (!user) return profilePopup.style.display = "flex";
+// Admin login
+adminBtn.onclick = () => adminPopup.style.display = "flex";
+adminLoginBtn.onclick = () => {
+  const pass = adminPassInput.value;
+  if (pass === "sanu0000") {
+    isAdminSession = true;
+    user = { name: "Admin", photoURL: "", isAdmin: true };
+    localStorage.setItem("chatUser", JSON.stringify(user));
+    adminPopup.style.display = "none";
+    alert("Admin login successful!");
+  } else {
+    alert("Wrong password!");
+  }
+};
 
-      const text = msgInput.value.trim();
-      const file = fileInput.files[0];
-      if (!text && !file) return;
+// Send message
+async function sendMessage() {
+  if (!user) return profilePopup.style.display = "flex";
+  const text = msgInput.value.trim();
+  const file = fileInput.files[0];
+  if (!text && !file) return;
+  let mediaUrl = "", mediaType = "", mediaName = "";
+  if (file) {
+    const path = `uploads/${Date.now()}_${file.name}`;
+    const sref = sRef(storage, path);
+    await uploadBytes(sref, file);
+    mediaUrl = await getDownloadURL(sref);
+    mediaType = file.type;
+    mediaName = file.name;
+  }
+  await push(ref(db, "messages"), {
+    user: user.name,
+    photo: user.photoURL,
+    isAdmin: user.isAdmin,
+    text,
+    mediaUrl,
+    mediaType,
+    mediaName,
+    timestamp: Date.now(),
+    likes: 0
+  });
+  msgInput.value = "";
+  fileInput.value = "";
+}
+sendBtn.onclick = sendMessage;
+msgInput.addEventListener("keydown", e => { if (e.key==="Enter") sendMessage(); });
 
-      let mediaUrl = "", mediaType = "", mediaName = "";
-      if (file) {
-        const path = `uploads/${Date.now()}_${file.name}`;
-        const sref = sRef(storage, path);
-        await uploadBytes(sref, file);
-        mediaUrl = await getDownloadURL(sref);
-        mediaType = file.type;
-        mediaName = file.name;
-      }
-
-      await push(ref(db, "messages"), {
-        user: user.name,
-        photo: user.photoURL,
-        isAdmin: user.isAdmin,
-        text,
-        mediaUrl,
-        mediaType,
-        mediaName,
-        timestamp: Date.now(),
-        likes: 0
-      });
-
-      msgInput.value = "";
-      fileInput.value = "";
-    }
-
-    sendBtn.onclick = sendMessage;
-    msgInput.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
-
-    function renderMedia(msg) {
-      if (msg.mediaType?.startsWith("image")) {
-        return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
-      } else if (msg.mediaType?.startsWith("video")) {
-        return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
-      } else if (msg.mediaUrl) {
-        return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
-      }
-      return "";
-    }
-
-    function renderMessages(data) {
-      chatBox.innerHTML = "";
-      const entries = Object.entries(data || {}).sort((a,b) => (a[1].timestamp||0)-(b[1].timestamp||0));
-      entries.forEach(([key, msg]) => {
-        const div = document.createElement("div");
-        div.className = "message";
-        div.innerHTML = `
-          <div class="header">
-            <img class="profile" src="${msg.photo || "https://api.dicebear.com/7.x/thumbs/svg?seed=" + msg.user}">
-            <div>
-              <div class="name-line">
-                <strong>${msg.user}</strong>
-                ${msg.isAdmin ? `<span class="admin-tag">Admin</span>` : ""}
-              </div>
-              <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
-            </div>
+// Render messages
+function renderMessages(data){
+  chatBox.innerHTML="";
+  const entries=Object.entries(data||{}).sort((a,b)=> (a[1].timestamp||0)-(b[1].timestamp||0));
+  entries.forEach(([key,msg])=>{
+    const div=document.createElement("div");
+    div.className="message";
+    div.innerHTML=`
+      <div class="header">
+        <img class="profile" src="${msg.photo||'https://api.dicebear.com/7.x/thumbs/svg?seed='+msg.user}">
+        <div>
+          <div class="name-line">
+            <strong>${msg.user}</strong>
+            ${msg.isAdmin?'<span class="admin-tag">Admin</span>':''}
           </div>
-          <div class="content">${msg.text || ""}</div>
-          ${renderMedia(msg)}
-        `;
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+          <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
+        </div>
+      </div>
+      <div class="content">${msg.text||''}</div>
+      ${msg.mediaUrl?renderMedia(msg):''}
+      ${user?.isAdmin?`<div class="actions"><button onclick="deleteMessage('${key}')">🗑️ Delete</button></div>`:''}
+    `;
+    chatBox.appendChild(div);
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-    onValue(ref(db, "messages"), (snapshot) => renderMessages(snapshot.val()));
-  </script>
+function renderMedia(msg){
+  if(msg.mediaType?.startsWith("image")) return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
+  if(msg.mediaType?.startsWith("video")) return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
+  if(msg.mediaUrl) return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
+  return '';
+}
+
+window.deleteMessage = async (key) => {
+  if (!user?.isAdmin) return alert("Only admin can delete messages");
+  if (!confirm("Delete this message?")) return;
+  await remove(ref(db, "messages/"+key));
+};
+
+onValue(ref(db, "messages"), snapshot=>renderMessages(snapshot.val()));
+</script>
 </body>
 </html>
