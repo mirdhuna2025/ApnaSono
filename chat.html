@@ -15,7 +15,6 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-
 /* Header */
 header {
   display: flex;
@@ -50,7 +49,6 @@ header {
   object-fit: cover;
   cursor: pointer;
 }
-
 /* Chat container */
 .chat-container {
   flex: 1;
@@ -95,20 +93,9 @@ header {
   padding: 1px 4px;
   border-radius: 3px;
 }
-.meta {
-  font-size: 11px;
-  color: #666;
-}
+.meta { font-size: 11px; color: #666; }
 .content { font-size: 14px; margin-top: 3px; }
-.reply {
-  margin-left: 35px;
-  font-size: 12px;
-  color: #444;
-  margin-top: 3px;
-  padding-left: 5px;
-  border-left: 2px solid #eee;
-}
-
+.reply { margin-left: 35px; font-size: 12px; color: #444; margin-top: 3px; padding-left: 5px; border-left: 2px solid #eee; }
 /* Composer */
 .composer {
   display: flex;
@@ -150,7 +137,6 @@ header {
   cursor: pointer;
   font-size: 20px;
 }
-
 /* Popup */
 .popup {
   position: fixed;
@@ -170,7 +156,6 @@ header {
   text-align: center;
 }
 .popup-content input { width: 100%; margin-bottom: 10px; padding: 8px; border:1px solid #ccc; border-radius:6px; }
-
 /* Admin panel */
 #adminPanel {
   position: fixed;
@@ -201,7 +186,7 @@ header {
 <header>
   <button id="adminBtn">Admin</button>
   <div id="chatTitle">Mirdhuna Chat</div>
-  <img id="profileBtn" src="https://via.placeholder.com/40"/>
+  <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default"/>
 </header>
 
 <div class="chat-container">
@@ -278,7 +263,6 @@ const adminPanel = document.getElementById("adminPanel");
 const adminMessages = document.getElementById("adminMessages");
 
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
-let isAdminSession = false;
 
 if(!user) profilePopup.style.display="flex";
 if(user?.photoURL) profileBtn.src=user.photoURL;
@@ -306,7 +290,6 @@ saveProfileBtn.onclick = async()=>{
 adminBtn.onclick = ()=> adminPopup.style.display="flex";
 adminLoginBtn.onclick = ()=>{
   if(adminPassInput.value==="sanu0000"){
-    isAdminSession=true;
     user={name:"Admin",photoURL:"",isAdmin:true};
     localStorage.setItem("chatUser", JSON.stringify(user));
     adminPopup.style.display="none";
@@ -397,9 +380,8 @@ window.deleteMessage = async(key)=>{
   await remove(ref(db,"messages/"+key));
 }
 
-import { onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+// Listen for messages
 onValue(ref(db,"messages"), snapshot=>renderMessages(snapshot.val()));
-
 </script>
 </body>
 </html>
