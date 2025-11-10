@@ -98,7 +98,7 @@ header {
 }
 .meta { font-size: 11px; color: #666; }
 .content { font-size: 14px; margin-top: 3px; }
-.reply { 
+.reply {
   margin-left: 35px; 
   font-size: 12px; 
   color: #444; 
@@ -272,7 +272,7 @@ header {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -313,7 +313,7 @@ const adminPanel = document.getElementById("adminPanel");
 const adminMessages = document.getElementById("adminMessages");
 
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
-let replyingTo = null; // Reply tracking
+let replyingTo = null; // Track reply
 
 if(!user) profilePopup.style.display="flex";
 if(user?.photoURL) profileBtn.src=user.photoURL;
@@ -361,7 +361,7 @@ async function sendMessage(){
   if(!user) return profilePopup.style.display="flex";
   const text = msgInput.value.trim();
   const file=fileInput.files[0];
-  if(!text && !file && !replyingTo) return;
+  if(!text && !file) return;
 
   let mediaUrl="", mediaType="", mediaName="";
   if(file){
@@ -373,7 +373,7 @@ async function sendMessage(){
     mediaName=file.name;
   }
 
-  const msgData = {
+  await push(ref(db,"messages"), {
     user:user.name,
     photo:user.photoURL,
     isAdmin:user.isAdmin,
@@ -382,17 +382,37 @@ async function sendMessage(){
     mediaType,
     mediaName,
     timestamp:Date.now(),
-    likes:0
-  };
-  if(replyingTo) msgData.replyTo = replyingTo;
+    likes:0,
+    replyTo: replyingTo
+  });
 
-  await push(ref(db,"messages"), msgData);
   msgInput.value="";
   fileInput.value="";
-  replyingTo = null;
+  replyingTo=null;
 }
+
 sendBtn.onclick = sendMessage;
 msgInput.addEventListener("keydown", e=>{if(e.key==="Enter") sendMessage();});
+
+// Reply handler
+window.replyMessage = (username)=> {
+  replyingTo = username;
+  msgInput.focus();
+}
+
+// Like handler
+window.likeMessage = async(key)=>{
+  const snap = await get(child(ref(db), "messages/" + key));
+  const val = snap.val() || {};
+  await update(ref(db, "messages/" + key), { likes: (val.likes || 0) + 1 });
+}
+
+// Delete handler
+window.deleteMessage = async(key)=>{
+  if(!user?.isAdmin) return alert("Only admin can delete messages");
+  if(!confirm("Delete this message?")) return;
+  await remove(ref(db,"messages/"+key));
+}
 
 // Render messages
 function renderMessages(data){
@@ -419,6 +439,7 @@ function renderMessages(data){
       ${msg.mediaUrl?renderMedia(msg):''}
       <div class="actions">
         <button onclick="replyMessage('${msg.user}')">💬 Reply</button>
+        <button onclick="likeMessage('${key}')">❤️ ${msg.likes||0}</button>
         ${user?.isAdmin?`<button onclick="deleteMessage('${key}')">🗑️ Delete</button>`:''}
       </div>
     `;
@@ -439,17 +460,6 @@ function renderMedia(msg){
   if(msg.mediaType?.startsWith("video")) return `<video controls style="max-width:100%;border-radius:8px;margin-top:5px"><source src="${msg.mediaUrl}"></video>`;
   if(msg.mediaUrl) return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
   return '';
-}
-
-window.deleteMessage = async(key)=>{
-  if(!user?.isAdmin) return alert("Only admin can delete messages");
-  if(!confirm("Delete this message?")) return;
-  await remove(ref(db,"messages/"+key));
-}
-
-window.replyMessage = (username)=> {
-  replyingTo = username;
-  msgInput.focus();
 }
 
 // Listen for messages
