@@ -22,33 +22,29 @@
       font-weight: 600;
       text-align: center;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    #changeProfile {
+    #profileBtn {
       position: absolute;
-      right: 12px;
+      right: 10px;
+      top: 8px;
       background: #007bff;
       color: #fff;
       border: none;
-      padding: 6px 10px;
       border-radius: 6px;
-      font-size: 13px;
+      padding: 6px 10px;
       cursor: pointer;
     }
 
     .chat-container {
-      flex: 1;
       display: flex;
       flex-direction: column;
+      flex: 1;
       max-width: 800px;
-      width: 100%;
       margin: 0 auto;
-      height: 100%;
-      overflow: hidden;
+      width: 100%;
       position: relative;
+      height: 100%;
     }
 
     .chat-box {
@@ -58,8 +54,7 @@
       border-radius: 10px;
       padding: 10px;
       background: #fafafa;
-      margin: 8px;
-      scroll-behavior: smooth;
+      margin-bottom: 70px; /* leave space for composer */
     }
 
     .message {
@@ -107,19 +102,6 @@
       font-size: 14px;
     }
 
-    .actions {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .actions button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      color: #007bff;
-    }
-
     .reply {
       margin-left: 45px;
       font-size: 13px;
@@ -129,15 +111,20 @@
       border-left: 2px solid #eee;
     }
 
+    /* ✅ Fixed composer at bottom */
     .composer {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px;
-      background: #fff;
-      border-top: 1px solid #ddd;
-      position: sticky;
+      gap: 8px;
+      position: fixed;
       bottom: 0;
+      left: 0;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      box-sizing: border-box;
     }
 
     .composer input[type=text] {
@@ -145,12 +132,10 @@
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 8px;
-      font-size: 14px;
     }
 
     .composer input[type=file] {
-      flex-shrink: 0;
-      max-width: 100px;
+      width: 90px;
     }
 
     .btn {
@@ -160,55 +145,49 @@
       padding: 10px 14px;
       border-radius: 8px;
       cursor: pointer;
-      flex-shrink: 0;
     }
 
-    /* Popup modal styles */
-    .modal {
+    /* ✅ Popup style for profile setup */
+    .profile-popup {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(0,0,0,0.5);
       display: none;
-      align-items: center;
       justify-content: center;
-      z-index: 1000;
+      align-items: center;
+      z-index: 100;
     }
 
-    .modal-content {
+    .profile-popup-content {
       background: #fff;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      border-radius: 10px;
       text-align: center;
       width: 90%;
-      max-width: 320px;
+      max-width: 300px;
     }
 
-    .modal-content h3 {
-      margin-top: 0;
-    }
-
-    .modal-content input {
-      display: block;
-      margin: 10px auto;
+    .profile-popup-content input {
+      width: 100%;
+      margin-bottom: 10px;
       padding: 8px;
-      width: 90%;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
 
     @media (max-width: 600px) {
-      .chat-container {
-        padding: 0;
-      }
-      .chat-box {
-        margin: 4px;
+      .composer {
+        padding: 8px;
+        gap: 6px;
       }
       .composer input[type=file] {
-        max-width: 80px;
+        width: 70px;
       }
       .btn {
-        padding: 8px 10px;
+        padding: 8px 12px;
       }
     }
   </style>
@@ -216,7 +195,7 @@
 <body>
   <header>
     Mirdhuna Community Chat
-    <button id="changeProfile">Change</button>
+    <button id="profileBtn">Profile</button>
   </header>
 
   <div class="chat-container">
@@ -229,12 +208,12 @@
     </div>
   </div>
 
-  <!-- Popup for name and photo -->
-  <div class="modal" id="profileModal">
-    <div class="modal-content">
-      <h3>Set up your profile</h3>
-      <input id="popupName" placeholder="Your name">
-      <input id="popupPhoto" type="file" accept="image/*">
+  <!-- ✅ Popup for Profile -->
+  <div class="profile-popup" id="profilePopup">
+    <div class="profile-popup-content">
+      <h3>Set Your Profile</h3>
+      <input id="name" placeholder="Your name">
+      <input id="photo" type="file" accept="image/*">
       <button id="saveProfile" class="btn">Save</button>
     </div>
   </div>
@@ -251,8 +230,7 @@
       projectId: "mirdhuna-25542",
       storageBucket: "mirdhuna-25542.firebasestorage.app",
       messagingSenderId: "575924409876",
-      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-      measurementId: "G-YB7LDKHBPV"
+      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -260,29 +238,27 @@
     const storage = getStorage(app);
 
     const ADMIN = "sanjiv";
-
     const chatBox = document.getElementById("chatBox");
     const msgInput = document.getElementById("msg");
     const sendBtn = document.getElementById("send");
+    const nameInput = document.getElementById("name");
+    const photoInput = document.getElementById("photo");
     const fileInput = document.getElementById("file");
-    const changeProfile = document.getElementById("changeProfile");
 
-    const modal = document.getElementById("profileModal");
-    const popupName = document.getElementById("popupName");
-    const popupPhoto = document.getElementById("popupPhoto");
-    const saveProfile = document.getElementById("saveProfile");
+    const profilePopup = document.getElementById("profilePopup");
+    const profileBtn = document.getElementById("profileBtn");
+    const saveProfileBtn = document.getElementById("saveProfile");
 
-    let user = JSON.parse(localStorage.getItem("mirdhunaUser")) || null;
+    let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 
-    function showModal() { modal.style.display = "flex"; }
-    function hideModal() { modal.style.display = "none"; }
+    profileBtn.onclick = () => profilePopup.style.display = "flex";
 
-    saveProfile.onclick = async () => {
-      const name = popupName.value.trim();
-      if (!name) return alert("Enter your name");
+    saveProfileBtn.onclick = async () => {
+      const name = nameInput.value.trim();
+      if (!name) return alert("Please enter your name");
+
       let photoURL = "";
-
-      const file = popupPhoto.files[0];
+      const file = photoInput.files[0];
       if (file) {
         const path = `profiles/${Date.now()}_${file.name}`;
         const sref = sRef(storage, path);
@@ -291,28 +267,13 @@
       }
 
       user = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN.toLowerCase() };
-      localStorage.setItem("mirdhunaUser", JSON.stringify(user));
-      hideModal();
-      alert("Profile saved!");
+      localStorage.setItem("chatUser", JSON.stringify(user));
+      profilePopup.style.display = "none";
     };
-
-    changeProfile.onclick = () => {
-      localStorage.removeItem("mirdhunaUser");
-      user = null;
-      showModal();
-    };
-
-    async function ensureUserProfile() {
-      if (!user) {
-        showModal();
-        return null;
-      }
-      return user;
-    }
 
     async function sendMessage() {
-      const u = await ensureUserProfile();
-      if (!u) return;
+      if (!user) return profilePopup.style.display = "flex";
+
       const text = msgInput.value.trim();
       const file = fileInput.files[0];
       if (!text && !file) return;
@@ -328,9 +289,9 @@
       }
 
       await push(ref(db, "messages"), {
-        user: u.name,
-        photo: u.photoURL,
-        isAdmin: u.isAdmin,
+        user: user.name,
+        photo: user.photoURL,
+        isAdmin: user.isAdmin,
         text,
         mediaUrl,
         mediaType,
@@ -344,11 +305,22 @@
     }
 
     sendBtn.onclick = sendMessage;
-    msgInput.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+    msgInput.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+    function renderMedia(msg) {
+      if (msg.mediaType?.startsWith("image")) {
+        return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
+      } else if (msg.mediaType?.startsWith("video")) {
+        return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
+      } else if (msg.mediaUrl) {
+        return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
+      }
+      return "";
+    }
 
     function renderMessages(data) {
       chatBox.innerHTML = "";
-      const entries = Object.entries(data || {}).sort((a,b)=> (a[1].timestamp||0)-(b[1].timestamp||0));
+      const entries = Object.entries(data || {}).sort((a,b) => (a[1].timestamp||0)-(b[1].timestamp||0));
       entries.forEach(([key, msg]) => {
         const div = document.createElement("div");
         div.className = "message";
@@ -364,65 +336,14 @@
             </div>
           </div>
           <div class="content">${msg.text || ""}</div>
-          ${msg.mediaUrl ? renderMedia(msg) : ""}
-          <div class="actions">
-            <button onclick="likeMessage('${key}')">❤️ ${msg.likes || 0}</button>
-            <button onclick="replyMessage('${key}')">💬 Reply</button>
-            ${user && user.isAdmin ? `<button onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ""}
-          </div>
+          ${renderMedia(msg)}
         `;
         chatBox.appendChild(div);
-        if (msg.replies) {
-          Object.values(msg.replies).forEach(r => {
-            const rdiv = document.createElement("div");
-            rdiv.className = "reply";
-            rdiv.textContent = `${r.user}: ${r.text}`;
-            div.appendChild(rdiv);
-          });
-        }
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function renderMedia(msg) {
-      if (msg.mediaType.startsWith("image")) {
-        return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
-      } else if (msg.mediaType.startsWith("video")) {
-        return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
-      } else {
-        return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
-      }
-    }
-
-    window.likeMessage = async (key) => {
-      const snap = await get(child(ref(db), "messages/" + key));
-      const val = snap.val() || {};
-      await update(ref(db, "messages/" + key), { likes: (val.likes || 0) + 1 });
-    };
-
-    window.replyMessage = async (key) => {
-      const u = await ensureUserProfile();
-      if (!u) return;
-      const text = prompt("Enter reply:");
-      if (!text) return;
-      await push(ref(db, `messages/${key}/replies`), {
-        user: u.name,
-        text,
-        timestamp: Date.now()
-      });
-    };
-
-    window.deleteMessage = async (key) => {
-      if (!user?.isAdmin) return alert("Only admin can delete messages");
-      if (!confirm("Delete this message?")) return;
-      await remove(ref(db, "messages/" + key));
-    };
-
-    function listenMessages() {
-      const msgRef = ref(db, "messages");
-      onValue(msgRef, (snapshot) => renderMessages(snapshot.val()));
-    }
-    listenMessages();
+    onValue(ref(db, "messages"), (snapshot) => renderMessages(snapshot.val()));
   </script>
 </body>
 </html>
