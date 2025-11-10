@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mirdhuna Chat Mobile</title>
+<title>Mirdhuna Chat</title>
 <style>
 body {
   font-family: 'Inter', system-ui, sans-serif;
@@ -98,13 +98,14 @@ header {
 }
 .meta { font-size: 11px; color: #666; }
 .content { font-size: 14px; margin-top: 3px; }
-.reply {
-  margin-left: 35px; 
-  font-size: 12px; 
-  color: #444; 
-  margin-top: 3px; 
-  padding-left: 5px; 
-  border-left: 2px solid #eee; 
+.reply-inline {
+  margin-top: 5px;
+  padding-left: 8px;
+  border-left: 3px solid #ddd;
+  font-size: 13px;
+  color: #555;
+  background: #f1f1f1;
+  border-radius: 5px;
 }
 
 /* Composer */
@@ -134,9 +135,7 @@ header {
   cursor: pointer;
   font-size: 16px;
 }
-.composer input[type=file] {
-  display: none;
-}
+.composer input[type=file] { display: none; }
 .file-label {
   display: flex;
   align-items: center;
@@ -194,14 +193,6 @@ header {
   z-index: 200;
 }
 #adminPanel h4 { text-align: center; margin: 0 0 10px 0; }
-.admin-message {
-  border-bottom:1px solid #eee;
-  padding: 6px;
-  font-size: 13px;
-  display: flex;
-  justify-content: space-between;
-}
-.admin-message button { background: #dc3545; border:none; color:#fff; border-radius:4px; cursor:pointer; padding:2px 5px; font-size:12px; }
 
 /* Emoji picker */
 #emojiPicker {
@@ -313,7 +304,7 @@ const adminPanel = document.getElementById("adminPanel");
 const adminMessages = document.getElementById("adminMessages");
 
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
-let replyingTo = null; // Track reply
+let replyToMsg = null;
 
 if(!user) profilePopup.style.display="flex";
 if(user?.photoURL) profileBtn.src=user.photoURL;
@@ -330,7 +321,7 @@ saveProfileBtn.onclick = async()=>{
     await uploadBytes(sref,file);
     photoURL = await getDownloadURL(sref);
   }
-  user={name,photoURL, isAdmin:false};
+  user={name,photoURL,isAdmin:false};
   localStorage.setItem("chatUser", JSON.stringify(user));
   profilePopup.style.display="none";
   if(photoURL) profileBtn.src=photoURL;
@@ -349,7 +340,7 @@ adminLoginBtn.onclick = ()=>{
 }
 
 // Emoji picker
-const emojis = ["😀","😂","😅","😊","😍","😎","😭","😡","👍","🙏","🎉"];
+const emojis = ["😀","😂","😅","😊","😍","😎","😭","😡","👍","👎","🙏","🎉"];
 emojiPicker.innerHTML = emojis.map(e=>`<span>${e}</span>`).join("");
 emojiBtn.onclick = ()=> emojiPicker.style.display = emojiPicker.style.display==="flex"?"none":"flex";
 emojiPicker.querySelectorAll("span").forEach(span=>{
@@ -383,28 +374,34 @@ async function sendMessage(){
     mediaName,
     timestamp:Date.now(),
     likes:0,
-    replyTo: replyingTo
+    dislikes:0,
+    replyTo:replyToMsg
   });
 
   msgInput.value="";
   fileInput.value="";
-  replyingTo=null;
+  replyToMsg=null;
 }
 
 sendBtn.onclick = sendMessage;
 msgInput.addEventListener("keydown", e=>{if(e.key==="Enter") sendMessage();});
 
 // Reply handler
-window.replyMessage = (username)=> {
-  replyingTo = username;
+window.setReply = (key)=>{
+  replyToMsg = key;
   msgInput.focus();
 }
 
-// Like handler
+// Like/Dislike handlers
 window.likeMessage = async(key)=>{
   const snap = await get(child(ref(db), "messages/" + key));
   const val = snap.val() || {};
   await update(ref(db, "messages/" + key), { likes: (val.likes || 0) + 1 });
+}
+window.dislikeMessage = async(key)=>{
+  const snap = await get(child(ref(db), "messages/" + key));
+  const val = snap.val() || {};
+  await update(ref(db, "messages/" + key), { dislikes: (val.dislikes || 0) + 1 });
 }
 
 // Delete handler
@@ -422,7 +419,11 @@ function renderMessages(data){
   entries.forEach(([key,msg])=>{
     const div=document.createElement("div");
     div.className="message";
-    let replyText = msg.replyTo?`<div class="reply">Replying to: ${msg.replyTo}</div>`:'';
+    let replyText='';
+    if(msg.replyTo){
+      const rMsg = Object.values(data).find(m=>m.timestamp==msg.replyTo || m.user==msg.replyTo);
+      if(rMsg) replyText=`<div class="reply-inline"><strong>${rMsg.user}</strong>: ${rMsg.text}</div>`;
+    }
     div.innerHTML=`
       <div class="header">
         <img class="profile" src="${msg.photo||'https://api.dicebear.com/7.x/thumbs/svg?seed='+msg.user}">
@@ -438,8 +439,9 @@ function renderMessages(data){
       <div class="content">${msg.text||''}</div>
       ${msg.mediaUrl?renderMedia(msg):''}
       <div class="actions">
-        <button onclick="replyMessage('${msg.user}')">💬 Reply</button>
-        <button onclick="likeMessage('${key}')">❤️ ${msg.likes||0}</button>
+        <button onclick="setReply('${key}')">💬 Reply</button>
+        <button onclick="likeMessage('${key}')">👍 ${msg.likes||0}</button>
+        <button onclick="dislikeMessage('${key}')">👎 ${msg.dislikes||0}</button>
         ${user?.isAdmin?`<button onclick="deleteMessage('${key}')">🗑️ Delete</button>`:''}
       </div>
     `;
@@ -448,7 +450,7 @@ function renderMessages(data){
     if(user?.isAdmin){
       const aDiv=document.createElement("div");
       aDiv.className="admin-message";
-      aDiv.innerHTML=`${msg.user}: ${msg.text||''}<button onclick="deleteMessage('${key}')">Delete</button>`;
+      aDiv.innerHTML=`${msg.user}: ${msg.text||''} <button onclick="deleteMessage('${key}')">Delete</button>`;
       adminMessages.appendChild(aDiv);
     }
   });
