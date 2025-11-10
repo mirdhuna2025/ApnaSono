@@ -2,51 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mirdhuna Chat with Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mirdhuna Chat Mobile</title>
 <style>
 body {
   font-family: 'Inter', system-ui, sans-serif;
   margin: 0;
-  background: #fff;
+  background: #f5f5f5;
   color: #111;
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
+
+/* Header */
 header {
-  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fff;
   border-bottom: 1px solid #ddd;
-  font-weight: 600;
-  text-align: center;
-  position: relative;
+  height: 60px;
+  box-sizing: border-box;
 }
+#adminBtn {
+  background: #28a745;
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+#chatTitle {
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+  flex: 1;
+}
+#profileBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ddd;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* Chat container */
 .chat-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  position: relative;
-  height: 100%;
+  padding: 5px;
+  overflow: hidden;
 }
 .chat-box {
   flex: 1;
   overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px;
-  background: #fafafa;
-  margin-bottom: 70px;
+  padding: 5px;
 }
 .message {
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 10px;
   background: #fff;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.1);
 }
 .message .header {
   display: flex;
@@ -54,101 +77,140 @@ header {
   gap: 8px;
 }
 .message img.profile {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   object-fit: cover;
 }
 .name-line {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  font-size: 13px;
 }
 .admin-tag {
   background: #007bff;
   color: #fff;
-  font-size: 11px;
-  padding: 2px 5px;
-  border-radius: 4px;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
-.meta { font-size: 12px; color: #666; }
-.content { margin-top: 6px; font-size: 14px; }
-.reply { margin-left: 45px; font-size: 13px; color: #444; margin-top: 5px; padding-left: 5px; border-left: 2px solid #eee; }
+.meta {
+  font-size: 11px;
+  color: #666;
+}
+.content { font-size: 14px; margin-top: 3px; }
+.reply {
+  margin-left: 35px;
+  font-size: 12px;
+  color: #444;
+  margin-top: 3px;
+  padding-left: 5px;
+  border-left: 2px solid #eee;
+}
 
-/* Composer fixed at bottom */
+/* Composer */
 .composer {
   display: flex;
-  gap: 8px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
   background: #fff;
-  padding: 10px;
   border-top: 1px solid #ddd;
   box-sizing: border-box;
 }
-.composer input[type=text] { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-.composer input[type=file] { width: 90px; }
-.btn { background: #007bff; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
-
-/* Admin button in composer left */
-#adminBtn {
-  background: #28a745;
-  padding: 8px 12px;
-  margin-right: 5px;
-  border-radius: 6px;
-  font-size: 13px;
+.composer input[type=text] {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+.composer button {
+  background: #007bff;
+  border: none;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+.composer input[type=file] {
+  display: none;
+}
+.file-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #eee;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
 }
 
-/* Popup styles */
+/* Popup */
 .popup {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
   background: rgba(0,0,0,0.5);
-  display: none; justify-content: center; align-items: center; z-index: 100;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
 }
 .popup-content {
-  background: #fff; padding: 20px; border-radius: 10px; text-align: center; width: 90%; max-width: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 300px;
+  text-align: center;
 }
-.popup-content input { width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+.popup-content input { width: 100%; margin-bottom: 10px; padding: 8px; border:1px solid #ccc; border-radius:6px; }
 
 /* Admin panel */
 #adminPanel {
   position: fixed;
-  top: 50px;
-  right: 10px;
+  top: 60px;
+  right: 5px;
   width: 300px;
   max-height: 400px;
   overflow-y: auto;
   background: #fff;
-  border: 1px solid #ddd;
+  border:1px solid #ddd;
   border-radius: 10px;
   padding: 10px;
   display: none;
   z-index: 200;
 }
-#adminPanel h4 { margin: 0 0 10px 0; text-align: center; }
+#adminPanel h4 { text-align: center; margin: 0 0 10px 0; }
 .admin-message {
-  border-bottom: 1px solid #eee;
+  border-bottom:1px solid #eee;
   padding: 6px;
   font-size: 13px;
+  display: flex;
+  justify-content: space-between;
 }
-.admin-message button { background: #dc3545; border: none; color: #fff; padding: 2px 5px; border-radius: 4px; cursor: pointer; float: right; }
+.admin-message button { background: #dc3545; border:none; color:#fff; border-radius:4px; cursor:pointer; padding:2px 5px; font-size:12px; }
 </style>
 </head>
 <body>
-<header>Mirdhuna Community Chat</header>
+<header>
+  <button id="adminBtn">Admin</button>
+  <div id="chatTitle">Mirdhuna Chat</div>
+  <img id="profileBtn" src="https://via.placeholder.com/40"/>
+</header>
 
 <div class="chat-container">
   <div class="chat-box" id="chatBox"></div>
-
   <div class="composer">
-    <button id="adminBtn">Admin</button>
-    <input id="msg" type="text" placeholder="Write a message...">
-    <input id="file" type="file">
-    <button id="send" class="btn">Send</button>
+    <label class="file-label" for="file">📎</label>
+    <input id="file" type="file"/>
+    <input id="msg" type="text" placeholder="Type a message..."/>
+    <button id="send">➤</button>
   </div>
 </div>
 
@@ -156,9 +218,9 @@ header {
 <div class="popup" id="profilePopup">
   <div class="popup-content">
     <h3>Set Your Profile</h3>
-    <input id="name" placeholder="Your name">
-    <input id="photo" type="file" accept="image/*">
-    <button id="saveProfile" class="btn">Save</button>
+    <input id="name" placeholder="Your Name"/>
+    <input id="photo" type="file" accept="image/*"/>
+    <button id="saveProfile">Save</button>
   </div>
 </div>
 
@@ -166,8 +228,8 @@ header {
 <div class="popup" id="adminPopup">
   <div class="popup-content">
     <h3>Admin Login</h3>
-    <input id="adminPass" type="password" placeholder="Password">
-    <button id="adminLoginBtn" class="btn">Login</button>
+    <input id="adminPass" type="password" placeholder="Password"/>
+    <button id="adminLoginBtn">Login</button>
   </div>
 </div>
 
@@ -201,6 +263,7 @@ const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const fileInput = document.getElementById("file");
 
+const profileBtn = document.getElementById("profileBtn");
 const profilePopup = document.getElementById("profilePopup");
 const saveProfileBtn = document.getElementById("saveProfile");
 const nameInput = document.getElementById("name");
@@ -217,52 +280,55 @@ const adminMessages = document.getElementById("adminMessages");
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 let isAdminSession = false;
 
-// Profile setup
-if(!user) profilePopup.style.display = "flex";
+if(!user) profilePopup.style.display="flex";
+if(user?.photoURL) profileBtn.src=user.photoURL;
 
-saveProfileBtn.onclick = async () => {
-  const name = nameInput.value.trim();
+profileBtn.onclick = ()=> profilePopup.style.display="flex";
+
+saveProfileBtn.onclick = async()=>{
+  const name=nameInput.value.trim();
   if(!name) return alert("Enter your name");
-  let photoURL = "";
-  const file = photoInput.files[0];
+  let photoURL="";
+  const file=photoInput.files[0];
   if(file){
     const path = `profiles/${Date.now()}_${file.name}`;
-    const sref = sRef(storage, path);
-    await uploadBytes(sref, file);
+    const sref = sRef(storage,path);
+    await uploadBytes(sref,file);
     photoURL = await getDownloadURL(sref);
   }
-  user = { name, photoURL, isAdmin:false };
+  user={name,photoURL, isAdmin:false};
   localStorage.setItem("chatUser", JSON.stringify(user));
-  profilePopup.style.display = "none";
-};
+  profilePopup.style.display="none";
+  if(photoURL) profileBtn.src=photoURL;
+}
 
 // Admin login
-adminBtn.onclick = () => adminPopup.style.display = "flex";
-adminLoginBtn.onclick = () => {
-  if(adminPassInput.value === "sanu0000"){
-    isAdminSession = true;
-    user = { name:"Admin", photoURL:"", isAdmin:true };
+adminBtn.onclick = ()=> adminPopup.style.display="flex";
+adminLoginBtn.onclick = ()=>{
+  if(adminPassInput.value==="sanu0000"){
+    isAdminSession=true;
+    user={name:"Admin",photoURL:"",isAdmin:true};
     localStorage.setItem("chatUser", JSON.stringify(user));
-    adminPopup.style.display = "none";
-    adminPanel.style.display = "block";
+    adminPopup.style.display="none";
+    adminPanel.style.display="block";
     alert("Admin login successful!");
-  }else alert("Wrong password!");
-};
+  }else alert("Wrong password");
+}
 
 // Send message
 async function sendMessage(){
-  if(!user) return profilePopup.style.display = "flex";
+  if(!user) return profilePopup.style.display="flex";
   const text = msgInput.value.trim();
-  const file = fileInput.files[0];
+  const file=fileInput.files[0];
   if(!text && !file) return;
   let mediaUrl="", mediaType="", mediaName="";
   if(file){
     const path = `uploads/${Date.now()}_${file.name}`;
-    const sref = sRef(storage, path);
-    await uploadBytes(sref, file);
-    mediaUrl = await getDownloadURL(sref);
-    mediaType = file.type;
-    mediaName = file.name;
+    const sref = sRef(storage,path);
+    await uploadBytes(sref,file);
+    mediaUrl=await getDownloadURL(sref);
+    mediaType=file.type;
+    mediaName=file.name;
   }
   await push(ref(db,"messages"),{
     user:user.name,
@@ -279,16 +345,16 @@ async function sendMessage(){
   fileInput.value="";
 }
 sendBtn.onclick = sendMessage;
-msgInput.addEventListener("keydown", e => { if(e.key==="Enter") sendMessage(); });
+msgInput.addEventListener("keydown", e=>{if(e.key==="Enter") sendMessage();});
 
 // Render messages
 function renderMessages(data){
   chatBox.innerHTML="";
   adminMessages.innerHTML="";
-  const entries=Object.entries(data||{}).sort((a,b)=> (a[1].timestamp||0)-(b[1].timestamp||0));
+  const entries=Object.entries(data||{}).sort((a,b)=>(a[1].timestamp||0)-(b[1].timestamp||0));
   entries.forEach(([key,msg])=>{
     // User chat
-    const div = document.createElement("div");
+    const div=document.createElement("div");
     div.className="message";
     div.innerHTML=`
       <div class="header">
@@ -298,7 +364,7 @@ function renderMessages(data){
             <strong>${msg.user}</strong>
             ${msg.isAdmin?'<span class="admin-tag">Admin</span>':''}
           </div>
-          <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
+          <div class="meta">${new Date(msg.timestamp).toLocaleTimeString()}</div>
         </div>
       </div>
       <div class="content">${msg.text||''}</div>
@@ -307,30 +373,31 @@ function renderMessages(data){
     `;
     chatBox.appendChild(div);
 
-    // Admin panel view
+    // Admin panel
     if(user?.isAdmin){
-      const aDiv = document.createElement("div");
+      const aDiv=document.createElement("div");
       aDiv.className="admin-message";
       aDiv.innerHTML=`${msg.user}: ${msg.text||''}<button onclick="deleteMessage('${key}')">Delete</button>`;
       adminMessages.appendChild(aDiv);
     }
   });
-  chatBox.scrollTop = chatBox.scrollHeight;
+  chatBox.scrollTop=chatBox.scrollHeight;
 }
 
 function renderMedia(msg){
-  if(msg.mediaType?.startsWith("image")) return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
-  if(msg.mediaType?.startsWith("video")) return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
+  if(msg.mediaType?.startsWith("image")) return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:5px">`;
+  if(msg.mediaType?.startsWith("video")) return `<video controls style="max-width:100%;border-radius:8px;margin-top:5px"><source src="${msg.mediaUrl}"></video>`;
   if(msg.mediaUrl) return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
   return '';
 }
 
-window.deleteMessage = async (key)=>{
+window.deleteMessage = async(key)=>{
   if(!user?.isAdmin) return alert("Only admin can delete messages");
   if(!confirm("Delete this message?")) return;
   await remove(ref(db,"messages/"+key));
-};
+}
 
+import { onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 onValue(ref(db,"messages"), snapshot=>renderMessages(snapshot.val()));
 
 </script>
