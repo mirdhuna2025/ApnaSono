@@ -1,487 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mirdhuna — Community Chat</title>
-<style>
-  :root{--bg:#ffffff;--muted:#6b7280;--accent:#2563eb;--card:#fbfbfb;--border:#e6e6e6;--text:#111827}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
-  header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center}
-  header h1{margin:0;font-size:18px}
-  .main{flex:1;display:flex;justify-content:center;align-items:stretch;padding:12px}
-  .app{width:100%;max-width:920px;border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:calc(100vh - 110px);overflow:hidden;background:#fff}
-  /* chat area */
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border)}
-  .chat-area{flex:1;display:flex;gap:12px;padding:12px;overflow:hidden}
-  .left{flex:1;display:flex;flex-direction:column}
-  .messages{flex:1;overflow:auto;padding:8px;border:1px solid #f0f0f0;border-radius:10px;background:var(--card)}
-  .composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);align-items:center}
-  input[type=text].msg{flex:1;padding:10px;border:1px solid var(--border);border-radius:8px}
-  input[type=file]{padding:6px}
-  .btn{background:var(--accent);color:#fff;border:none;padding:9px 12px;border-radius:8px;cursor:pointer}
-  /* message styles */
-  .msg-wrap{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
-  .avatar{width:44px;height:44px;border-radius:8px;object-fit:cover}
-  .bubble{background:#fff;border:1px solid var(--border);padding:10px;border-radius:10px;max-width:78%}
-  .meta{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
-  .admin-badge{background:var(--accent);color:#fff;font-size:11px;padding:2px 6px;border-radius:6px;margin-left:6px}
-  .content img{max-width:100%;border-radius:8px;margin-top:8px;display:block}
-  .content video{max-width:100%;border-radius:8px;margin-top:8px;display:block}
-  .file-link{display:inline-block;margin-top:8px;padding:8px;border:1px dashed var(--border);border-radius:8px;text-decoration:none;color:var(--text)}
-  .actions{margin-top:8px;display:flex;gap:8px;font-size:13px;color:var(--muted);align-items:center}
-  .reply-item{margin-top:6px;margin-left:50px;padding-left:8px;border-left:2px solid #f0f0f0;font-size:13px;color:#444}
-  /* right side controls */
-  .right{width:300px;padding-left:12px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
-  .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid var(--border)}
-  .small{font-size:13px;color:var(--muted)}
-  /* modal */
-  .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999}
-  .modal{background:#fff;padding:18px;border-radius:10px;width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.15)}
-  .modal h3{margin:0 0 8px 0}
-  .modal input[type=text]{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
-  .modal .actions{display:flex;gap:8px;justify-content:flex-end}
-  /* responsive */
-  @media (max-width:900px){.chat-area{flex-direction:column}.right{width:100%;border-left:none;border-top:1px solid var(--border);padding-top:12px}}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mirdhuna Chat</title>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      margin: 0;
+      background: #fff;
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+      font-weight: 600;
+      text-align: center;
+    }
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 10px;
+    }
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafafa;
+    }
+    .message {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      margin-bottom: 10px;
+    }
+    .message .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .message img.profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .name-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-tag {
+      background: #007bff;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .meta {
+      font-size: 12px;
+      color: #666;
+    }
+    .content {
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .actions {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+    .actions button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: #007bff;
+    }
+    .reply {
+      margin-left: 45px;
+      font-size: 13px;
+      color: #444;
+      margin-top: 5px;
+      padding-left: 5px;
+      border-left: 2px solid #eee;
+    }
+    .composer {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .composer input[type=text] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .composer input[type=file] {
+      width: 160px;
+    }
+    .btn {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .profile-setup {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .profile-setup input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
+  <header>Mirdhuna Community Chat</header>
 
-<header>
-  <h1>Mirdhuna Community Chat</h1>
-  <div style="margin-left:auto"><button id="changeProfileBtn" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Change Profile</button></div>
-</header>
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox"></div>
 
-<div class="main">
-  <div class="app" role="application">
-    <div class="topbar">
-      <div class="small">Public community wall — share thoughts & files</div>
-      <div class="small">Admin controls limited to admin user</div>
+    <div class="profile-setup">
+      <input id="name" placeholder="Your name">
+      <input id="photo" type="file" accept="image/*">
     </div>
 
-    <div class="chat-area">
-      <div class="left">
-        <div id="messages" class="messages" aria-live="polite"></div>
-
-        <div class="composer">
-          <input id="messageText" class="msg" type="text" placeholder="Write a message... (text or attach a file)">
-          <input id="messageFile" type="file">
-          <button id="sendBtn" class="btn">Send</button>
-        </div>
-      </div>
-
-      <div class="right">
-        <div class="card">
-          <div style="font-weight:600">Your profile</div>
-          <div id="profilePreview" style="margin-top:8px;display:flex;gap:10px;align-items:center">
-            <img id="previewAvatar" src="" alt="avatar" class="avatar" style="width:56px;height:56px;border-radius:8px;object-fit:cover">
-            <div>
-              <div id="previewName" style="font-weight:600">Guest</div>
-              <div class="small" id="previewRole">—</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-weight:600">Controls</div>
-          <div class="small" style="margin-top:8px">Live updates, cache & page size</div>
-          <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
-            <label><input id="liveToggle" type="checkbox" checked> Live updates</label>
-            <label><input id="cacheToggle" type="checkbox" checked> Use local cache</label>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div class="small">Page size</div>
-              <select id="pageSize">
-                <option value="20">20</option>
-                <option value="50" selected>50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-            <button id="loadMore" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Load older</button>
-          </div>
-        </div>
-
-        <div class="card small">
-          Messages and files are stored in Firebase. For strong security use Firebase Auth + server rules.
-        </div>
-      </div>
+    <div class="composer">
+      <input id="msg" type="text" placeholder="Write a message...">
+      <input id="file" type="file">
+      <button id="send" class="btn">Send</button>
     </div>
   </div>
-</div>
 
-<!-- profile modal -->
-<div id="profileModal" class="modal-back" style="display:none">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Set your name & profile photo</h3>
-    <input id="modalName" type="text" placeholder="Display name">
-    <input id="modalFile" type="file" accept="image/*">
-    <div class="actions" style="margin-top:10px">
-      <button id="modalCancel" class="btn" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">Cancel</button>
-      <button id="modalSave" class="btn">Save</button>
-    </div>
-  </div>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getDatabase, ref, push, onValue, remove, update, get, child, runTransaction
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-  // Your Firebase config (same as before)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-    authDomain: "mirdhuna-25542.firebaseapp.com",
-    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-    projectId: "mirdhuna-25542",
-    storageBucket: "mirdhuna-25542.firebasestorage.app",
-    messagingSenderId: "575924409876",
-    appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-    measurementId: "G-YB7LDKHBPV"
-  };
-
-  const ADMIN_NAME = "sanjiv";
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
-
-  // UI refs
-  const messagesEl = document.getElementById('messages');
-  const messageText = document.getElementById('messageText');
-  const messageFile = document.getElementById('messageFile');
-  const sendBtn = document.getElementById('sendBtn');
-  const previewAvatar = document.getElementById('previewAvatar');
-  const previewName = document.getElementById('previewName');
-  const previewRole = document.getElementById('previewRole');
-  const changeProfileBtn = document.getElementById('changeProfileBtn');
-
-  const modal = document.getElementById('profileModal');
-  const modalName = document.getElementById('modalName');
-  const modalFile = document.getElementById('modalFile');
-  const modalSave = document.getElementById('modalSave');
-  const modalCancel = document.getElementById('modalCancel');
-
-  const liveToggle = document.getElementById('liveToggle');
-  const cacheToggle = document.getElementById('cacheToggle');
-  const pageSizeSelect = document.getElementById('pageSize');
-  const loadMoreBtn = document.getElementById('loadMore');
-
-  // state
-  const CACHE_KEY = 'mirdhuna_profile_v1';
-  const MESSAGES_CACHE = 'mirdhuna_msgs_v1';
-  let currentUser = null; // {name, photoURL, isAdmin}
-  let listening = false;
-  let pageSize = parseInt(pageSizeSelect.value, 10) || 50;
-  let oldestTimestamp = null; // for pagination
-  let cachedMessages = [];
-
-  // helpers
-  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
-  function fmt(ts){ return new Date(ts).toLocaleString(); }
-
-  // profile modal + persistence
-  function loadProfileFromStorage(){
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch(e){
-      return null;
-    }
-  }
-  function saveProfileToStorage(profile){
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(profile)); } catch(e){}
-  }
-  function clearProfileStorage(){
-    try { localStorage.removeItem(CACHE_KEY); } catch(e){}
-  }
-
-  async function uploadProfileFile(file){
-    const path = `profiles/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-    const s = sRef(storage, path);
-    await uploadBytes(s, file);
-    return await getDownloadURL(s);
-  }
-
-  async function openProfileModal(prefillName = '', prefillPhoto = null){
-    modal.style.display = 'flex';
-    modalName.value = prefillName || '';
-    modalFile.value = '';
-  }
-  function closeProfileModal(){ modal.style.display = 'none'; }
-
-  // initialize profile from storage or ask
-  (async function initProfile(){
-    const p = loadProfileFromStorage();
-    if(p && p.name){
-      currentUser = p;
-      updateProfilePreview();
-    } else {
-      // show modal on first visit
-      await openProfileModal();
-    }
-  })();
-
-  changeProfileBtn.addEventListener('click', async () => {
-    // let user change; prefill modal
-    const p = loadProfileFromStorage() || {};
-    await openProfileModal(p.name || '', p.photoURL || null);
-  });
-
-  modalCancel.addEventListener('click', () => {
-    closeProfileModal();
-    const p = loadProfileFromStorage();
-    if(!p || !p.name){
-      // if still no profile, keep modal open by focusing name (user must set before sending). do nothing.
-    }
-  });
-
-  modalSave.addEventListener('click', async () => {
-    const name = (modalName.value || '').trim();
-    if(!name){ alert('Please enter a name'); return; }
-    let photoURL = null;
-    if(modalFile.files && modalFile.files[0]){
-      try {
-        photoURL = await uploadProfileFile(modalFile.files[0]);
-      } catch(e){ console.error('profile upload failed', e); alert('Profile upload failed'); }
-    }
-    currentUser = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN_NAME.toLowerCase() };
-    saveProfileToStorage(currentUser);
-    updateProfilePreview();
-    closeProfileModal();
-  });
-
-  function updateProfilePreview(){
-    previewName.textContent = currentUser.name;
-    previewRole.textContent = currentUser.isAdmin ? 'Admin' : 'Member';
-    previewAvatar.src = currentUser.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(currentUser.name)}`;
-  }
-
-  // message rendering & realtime (no .indexOn rules)
-  function renderAllMessages(obj){
-    // obj is object of messages keyed by id
-    messagesEl = messagesEl || document.getElementById('messages');
-    messagesEl.innerHTML = '';
-    const arr = obj ? Object.entries(obj) : [];
-    // sort by timestamp ascending (client-side)
-    arr.sort((a,b) => (a[1].timestamp||0) - (b[1].timestamp||0));
-    // remember oldest timestamp for pagination
-    if(arr.length) oldestTimestamp = arr[0][1].timestamp;
-    arr.forEach(([key, msg]) => {
-      const node = messageNode(key, msg);
-      messagesEl.appendChild(node);
-      // append replies if any
-      if(msg.replies){
-        Object.values(msg.replies).forEach(r => {
-          const rnode = document.createElement('div');
-          rnode.className = 'reply-item';
-          rnode.textContent = `${r.user}: ${r.text}`;
-          node.appendChild(rnode);
-        });
-      }
-    });
-    // cache messages locally for faster reload
-    try { localStorage.setItem(MESSAGES_CACHE, JSON.stringify(arr.slice(-pageSize))); } catch(e){}
-    // scroll to bottom
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function messageNode(key, msg){
-    const wrap = document.createElement('div');
-    wrap.className = 'msg-wrap';
-    const avatar = document.createElement('img');
-    avatar.className = 'avatar';
-    avatar.src = msg.photo || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(msg.user||'guest')}`;
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    const header = document.createElement('div');
-    header.className = 'meta';
-    header.innerHTML = `<span style="font-weight:700">${escapeHtml(msg.user||'Anonymous')}</span> ${msg.isAdmin ? '<span class="admin-badge">Admin</span>' : ''} <span style="margin-left:8px;color:var(--muted);font-size:12px">${fmt(msg.timestamp)}</span>`;
-
-    const content = document.createElement('div');
-    content.className = 'content';
-    content.innerHTML = `<div>${escapeHtml(msg.text||'')}</div>`;
-
-    if(msg.mediaUrl){
-      if(msg.mediaType && msg.mediaType.startsWith('image')){
-        const im = document.createElement('img'); im.src = msg.mediaUrl; im.loading='lazy'; content.appendChild(im);
-      } else if(msg.mediaType && msg.mediaType.startsWith('video')){
-        const v = document.createElement('video'); v.src = msg.mediaUrl; v.controls=true; v.preload='metadata'; content.appendChild(v);
-      } else {
-        const a = document.createElement('a'); a.href = msg.mediaUrl; a.target = '_blank'; a.className='file-link';
-        a.textContent = msg.mediaName || 'Download file';
-        content.appendChild(a);
-      }
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    const likeBtn = document.createElement('button'); likeBtn.textContent = `❤️ ${msg.likes||0}`; likeBtn.onclick = () => likeMessage(key);
-    const replyBtn = document.createElement('button'); replyBtn.textContent = '💬 Reply'; replyBtn.onclick = () => replyMessage(key);
-    const delBtn = document.createElement('button'); delBtn.textContent = '🗑️ Delete'; delBtn.onclick = () => deleteMessage(key);
-
-    actions.appendChild(likeBtn); actions.appendChild(replyBtn);
-    if(currentUser && currentUser.isAdmin) actions.appendChild(delBtn);
-
-    bubble.appendChild(header); bubble.appendChild(content); bubble.appendChild(actions);
-
-    wrap.appendChild(avatar); wrap.appendChild(bubble);
-    return wrap;
-  }
-
-  // attach listener for entire messages node (onValue)
-  function attachMessagesListener(){
-    if (listening) return;
-    listening = true;
-    const msgsRef = ref(db, 'messages');
-    onValue(msgsRef, snapshot => {
-      const val = snapshot.val();
-      renderAllMessages(val);
-    });
-  }
-
-  // send message (ensures profile saved)
-  async function sendMessage(){
-    // ensure profile
-    if(!currentUser || !currentUser.name){
-      // open modal and require save
-      await openProfileModal(currentUser?.name||'');
-      // modalSave will set currentUser
-      return;
-    }
-    const text = (messageText.value || '').trim();
-    const file = messageFile.files[0];
-    if(!text && !file) return;
-
-    let mediaUrl = null, mediaType = null, mediaName = null;
-    if(file){
-      const path = `uploads/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-      const s = sRef(storage, path);
-      await uploadBytes(s, file);
-      mediaUrl = await getDownloadURL(s);
-      mediaType = file.type || 'file';
-      mediaName = file.name;
-    }
-
-    const payload = {
-      user: currentUser.name,
-      photo: currentUser.photoURL || null,
-      isAdmin: currentUser.isAdmin || false,
-      text: text || '',
-      mediaUrl: mediaUrl || null,
-      mediaType: mediaType || null,
-      mediaName: mediaName || null,
-      timestamp: Date.now(),
-      likes: 0
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+      authDomain: "mirdhuna-25542.firebaseapp.com",
+      databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+      projectId: "mirdhuna-25542",
+      storageBucket: "mirdhuna-25542.firebasestorage.app",
+      messagingSenderId: "575924409876",
+      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
+      measurementId: "G-YB7LDKHBPV"
     };
 
-    await push(ref(db, 'messages'), payload);
-    messageText.value = '';
-    messageFile.value = null;
-  }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
 
-  // like using transaction to avoid races
-  async function likeMessage(key){
-    const nodeRef = ref(db, `messages/${key}/likes`);
-    await runTransaction(nodeRef, cur => (cur || 0) + 1);
-  }
+    const ADMIN = "sanjiv";
 
-  async function replyMessage(key){
-    if(!currentUser || !currentUser.name){
-      await openProfileModal();
-      return;
+    const chatBox = document.getElementById("chatBox");
+    const msgInput = document.getElementById("msg");
+    const sendBtn = document.getElementById("send");
+    const nameInput = document.getElementById("name");
+    const photoInput = document.getElementById("photo");
+    const fileInput = document.getElementById("file");
+
+    let user = null;
+
+    async function getUserProfile() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert("Please enter your name before sending a message");
+        return null;
+      }
+      let photoURL = "";
+      const file = photoInput.files[0];
+      if (file && !user?.photoURL) {
+        const path = `profiles/${Date.now()}_${file.name}`;
+        const sref = sRef(storage, path);
+        await uploadBytes(sref, file);
+        photoURL = await getDownloadURL(sref);
+      } else if (user?.photoURL) {
+        photoURL = user.photoURL;
+      }
+      user = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN.toLowerCase() };
+      return user;
     }
-    const text = prompt('Enter reply:');
-    if(!text) return;
-    await push(ref(db, `messages/${key}/replies`), { user: currentUser.name, text, timestamp: Date.now() });
-  }
 
-  async function deleteMessage(key){
-    if(!currentUser || !currentUser.isAdmin){ alert('Only admin can delete'); return; }
-    if(!confirm('Delete this message permanently?')) return;
-    await remove(ref(db, `messages/${key}`));
-  }
+    async function sendMessage() {
+      const u = await getUserProfile();
+      if (!u) return;
+      const text = msgInput.value.trim();
+      const file = fileInput.files[0];
+      if (!text && !file) return;
 
-  // load older messages (client-side sorted without index)
-  async function loadOlder(){
-    // get all messages, pick those older than current oldestTimestamp
-    const snap = await get(ref(db, 'messages'));
-    if(!snap.exists()) return alert('No messages');
-    const all = snap.val();
-    const entries = Object.entries(all || {}).map(([k,v]) => ({ key:k, data:v }));
-    // filter older than oldestTimestamp (if set)
-    const older = entries.filter(e => !oldestTimestamp || (e.data.timestamp < oldestTimestamp));
-    if(!older.length) return alert('No older messages');
-    // sort ascending and take pageSize
-    older.sort((a,b) => a.data.timestamp - b.data.timestamp);
-    const take = older.slice(0, parseInt(pageSizeSelect.value,10) || 50);
-    // prepend to messages container
-    const container = document.getElementById('messages');
-    take.forEach(item => {
-      const node = messageNode(item.key, item.data);
-      container.insertBefore(node, container.firstChild);
-    });
-    // update oldestTimestamp
-    oldestTimestamp = take.length ? take[take.length-1].data.timestamp : oldestTimestamp;
-  }
+      let mediaUrl = "";
+      let mediaType = "";
+      let mediaName = "";
 
-  // wire UI
-  sendBtn.addEventListener('click', sendMessage);
-  messageText.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
-  changeProfileBtn.addEventListener('click', async ()=>{ await openProfileModal(currentUser?.name||''); });
+      if (file) {
+        const path = `uploads/${Date.now()}_${file.name}`;
+        const sref = sRef(storage, path);
+        await uploadBytes(sref, file);
+        mediaUrl = await getDownloadURL(sref);
+        mediaType = file.type;
+        mediaName = file.name;
+      }
 
-  // modal open helpers adapted for flow (re-implement to return Promise resolve after save)
-  function openProfileModal(prefill=''){
-    return new Promise(res => {
-      modal.style.display = 'flex';
-      modalName.value = prefill || '';
-      modalFile.value = '';
-      // temporary save handler
-      const onSave = async () => {
-        const name = (modalName.value||'').trim();
-        if(!name){ alert('Name required'); return; }
-        let photoURL = null;
-        if(modalFile.files && modalFile.files[0]){
-          try { photoURL = await uploadProfileFile(modalFile.files[0]); } catch(e){ console.error(e); alert('Upload failed'); }
-        } else {
-          const existing = loadProfileFromStorage();
-          photoURL = existing?.photoURL || null;
+      await push(ref(db, "messages"), {
+        user: u.name,
+        photo: u.photoURL,
+        isAdmin: u.isAdmin,
+        text,
+        mediaUrl,
+        mediaType,
+        mediaName,
+        timestamp: Date.now(),
+        likes: 0
+      });
+
+      msgInput.value = "";
+      fileInput.value = "";
+    }
+
+    sendBtn.onclick = sendMessage;
+    msgInput.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+    function renderMessages(data) {
+      chatBox.innerHTML = "";
+      const entries = Object.entries(data || {}).sort((a,b) => (a[1].timestamp||0)-(b[1].timestamp||0));
+      entries.forEach(([key, msg]) => {
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerHTML = `
+          <div class="header">
+            <img class="profile" src="${msg.photo || "https://api.dicebear.com/7.x/thumbs/svg?seed=" + msg.user}">
+            <div>
+              <div class="name-line">
+                <strong>${msg.user}</strong>
+                ${msg.isAdmin ? `<span class="admin-tag">Admin</span>` : ""}
+              </div>
+              <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
+            </div>
+          </div>
+          <div class="content">${msg.text || ""}</div>
+          ${msg.mediaUrl ? renderMedia(msg) : ""}
+          <div class="actions">
+            <button onclick="likeMessage('${key}')">❤️ ${msg.likes || 0}</button>
+            <button onclick="replyMessage('${key}')">💬 Reply</button>
+            ${user && user.isAdmin ? `<button onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ""}
+          </div>
+          <div id="replies-${key}"></div>
+        `;
+        chatBox.appendChild(div);
+
+        if (msg.replies) {
+          Object.values(msg.replies).forEach(r => {
+            const rdiv = document.createElement("div");
+            rdiv.className = "reply";
+            rdiv.textContent = `${r.user}: ${r.text}`;
+            div.appendChild(rdiv);
+          });
         }
-        currentUser = { name, photoURL, isAdmin: name.toLowerCase() === ADMIN_NAME.toLowerCase() };
-        saveProfileToStorage(currentUser);
-        updateProfilePreview();
-        modal.style.display = 'none';
-        cleanup();
-        res(currentUser);
-      };
-      const onCancel = () => { modal.style.display = 'none'; cleanup(); res(null); };
-      modalSave.addEventListener('click', onSave, { once: true });
-      modalCancel.addEventListener('click', onCancel, { once: true });
-      function cleanup(){ /* nothing extra */ }
-    });
-  }
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-  // on load: set preview from storage if present
-  const stored = loadProfileFromStorage();
-  if(stored){ currentUser = stored; updateProfilePreview(); }
-  // start listening if live enabled
-  if(liveToggle.checked) attachMessagesListener();
+    function renderMedia(msg) {
+      if (msg.mediaType.startsWith("image")) {
+        return `<img src="${msg.mediaUrl}" style="max-width:100%;border-radius:8px;margin-top:6px">`;
+      } else if (msg.mediaType.startsWith("video")) {
+        return `<video controls style="max-width:100%;border-radius:8px;margin-top:6px"><source src="${msg.mediaUrl}"></video>`;
+      } else {
+        return `<a href="${msg.mediaUrl}" target="_blank">${msg.mediaName}</a>`;
+      }
+    }
 
-  // page controls
-  loadMoreBtn.addEventListener('click', loadOlder);
-  liveToggle.addEventListener('change', ()=>{ if(liveToggle.checked) attachMessagesListener(); else listening=false; });
-  cacheToggle.addEventListener('change', ()=>{ if(!cacheToggle.checked) localStorage.removeItem(MESSAGES_CACHE); });
+    window.likeMessage = async (key) => {
+      const snap = await get(child(ref(db), "messages/" + key));
+      const val = snap.val() || {};
+      await update(ref(db, "messages/" + key), { likes: (val.likes || 0) + 1 });
+    };
 
-  // expose functions for buttons created earlier (global access for inline handlers if any)
-  window.likeMessage = likeMessage;
-  window.replyMessage = replyMessage;
-  window.deleteMessage = deleteMessage;
+    window.replyMessage = async (key) => {
+      const u = await getUserProfile();
+      if (!u) return;
+      const text = prompt("Enter reply:");
+      if (!text) return;
+      await push(ref(db, `messages/${key}/replies`), {
+        user: u.name,
+        text,
+        timestamp: Date.now()
+      });
+    };
 
-  // ready
-  console.log('Mirdhuna chat loaded');
-</script>
+    window.deleteMessage = async (key) => {
+      if (!user?.isAdmin) return alert("Only admin can delete messages");
+      if (!confirm("Delete this message?")) return;
+      await remove(ref(db, "messages/" + key));
+    };
+
+    function listenMessages() {
+      const msgRef = ref(db, "messages");
+      onValue(msgRef, (snapshot) => renderMessages(snapshot.val()));
+    }
+
+    listenMessages();
+  </script>
 </body>
 </html>
