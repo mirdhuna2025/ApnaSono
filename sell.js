@@ -1,5 +1,5 @@
 // ==============================
-// Firebase Config
+// Firebase Config & Init
 // ==============================
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
@@ -10,18 +10,33 @@ const firebaseConfig = {
   appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
 
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 const bucket = storage.ref();
 
 const DEFAULT_ADMIN_PHONE = "6454678866";
-const COD_NOTE = "✅ Cash on Delivery Available";
+let CURRENT_USER = null;
+
+// ==============================
+// Auth – Simple Login
+// ==============================
+window.loginUser = () => {
+  const pass = prompt("Enter Admin Password:");
+  if (pass === "123456") {
+    CURRENT_USER = "admin";
+    alert("✔ Logged In as Admin");
+    document.getElementById("addListingForm").style.display = "block";
+    loadListings();
+  } else {
+    alert("❌ Wrong Password");
+  }
+};
 
 // ==============================
 // Toggle Add Form
 // ==============================
 window.toggleAddForm = () => {
+  if (!CURRENT_USER) return alert("Please login first.");
   document.getElementById("addForm").classList.toggle("active");
 };
 
@@ -33,23 +48,16 @@ document.getElementById("imageUpload").addEventListener("change", function () {
   const preview = document.getElementById("imagePreview");
 
   if (!file) return (preview.style.display = "none");
-
-  if (!/image\/(jpe?g|png)$/i.test(file.type)) {
-    alert("❌ Only JPG/PNG images allowed.");
-    this.value = "";
-    preview.style.display = "none";
-    return;
-  }
-
   preview.src = URL.createObjectURL(file);
   preview.style.display = "block";
 });
 
 // ==============================
-// Save Listing (Image + JSON)
+// Save Listing
 // ==============================
 document.getElementById("addListingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (!CURRENT_USER) return alert("Login required!");
 
   const title = document.getElementById("title").value.trim();
   const price = Number(document.getElementById("price").value);
@@ -57,17 +65,11 @@ document.getElementById("addListingForm").addEventListener("submit", async (e) =
   const mobile = document.getElementById("mobile").value.trim();
   const file = document.getElementById("imageUpload").files[0];
 
-  if (mobile && !/^\d{10}$/.test(mobile)) {
-    alert("❌ Mobile must be 10 digits or blank.");
-    return;
-  }
-
   try {
     const id = Date.now().toString();
     const imgPath = `images/${id}_${file.name}`;
     const jsonPath = `listings/${id}.json`;
 
-    // Upload image
     await bucket.child(imgPath).put(file);
     const imgUrl = await bucket.child(imgPath).getDownloadURL();
 
@@ -79,27 +81,25 @@ document.getElementById("addListingForm").addEventListener("submit", async (e) =
       createdAt: Date.now()
     };
 
-    // Upload JSON metadata
     const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
     await bucket.child(jsonPath).put(blob);
 
-    alert("✅ Listing successfully added!");
-
+    alert("✔ Listing Added");
     document.getElementById("addListingForm").reset();
     document.getElementById("imagePreview").style.display = "none";
     toggleAddForm();
     loadListings();
   } catch (err) {
-    alert("❌ Failed: " + err.message);
+    alert(err.message);
   }
 });
 
 // ==============================
-// Load Listings
+// Lazy Load + Display Listings
 // ==============================
 async function loadListings() {
   const container = document.getElementById("listingsContainer");
-  container.innerHTML = `<div class="loading">Loading listings...</div>`;
+  container.innerHTML = `<div class="loading">Loading...</div>`;
 
   try {
     const listRef = bucket.child("listings/");
@@ -108,53 +108,48 @@ async function loadListings() {
 
     container.innerHTML = "";
 
-    const listings = [];
-
+    const items = [];
     for (const fileRef of jsonFiles) {
       const url = await fileRef.getDownloadURL();
       const resp = await fetch(url);
-      const data = await resp.json();
-      listings.push(data);
+      items.push(await resp.json());
     }
 
-    listings.sort((a, b) => b.createdAt - a.createdAt);
+    items.sort((a, b) => b.createdAt - a.createdAt);
 
-    listings.forEach(item => {
-      const sellerPhone = item.mobile || DEFAULT_ADMIN_PHONE;
+    items.forEach(item => {
       const waText = encodeURIComponent(
-        `Hi, I'm interested in:\n📌 ${item.title}\n💰 ₹${item.price}\n📍 ${item.location}\n${COD_NOTE}\nThank you`
+        `Hi, I'm interested in:\n${item.title}\nPrice: ₹${item.price}\nLocation: ${item.location}`
       );
-
-      const waURL = `https://wa.me/91${sellerPhone}?text=${waText}`;
-      const statusText = item.status === "purchased" ? "⏳ Purchased" : "🟢 Active";
+      const waURL = `https://wa.me/91${item.mobile || DEFAULT_ADMIN_PHONE}?text=${waText}`;
 
       const card = document.createElement("div");
       card.className = "item-card";
 
       card.innerHTML = `
         <div class="item-img">
-          <img src="${item.imageUrl}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
+          <img loading="lazy" src="${item.imageUrl}"
+            onclick="openImage('${item.imageUrl}')"
+            onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
         </div>
         <div class="item-info">
           <div class="item-title">${item.title}</div>
           <div class="item-price">₹${item.price.toLocaleString()}</div>
-          <div class="item-meta">
-            📍 ${item.location} ${item.mobile ? `| 📱 ${item.mobile}` : ""}
-            <br><small>${statusText}</small>
-          </div>
+          <div class="item-meta">📍 ${item.location}</div>
+
           <div class="btn-group">
             <a href="${waURL}" target="_blank" class="btn btn-whatsapp">WhatsApp</a>
             ${item.status === "active"
-              ? `<button class="btn btn-purchase" onclick="markAsPurchased('${item.id}')">🛒 Purchased</button>`
-              : ""}
+              ? `<button class="btn btn-purchase" onclick="markAsPurchased('${item.id}')">Purchased</button>`
+              : `<button class="btn btn-purchase" onclick="deleteItem('${item.id}')">Delete</button>`
+            }
           </div>
         </div>
       `;
-
       container.appendChild(card);
     });
   } catch (err) {
-    container.innerHTML = `<p class="loading">❌ Error loading items: ${err.message}</p>`;
+    container.innerHTML = `<p>Error: ${err.message}</p>`;
   }
 }
 
@@ -162,28 +157,41 @@ async function loadListings() {
 // Mark As Purchased
 // ==============================
 window.markAsPurchased = async function (listingId) {
-  if (!confirm("Confirm purchase?")) return;
+  const jsonPath = `listings/${listingId}.json`;
+  const fileRef = bucket.child(jsonPath);
 
-  try {
-    const jsonPath = `listings/${listingId}.json`;
-    const fileRef = bucket.child(jsonPath);
-    const url = await fileRef.getDownloadURL();
+  const resp = await fetch(await fileRef.getDownloadURL());
+  const data = await resp.json();
+  data.status = "purchased";
 
-    const resp = await fetch(url);
-    const data = await resp.json();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  await fileRef.put(blob);
 
-    data.status = "purchased";
-    data.purchasedAt = Date.now();
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    await fileRef.put(blob);
-
-    alert("✔ Updated to Purchased");
-    loadListings();
-  } catch (err) {
-    alert(err.message);
-  }
+  alert("✔ Marked Purchased");
+  loadListings();
 };
 
-// Init load
+// ==============================
+// Delete item
+// ==============================
+window.deleteItem = async function (listingId) {
+  if (!CURRENT_USER) return alert("Admin only!");
+  if (!confirm("Delete this item?")) return;
+
+  await bucket.child(`listings/${listingId}.json`).delete();
+  alert("🗑 Deleted");
+  loadListings();
+};
+
+// ==============================
+// View full image on click
+// ==============================
+window.openImage = (url) => {
+  const win = window.open("");
+  win.document.write(`<img src="${url}" style="width:100%">`);
+};
+
+// AUTO LOAD
 window.addEventListener("load", loadListings);
+
+// Login button action
