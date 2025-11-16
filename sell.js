@@ -97,6 +97,66 @@ document.getElementById("addListingForm").addEventListener("submit", async (e) =
 // ==============================
 // Lazy Load + Display Listings
 // ==============================
+function updateAuthUI() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  authText.textContent = isLoggedIn ? 'Logout' : 'Login';
+}
+
+function closeLoginPopup() {
+  popup.style.display = 'none';
+  mobInput.value = '';
+}
+
+async function handleLogin() {
+  const number = mobInput.value.trim();
+  if (!number || !/^[6-9]\d{9}$/.test(number)) {
+    alert('Please enter a valid 10-digit Indian mobile number (starting with 6–9).');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Logging in...';
+
+  let location = null;
+  if ('geolocation' in navigator) {
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
+      });
+      location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    } catch (err) {
+      console.warn('Geolocation not available:', err);
+    }
+  }
+
+  try {
+    const database = await initFirebase();
+    const { ref, push } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+
+    await push(ref(database, 'loginHistory'), {
+      mobileNumber: number,
+      timestamp: new Date().toISOString(),
+      location: location || { error: 'Geolocation denied or unavailable' }
+    });
+
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('mobileNumber', number);
+    updateAuthUI();
+   
+    closeLoginPopup();
+  } catch (error) {
+    console.error('Firebase error:', error);
+    alert('Login failed. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Login';
+  }
+}
+
+
 async function loadListings() {
   const container = document.getElementById("listingsContainer");
   container.innerHTML = `<div class="loading">Loading...</div>`;
