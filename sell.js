@@ -10,9 +10,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const storage = firebase.storage();
-const bucket = storage.ref();
+const app = firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage(app);
+
+
 
 const DEFAULT_ADMIN_PHONE = "6454678866";
 const COD_NOTE = "✅ Cash on Delivery Available";
