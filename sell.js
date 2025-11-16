@@ -14,34 +14,65 @@ firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 const bucket = storage.ref();
 
-const DEFAULT_ADMIN_PHONE = "6454678866";
-let CURRENT_USER = null;
+// ==============================
+// LOGIN CONFIG
+// ==============================
+const ADMIN_MOBILE = "6454678866";
+const ADMIN_PASS = "123456";
+
+let CURRENT_USER = localStorage.getItem("mobileNumber") || null;
+let CURRENT_PASS = localStorage.getItem("userPassword") || null;
 
 // ==============================
-// Auth – Simple Login
+// LOGIN & LOGOUT
 // ==============================
 window.loginUser = () => {
-  const pass = prompt("Enter Admin Password:");
-  if (pass === "123456") {
-    CURRENT_USER = "admin";
-    alert("✔ Logged In as Admin");
-    document.getElementById("addListingForm").style.display = "block";
+  const mobile = prompt("Enter Mobile Number:");
+  const pass = prompt("Enter Password:");
+
+  if (!mobile || !pass) return alert("Enter both fields!");
+
+  // Admin login
+  if (mobile === ADMIN_MOBILE && pass === ADMIN_PASS) {
+    CURRENT_USER = ADMIN_MOBILE;
+    CURRENT_PASS = ADMIN_PASS;
+    localStorage.setItem("mobileNumber", mobile);
+    localStorage.setItem("userPassword", pass);
+
+    alert("✔ Logged in as Admin");
     loadListings();
-  } else {
-    alert("❌ Wrong Password");
+    return;
   }
+
+  // Normal user login
+  CURRENT_USER = mobile;
+  CURRENT_PASS = pass;
+  localStorage.setItem("mobileNumber", mobile);
+  localStorage.setItem("userPassword", pass);
+
+  alert("✔ Logged In Successfully");
+  loadListings();
+};
+
+window.logoutUser = () => {
+  localStorage.removeItem("mobileNumber");
+  localStorage.removeItem("userPassword");
+  CURRENT_USER = null;
+  CURRENT_PASS = null;
+  alert("Logged out");
+  location.reload();
 };
 
 // ==============================
 // Toggle Add Form
 // ==============================
 window.toggleAddForm = () => {
-  if (!CURRENT_USER) return alert("Please login first.");
+  if (!CURRENT_USER) return alert("Login required!");
   document.getElementById("addForm").classList.toggle("active");
 };
 
 // ==============================
-// Preview Image Before Upload
+// Preview Image
 // ==============================
 document.getElementById("imageUpload").addEventListener("change", function () {
   const file = this.files[0];
@@ -53,7 +84,7 @@ document.getElementById("imageUpload").addEventListener("change", function () {
 });
 
 // ==============================
-// Save Listing
+// Save Listing (Upload)
 // ==============================
 document.getElementById("addListingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -74,9 +105,13 @@ document.getElementById("addListingForm").addEventListener("submit", async (e) =
     const imgUrl = await bucket.child(imgPath).getDownloadURL();
 
     const metadata = {
-      id, title, price, location,
-      mobile: mobile || "",
+      id,
+      title,
+      price,
+      location,
+      mobile,
       imageUrl: imgUrl,
+      ownerMobile: CURRENT_USER,  // SET OWNER
       status: "active",
       createdAt: Date.now()
     };
@@ -95,68 +130,8 @@ document.getElementById("addListingForm").addEventListener("submit", async (e) =
 });
 
 // ==============================
-// Lazy Load + Display Listings
+// Load Listings
 // ==============================
-function updateAuthUI() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  authText.textContent = isLoggedIn ? 'Logout' : 'Login';
-}
-
-function closeLoginPopup() {
-  popup.style.display = 'none';
-  mobInput.value = '';
-}
-
-async function handleLogin() {
-  const number = mobInput.value.trim();
-  if (!number || !/^[6-9]\d{9}$/.test(number)) {
-    alert('Please enter a valid 10-digit Indian mobile number (starting with 6–9).');
-    return;
-  }
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Logging in...';
-
-  let location = null;
-  if ('geolocation' in navigator) {
-    try {
-      const pos = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000
-        });
-      });
-      location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    } catch (err) {
-      console.warn('Geolocation not available:', err);
-    }
-  }
-
-  try {
-    const database = await initFirebase();
-    const { ref, push } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
-
-    await push(ref(database, 'loginHistory'), {
-      mobileNumber: number,
-      timestamp: new Date().toISOString(),
-      location: location || { error: 'Geolocation denied or unavailable' }
-    });
-
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('mobileNumber', number);
-    updateAuthUI();
-   
-    closeLoginPopup();
-  } catch (error) {
-    console.error('Firebase error:', error);
-    alert('Login failed. Please try again.');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Login';
-  }
-}
-
-
 async function loadListings() {
   const container = document.getElementById("listingsContainer");
   container.innerHTML = `<div class="loading">Loading...</div>`;
@@ -167,8 +142,8 @@ async function loadListings() {
     const jsonFiles = res.items.filter(item => item.name.endsWith(".json"));
 
     container.innerHTML = "";
-
     const items = [];
+
     for (const fileRef of jsonFiles) {
       const url = await fileRef.getDownloadURL();
       const resp = await fetch(url);
@@ -181,16 +156,14 @@ async function loadListings() {
       const waText = encodeURIComponent(
         `Hi, I'm interested in:\n${item.title}\nPrice: ₹${item.price}\nLocation: ${item.location}`
       );
-      const waURL = `https://wa.me/91${item.mobile || DEFAULT_ADMIN_PHONE}?text=${waText}`;
+      const waURL = `https://wa.me/91${item.mobile}?text=${waText}`;
 
       const card = document.createElement("div");
       card.className = "item-card";
 
       card.innerHTML = `
         <div class="item-img">
-          <img loading="lazy" src="${item.imageUrl}"
-            onclick="openImage('${item.imageUrl}')"
-            onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
+          <img loading="lazy" src="${item.imageUrl}" onclick="openImage('${item.imageUrl}')">
         </div>
         <div class="item-info">
           <div class="item-title">${item.title}</div>
@@ -198,23 +171,33 @@ async function loadListings() {
           <div class="item-meta">📍 ${item.location}</div>
 
           <div class="btn-group">
-            <a href="${waURL}" target="_blank" class="btn btn-whatsapp">WhatsApp</a>
-            ${item.status === "active"
-              ? `<button class="btn btn-purchase" onclick="markAsPurchased('${item.id}')">Purchased</button>`
-              : `<button class="btn btn-purchase" onclick="deleteItem('${item.id}')">Delete</button>`
+            <a href="${waURL}" class="btn btn-whatsapp" target="_blank">WhatsApp</a>
+
+            ${
+              item.ownerMobile === CURRENT_USER || CURRENT_USER === ADMIN_MOBILE
+                ? `<button class="btn btn-delete" onclick="deleteItem('${item.id}')">Delete</button>`
+                : ""
+            }
+
+            ${
+              CURRENT_USER === ADMIN_MOBILE && item.status === "active"
+                ? `<button class="btn btn-purchase" onclick="markAsPurchased('${item.id}')">Purchased</button>`
+                : ""
             }
           </div>
         </div>
       `;
+
       container.appendChild(card);
     });
+
   } catch (err) {
     container.innerHTML = `<p>Error: ${err.message}</p>`;
   }
 }
 
 // ==============================
-// Mark As Purchased
+// Purchased
 // ==============================
 window.markAsPurchased = async function (listingId) {
   const jsonPath = `listings/${listingId}.json`;
@@ -232,19 +215,26 @@ window.markAsPurchased = async function (listingId) {
 };
 
 // ==============================
-// Delete item
+// Delete Item with Permission
 // ==============================
 window.deleteItem = async function (listingId) {
-  if (!CURRENT_USER) return alert("Admin only!");
+  const fileRef = bucket.child(`listings/${listingId}.json`);
+  const resp = await fetch(await fileRef.getDownloadURL());
+  const item = await resp.json();
+
+  if (CURRENT_USER !== ADMIN_MOBILE && CURRENT_USER !== item.ownerMobile) {
+    return alert("❌ You don't have permission to delete this!");
+  }
+
   if (!confirm("Delete this item?")) return;
 
-  await bucket.child(`listings/${listingId}.json`).delete();
+  await fileRef.delete();
   alert("🗑 Deleted");
   loadListings();
 };
 
 // ==============================
-// View full image on click
+// View Image
 // ==============================
 window.openImage = (url) => {
   const win = window.open("");
@@ -253,5 +243,3 @@ window.openImage = (url) => {
 
 // AUTO LOAD
 window.addEventListener("load", loadListings);
-
-// Login button action
