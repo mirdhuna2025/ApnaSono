@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
     loginBtn: () => currentPath.includes('login.html'),
     chatsBtn: () => currentHost === 'apnasono.in' && currentPath.startsWith('/chat')
     newsBtn: () => currentHost === 'apnasono.in' && currentPath.startsWith('/news')
+  sellBtn: () => currentHost === 'apnasono.in' && currentPath.startsWith('/sell')
+  }
   };
 
   for (const [id, isActive] of Object.entries(buttons)) {
