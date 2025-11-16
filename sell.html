@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LocalMart — Storage Only</title>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     body { background: #f5f5f5; padding: 16px; }
@@ -31,11 +32,15 @@
       display: none;
     }
 
+    /* ================================ */
+    /* 2 items per row always in grid   */
+    /* ================================ */
     .listings {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
+
     .item-card {
       background: white; border-radius: 8px; overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -59,10 +64,6 @@
     }
     .btn-whatsapp { background: #25D366; color: white; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-purchase { background: #ff9800; color: white; }
-
-    @media (max-width: 480px) {
-      .listings { grid-template-columns: 1fr; }
-    }
 
     .loading { text-align: center; padding: 40px; color: #777; }
   </style>
@@ -116,12 +117,11 @@
   <div class="loading">Loading listings...</div>
 </div>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-
-<!-- External Script -->
+<!-- App JS -->
 <script src="sell.js"></script>
 
 </body>
