@@ -184,4 +184,4 @@ window.markAsPurchased = async function(listingId) {
 };
 
 // Init
-window.addEventListener("load", loadListings);  why apnasono.in/sell is working but while put it on the index it is not loading 
+window.addEventListener("load", loadListings);  
