@@ -1,556 +1,278 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Mirdhuna Chat • Nov 21, 2025</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    /* ========== GLOBAL ========== */
-    :root {
+    /* -------- Variables & reset -------- */
+    :root{
+      --bg-light: linear-gradient(135deg,#f0f9ff,#e0e7ff);
+      --bg-dark: linear-gradient(135deg,#0b1220,#2b1b4a);
+      --card: rgba(255,255,255,0.95);
+      --glass: rgba(255,255,255,0.08);
       --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #8b5cf6;
       --accent: #ec4899;
-      --bg-gradient: linear-gradient(135deg, #f0f9ff, #e0e7ff);
-      --card-bg: rgba(255, 255, 255, 0.85);
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.12);
-      --border-radius: 20px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --success: #16a34a;
+      --danger: #dc2626;
+      --muted: #64748b;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.12);
+      --transition: 180ms cubic-bezier(.2,.9,.2,1);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;color:#0f172a}
+    body.light{background:var(--bg-light);color:#0f172a}
+    body.dark{background:var(--bg-dark);color:#e6eef8}
+
+    /* -------- Header -------- */
+    header{
+      position:sticky;top:0;z-index:120;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;padding:12px 14px;border-radius:0;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));
+      color:white;display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:var(--shadow)
+    }
+    .title{font-weight:700;font-size:16px;line-height:1}
+    .header-actions{display:flex;align-items:center;gap:8px}
+
+    .btn{
+      border:0;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.9);
+      cursor:pointer;font-weight:600;transition:var(--transition);display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn:active{transform:translateY(1px)}
+    .icon-btn{width:44px;height:44px;border-radius:12px;border:0;display:inline-flex;align-items:center;justify-content:center}
+
+    /* -------- Main layout -------- */
+    .app{
+      height:calc(100vh - 72px);display:flex;gap:12px;padding:14px;align-items:stretch;
+    }
+    .left{
+      width:320px;max-width:38%;display:flex;flex-direction:column;gap:12px;
+    }
+    .panel{
+      background:var(--card);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);
+      overflow:auto;
+    }
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{flex:1;padding:10px;border-radius:12px;border:1px solid #e6edf6}
+
+    .online-list{display:flex;gap:8px;flex-wrap:wrap}
+    .online-item{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,0.03)}
+
+    /* -------- Chat area -------- */
+    .chat-wrap{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0}
+    .chat-box{flex:1;padding:18px;overflow:auto;border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.6));box-shadow:var(--shadow)}
+    body.dark .chat-box{background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.08))}
+    .message{display:flex;gap:12px;padding:12px;border-radius:14px;margin-bottom:12px;align-items:flex-start;position:relative}
+    .message .meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .message .profile{width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid rgba(0,0,0,0.06)}
+    .msg-body{flex:1}
+    .msg-header{display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .msg-name{font-weight:700}
+    .admin-tag{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--accent);color:white}
+    .msg-text{margin-top:8px;white-space:pre-wrap;word-break:break-word}
+    .media-content{max-width:360px;border-radius:12px;margin-top:8px;cursor:pointer;object-fit:cover;border:1px solid rgba(0,0,0,0.06)}
+    .replies-section{margin-top:10px;padding-top:8px;border-top:1px dashed rgba(0,0,0,0.06)}
+    .reply-inline{padding:8px;border-radius:10px;background:rgba(0,0,0,0.02);margin-top:6px}
+
+    .actions{display:flex;gap:8px;margin-top:10px}
+    .small-btn{padding:8px 10px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
+
+    /* composer */
+    .composer{position:sticky;bottom:0;display:flex;gap:8px;padding:12px;background:transparent;align-items:center}
+    .composer .input{flex:1;display:flex;gap:8px;align-items:center;background:var(--card);padding:8px;border-radius:14px;border:1px solid rgba(0,0,0,0.05)}
+    .composer input[type="text"]{flex:1;padding:12px;border:0;outline:none;background:transparent;font-size:15px}
+    .composer .media-btn{width:46px;height:46px;border-radius:12px;border:0;background:rgba(255,255,255,0.9);cursor:pointer}
+    .send-btn{width:52px;height:52px;border-radius:14px;border:0;background:linear-gradient(90deg,var(--primary),var(--accent));color:white;font-weight:700;cursor:pointer}
+
+    /* popups & modal */
+    .popup, .media-modal, .edit-modal {position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,0.45);z-index:1500}
+    .popup .card, .media-modal .card, .edit-modal .card{background:var(--card);padding:18px;border-radius:14px;max-width:92%;max-height:92%;overflow:auto}
+    .media-modal img, .media-modal video{max-width:95vw;max-height:80vh;border-radius:12px}
+
+    /* admin panel (floating) */
+    #adminPanel{position:fixed;top:84px;right:18px;width:320px;display:none;z-index:1600}
+
+    /* small screens */
+    @media (max-width:900px){
+      .app{padding:10px;flex-direction:column}
+      .left{width:100%;max-width:100%}
+      .chat-wrap{width:100%}
+      header{padding:10px}
+      .logo{width:40px;height:40px}
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      background: var(--bg-gradient);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      color: #1e293b;
-    }
-
-    /* ========== HEADER ========== */
-    header {
-      position: sticky;
-      top: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 16px;
-      background: linear-gradient(90deg, #8b5cf6, #ec4899);
-      color: white;
-      z-index: 100;
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    #chatTitle {
-      font-weight: 700;
-      font-size: 18px;
-      text-align: center;
-      flex: 1;
-      letter-spacing: -0.5px;
-    }
-
-    .header-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      padding: 8px 14px;
-      border-radius: 14px;
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header-btn:hover {
-      background: rgba(255, 255, 255, 0.35);
-      transform: translateY(-1px);
-    }
-
-    #profileBtn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    #profileBtn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-    }
-
-    /* ========== CHAT CONTAINER ========== */
-    .chat-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px;
-      padding-bottom: 80px;
-    }
-
-    /* ========== MESSAGE ========== */
-    .message {
-      background: var(--card-bg);
-      padding: 18px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.6);
-      position: relative;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .message img.profile {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-      flex-shrink: 0;
-    }
-
-    .name-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #1e293b;
-    }
-
-    .admin-tag {
-      background: var(--accent);
-      color: white;
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: #64748b;
-      font-weight: 500;
-    }
-
-    .content {
-      font-size: 15px;
-      margin: 8px 0;
-      color: #334155;
-      word-break: break-word;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .media-content {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 16px;
-      margin: 10px 0;
-      cursor: pointer;
-      transition: var(--transition);
-      object-fit: cover;
-      border: 1px solid #e2e8f0;
-    }
-
-    .media-content:hover {
-      transform: scale(1.01);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    .replies-section {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed #cbd5e1;
-    }
-
-    .reply-inline {
-      background: #f1f5f9;
-      padding: 8px 12px;
-      border-radius: 14px;
-      font-size: 14px;
-      margin-top: 6px;
-      color: #475569;
-    }
-
-    .reply-inline strong {
-      color: var(--primary-dark);
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .actions button {
-      flex: 1;
-      min-width: 60px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .reply-btn { background: #dbeafe; color: #1d4ed8; }
-    .like-btn { background: #dcfce7; color: #16a34a; }
-    .dislike-btn { background: #fee2e2; color: #dc2626; }
-    .delete-btn { background: #fde8ff; color: #c026d3; }
-
-    .actions button:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-    }
-
-    /* ========== COMPOSER ========== */
-    .composer {
-      position: sticky;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px;
-      background: white;
-      border-top: 1px solid #e2e8f0;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-      z-index: 500;
-    }
-
-    .media-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #f1f5f9;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    .media-btn:hover {
-      background: #e2e8f0;
-      transform: scale(1.1);
-    }
-
-    #msg {
-      flex: 1;
-      padding: 14px 18px;
-      border-radius: 24px;
-      border: 1px solid #cbd5e1;
-      outline: none;
-      font-size: 15px;
-      background: #f8fafc;
-      transition: var(--transition);
-    }
-
-    #msg:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    #send {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    #send:hover {
-      background: var(--primary-dark);
-      transform: scale(1.08);
-    }
-
-    /* ========== POPUPS ========== */
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .popup-content {
-      background: white;
-      padding: 28px;
-      border-radius: 24px;
-      width: 92%;
-      max-width: 400px;
-      text-align: center;
-      position: relative;
-      box-shadow: var(--shadow-md);
-      animation: popIn 0.3s ease-out;
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .closeBtn {
-      position: absolute;
-      top: 16px;
-      right: 18px;
-      cursor: pointer;
-      font-size: 24px;
-      font-weight: bold;
-      color: #94a3b8;
-      transition: var(--transition);
-    }
-
-    .closeBtn:hover {
-      color: #ef4444;
-      transform: rotate(90deg);
-    }
-
-    .popup-content h3 {
-      margin: 0 0 20px;
-      color: #1e293b;
-      font-weight: 700;
-    }
-
-    .popup-content input {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 16px;
-      border-radius: 14px;
-      border: 1px solid #cbd5e1;
-      font-size: 15px;
-      outline: none;
-    }
-
-    .popup-content input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    .popup-content button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      background: var(--primary);
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .popup-content button:hover {
-      background: var(--primary-dark);
-    }
-
-    /* ========== MEDIA MODAL ========== */
-    .media-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      backdrop-filter: blur(4px);
-    }
-
-    .media-modal .closeBtn {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      font-size: 36px;
-      color: white;
-      cursor: pointer;
-      z-index: 2001;
-    }
-
-    .media-modal img,
-    .media-modal video {
-      max-width: 95%;
-      max-height: 85vh;
-      border-radius: 18px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-      object-fit: contain;
-    }
-
-    /* ========== ADMIN PANEL ========== */
-    #adminPanel {
-      position: fixed;
-      top: 70px;
-      right: 12px;
-      width: 360px;
-      max-height: 480px;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      display: none;
-      z-index: 300;
-      box-shadow: var(--shadow-md);
-      border: 1px solid #e2e8f0;
-    }
-
-    #adminPanel h4 {
-      margin: 0 0 16px;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 18px;
-    }
-
-    /* ========== MOBILE OPTIMIZATION ========== */
-    @media (max-width: 768px) {
-      .composer {
-        padding: 12px;
-      }
-      #msg {
-        padding: 12px 16px;
-        font-size: 14px;
-      }
-      .message {
-        padding: 16px;
-      }
-      .header-btn {
-        padding: 6px 10px;
-        font-size: 13px;
-      }
-      .meta {
-        font-size: 11px;
-      }
-    }
-
-    /* Hidden file inputs */
-    #cameraInput, #galleryInput, #photo {
-      display: none;
-    }
+    /* hidden inputs */
+    input[type="file"]{display:none}
   </style>
 </head>
-<body>
-  <header>
-    <button id="adminBtn" class="header-btn">🔐 Admin</button>
-    <div id="chatTitle">Mirdhuna Chat <button id="refreshBtn" class="header-btn">🔄 Refresh</button></div>
-    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
-  </header>
+<body class="light">
 
-  <div class="chat-container">
-    <div class="chat-box" id="chatBox">
-      <div class="message" style="text-align:center; opacity:0.7">
-        <div class="content">💬 Welcome to Mirdhuna Chat — Nov 21, 2025</div>
+  <header>
+    <div class="brand">
+      <div class="logo">MC</div>
+      <div>
+        <div class="title">Mirdhuna Chat</div>
+        <div style="font-size:12px;color:var(--muted)">real-time • mobile-first • Nov 21, 2025</div>
       </div>
     </div>
 
-    <div class="composer">
-      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
-      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
-      <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
-      <input id="galleryInput" type="file" accept="image/*,video/*">
-      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
-      <button id="send" title="Send message">➤</button>
+    <div class="header-actions">
+      <button id="themeToggle" class="btn">🌙 Theme</button>
+      <button id="exportBtn" class="btn">⬇ Export</button>
+      <button id="adminBtn" class="btn">🔐 Admin</button>
+      <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="profile" style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid rgba(0,0,0,0.06);cursor:pointer" />
+    </div>
+  </header>
+
+  <div class="app">
+    <div class="left">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Search / Filters</strong>
+          <button id="clearSearch" class="btn" style="padding:6px 8px">Clear</button>
+        </div>
+        <div class="search">
+          <input id="searchInput" placeholder="Search messages, names, dates..." />
+          <button id="searchBtn" class="btn">Search</button>
+        </div>
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Online (<span id="onlineCount">0</span>)</strong>
+          <button id="refreshBtn" class="btn">🔄 Refresh</button>
+        </div>
+        <div id="onlineList" class="online-list"></div>
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Settings</strong>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="toggleSound" class="btn">🔔 Sound: On</button>
+          <button id="clearChatBtn" class="btn" title="Admin only">🧹 Clear Chat</button>
+          <div style="font-size:12px;color:var(--muted)">Tip: Persist profile to keep your avatar & name</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:12px">
+        <strong>About</strong>
+        <p style="margin-top:8px;font-size:13px;color:var(--muted)">This build includes presence, typing indicators, message edits, pins, offline queue, search, theme toggle, simple profanity filter, and admin moderation. Uses Firebase Realtime DB + Storage.</p>
+      </div>
+    </div>
+
+    <div class="chat-wrap">
+      <div id="chatBox" class="chat-box">
+        <div style="text-align:center;opacity:0.7">💬 Welcome to Mirdhuna Chat — Nov 21, 2025</div>
+      </div>
+
+      <div class="composer">
+        <div class="input">
+          <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
+          <button id="galleryBtn" class="media-btn" title="Upload">🖼️</button>
+          <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
+          <input id="galleryInput" type="file" accept="image/*,video/*" multiple>
+          <input id="msg" type="text" placeholder="Type a message..." maxlength="1000" />
+        </div>
+
+        <button id="send" class="send-btn" title="Send">➤</button>
+      </div>
     </div>
   </div>
 
   <!-- Reply Popup -->
   <div class="popup" id="replyPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="replyClose">×</span>
-      <h3>💬 Reply to Message</h3>
-      <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
-      <button id="sendReply">Send Reply</button>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Reply</strong>
+        <button id="replyClose" class="btn">✖</button>
+      </div>
+      <input id="replyText" type="text" placeholder="Type reply..." />
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="sendReply" class="btn">Send Reply</button>
+        <button id="cancelReply" class="btn">Cancel</button>
+      </div>
     </div>
   </div>
 
-  <!-- Profile Setup -->
+  <!-- Profile Popup -->
   <div class="popup" id="profilePopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="profileClose">×</span>
-      <h3>👋 Set Your Profile</h3>
-      <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Set Profile</strong>
+        <button id="profileClose" class="btn">✖</button>
+      </div>
+      <input id="name" placeholder="Display name (required)" />
       <input id="photo" type="file" accept="image/*" />
-      <button id="saveProfile">✓ Save Profile</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="saveProfile" class="btn">Save</button>
+        <button id="clearProfile" class="btn">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Popup -->
+  <div class="edit-modal" id="editModal">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Edit Message</strong>
+        <button id="editClose" class="btn">✖</button>
+      </div>
+      <input id="editText" />
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="saveEdit" class="btn">Save</button>
+        <button id="cancelEdit" class="btn">Cancel</button>
+      </div>
     </div>
   </div>
 
   <!-- Admin Login -->
   <div class="popup" id="adminPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="adminClose">×</span>
-      <h3>🔐 Admin Access</h3>
-      <input id="adminPass" type="password" placeholder="Enter admin password" />
-      <button id="adminLoginBtn">🔓 Login</button>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Admin Access</strong>
+        <button id="adminClose" class="btn">✖</button>
+      </div>
+      <input id="adminPass" placeholder="Admin password" type="password" />
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="adminLoginBtn" class="btn">Login</button>
+        <button id="adminCancel" class="btn">Cancel</button>
+      </div>
     </div>
   </div>
 
-  <!-- Admin Panel (minimal placeholder) -->
-  <div id="adminPanel">
-    <h4>🛡️ Admin Dashboard</h4>
-    <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
+  <!-- Media Modal -->
+  <div class="media-modal" id="mediaModal">
+    <div class="card" id="mediaCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Media</strong>
+        <button id="mediaClose" class="btn">✖</button>
+      </div>
+      <div id="mediaContent"></div>
+    </div>
   </div>
 
-  <!-- Media Viewer -->
-  <div class="media-modal" id="mediaModal">
-    <span class="closeBtn" id="mediaClose">×</span>
-    <div id="mediaContent"></div>
+  <!-- Admin panel -->
+  <div id="adminPanel" class="panel">
+    <h4>🛡 Admin Dashboard</h4>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button id="showModeration" class="btn">Moderation Log</button>
+      <button id="banUserBtn" class="btn">Ban User (by name)</button>
+      <div id="moderationLog" style="max-height:260px;overflow:auto;margin-top:8px"></div>
+    </div>
   </div>
+
+  <!-- Hidden download anchor -->
+  <a id="downloadAnchor" style="display:none"></a>
 
   <script type="module" src="chat.js"></script>
 </body>
