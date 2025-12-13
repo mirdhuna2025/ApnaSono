@@ -4,68 +4,294 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LocalMart — Storage Only</title>
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { background: #f5f5f5; padding: 16px; }
-    header { text-align: center; margin-bottom: 16px; }
-    h1 { color: #ff6f00; }
-
-    .add-toggle-btn {
-      background: #25D366; color: white; border: none; padding: 12px 20px;
-      border-radius: 6px; font-weight: bold; cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
-      margin: 0 auto 20px; width: fit-content;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 12px 0;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2rem;
+      background: linear-gradient(90deg, #ff6f00, #ff9800);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    /* === Floating Action Button === */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.2s;
+    }
+    .fab:hover { transform: scale(1.08); }
+    .fab svg { width: 28px; height: 28px; }
+
+    /* === Modal Backdrop & Form === */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 20;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-backdrop.active { display: flex; }
 
     .add-form {
-      background: white; padding: 16px; border-radius: 8px; margin-bottom: 24px;
-      display: none;
-    }
-    .add-form.active { display: block; }
-    .form-group { margin-bottom: 14px; }
-    label { display: block; margin-bottom: 4px; font-weight: bold; }
-    input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    input[type="file"] { padding: 3px; }
-    .preview-img {
-      width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-top: 8px;
-      display: none;
+      background: white;
+      border-radius: 16px;
+      width: 95%;
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      animation: slideUp 0.3s ease;
     }
 
-    /* ================================ */
-    /* 2 items per row always in grid   */
-    /* ================================ */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .form-header h3 {
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: #1f2937;
+    }
+    .close-btn {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #4b5563;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #25D366;
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+    }
+    .form-input[type="file"] {
+      padding: 4px;
+    }
+
+    .image-preview-container {
+      width: 100%;
+      height: 160px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+      display: none;
+      position: relative;
+    }
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .form-footer {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary {
+      background: #25D366;
+      color: white;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* === Listings Grid === */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 24px 0 16px;
+      color: #1f2937;
+    }
+
     .listings {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
     }
 
     .item-card {
-      background: white; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
+    .item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
     .item-img {
-      width: 100%; height: 140px; background: #f0f0f0;
-      display: flex; align-items: center; justify-content: center;
+      height: 160px;
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .item-img img { width: 100%; height: 100%; object-fit: cover; }
-    .item-info { padding: 12px; }
-    .item-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; }
-    .item-price { color: #ff6f00; font-weight: bold; margin: 4px 0; }
-    .item-meta { font-size: 0.8em; color: #555; margin-bottom: 8px; }
+    .item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-info {
+      padding: 16px;
+    }
+    .item-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      color: #111827;
+    }
+    .item-price {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #ff6f00;
+      margin: 6px 0;
+    }
+    .item-meta {
+      font-size: 0.85rem;
+      color: #6b7280;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .meta-badge {
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
 
     .btn-group {
-      display: flex; gap: 6px;
+      display: flex;
+      gap: 8px;
     }
-    .btn {
-      flex: 1; padding: 6px 8px; border: none; border-radius: 4px;
-      font-size: 13px; cursor: pointer;
+    .btn-whatsapp {
+      flex: 3;
+      background: #25D366;
+      color: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .btn-whatsapp { background: #25D366; color: white; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .btn-purchase { background: #ff9800; color: white; }
+    .btn-purchase {
+      flex: 2;
+      background: #ff9800;
+      color: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
 
-    .loading { text-align: center; padding: 40px; color: #777; }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+    .empty-state svg {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .listings { grid-template-columns: 1fr; }
+      .btn-group { flex-direction: column; }
+      .btn-whatsapp, .btn-purchase { flex: 1; }
+    }
   </style>
 </head>
 <body>
@@ -75,54 +301,112 @@
   <p>Firebase Storage Only</p>
 </header>
 
-<button class="add-toggle-btn" onclick="toggleAddForm()">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
-    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+<!-- FAB to open form -->
+<button class="fab" id="fab">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
   </svg>
-  Add Listing
 </button>
 
-<div class="add-form" id="addForm">
-  <h3>➕ Add New Listing</h3>
-  <form id="addListingForm">
-    <div class="form-group">
-      <label>Title *</label>
-      <input type="text" id="title" required placeholder="E.g., iPhone 12">
+<!-- Modal Backdrop -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="add-form">
+    <div class="form-header">
+      <h3>➕ Add New Listing</h3>
+      <button class="close-btn" id="closeModal">&times;</button>
     </div>
-    <div class="form-group">
-      <label>Price (₹) *</label>
-      <input type="number" id="price" required min="1">
-    </div>
-    <div class="form-group">
-      <label>Location *</label>
-      <input type="text" id="location" value="Delhi" required>
-    </div>
-    <div class="form-group">
-      <label>Seller Mobile (Optional)</label>
-      <input type="tel" id="mobile" placeholder="e.g., 9876543210" maxlength="10">
-      <small style="color:#777">If blank, uses admin: 6454678866</small>
-    </div>
-    <div class="form-group">
-      <label>Upload Photo *</label>
-      <input type="file" id="imageUpload" accept="image/jpeg,image/png" required>
-      <img id="imagePreview" class="preview-img" alt="Preview">
-    </div>
-    <button type="submit">Post Listing</button>
-    <button type="button" onclick="toggleAddForm()" style="background:#999; margin-top:8px; width:100%;">Cancel</button>
-  </form>
+    <form id="addListingForm">
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" id="title" class="form-input" required placeholder="E.g., iPhone 12">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Price (₹) *</label>
+        <input type="number" id="price" class="form-input" required min="1" placeholder="1000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location *</label>
+        <input type="text" id="location" class="form-input" value="Delhi" required placeholder="e.g., Connaught Place">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Seller Mobile (Optional)</label>
+        <input type="tel" id="mobile" class="form-input" placeholder="e.g., 9876543210" maxlength="10">
+        <small style="color:#777; font-size:0.8rem">If blank, uses admin: 6454678866</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Upload Photo *</label>
+        <input type="file" id="imageUpload" class="form-input" accept="image/jpeg,image/png" required>
+        <div class="image-preview-container" id="previewContainer">
+          <img id="imagePreview" class="image-preview" alt="Preview">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary">Post Listing</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<h3>🛍️ Available Items</h3>
+<h3 class="section-title">🛍️ Available Items</h3>
 <div class="listings" id="listingsContainer">
-  <div class="loading">Loading listings...</div>
+  <div class="empty-state">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
+    <p>No listings yet. Tap + to add one!</p>
+  </div>
 </div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-<!-- App JS -->
-<script src="sell.js"></script>
+<!-- App Logic (sell.js will handle the rest) -->
+<script>
+  // UI helpers
+  const modal = document.getElementById('modalBackdrop');
+  const fab = document.getElementById('fab');
+  const closeBtn = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const imageUpload = document.getElementById('imageUpload');
+  const previewContainer = document.getElementById('previewContainer');
+  const imagePreview = document.getElementById('imagePreview');
 
+  function toggleModal(show = true) {
+    modal.classList.toggle('active', show);
+    if (show) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+  }
+
+  fab.onclick = () => toggleModal(true);
+  closeBtn.onclick = () => toggleModal(false);
+  cancelBtn.onclick = () => toggleModal(false);
+
+  // Image preview
+  imageUpload.onchange = () => {
+    const file = imageUpload.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      imagePreview.src = url;
+      previewContainer.style.display = 'block';
+    } else {
+      previewContainer.style.display = 'none';
+    }
+  };
+
+  // Form submission (sell.js must still handle Firebase upload)
+  document.getElementById('addListingForm').onsubmit = (e) => {
+    e.preventDefault();
+    // Let sell.js take over from here
+    if (typeof handleAddListing === 'function') {
+      handleAddListing();
+    } else {
+      alert('⚠️ sell.js not loaded or missing handleAddListing()');
+    }
+  };
+</script>
+
+<script src="sell.js"></script>
 </body>
 </html>
