@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sono Village News Today</title>
+
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #222;
+    }
+
+    p {
+      margin: 4px 0 0;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    /* Google Search appearance overrides */
+    .gcse-search, .gcse-searchresults {
+      width: 100% !important;
+    }
+
+    .gsc-control-cse {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+
+    .gsc-webResult.gsc-result {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      border-radius: 8px !important;
+      padding: 16px !important;
+      margin-bottom: 12px !important;
+    }
+
+    .gs-title a {
+      color: #0056b3 !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+    }
+
+    .gs-title a:hover {
+      text-decoration: underline !important;
+    }
+
+    .gs-snippet {
+      color: #333 !important;
+      line-height: 1.5 !important;
+      font-size: 0.95rem !important;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+      margin: 30px 0;
+    }
+
+    /* ⚠️ Removed floating button styles — no #newsBtn CSS */
+  </style>
+</head>
+
+<body>
+
+
+  <div class="content">
+    <!-- Google CSE -->
+    <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
+    <div class="gcse-searchresults-only" data-query=""></div>
+  </div>
+
+
+
+  <!-- ✅ Button and its click handler removed -->
+
+  <!-- Script Section -->
+  <script>
+    // Google CSE auto query
+    function runSearch() {
+      const query = "sono jhajha jamui";
+      try {
+        if (window.google && google.search && google.search.cse) {
+          const element = google.search.cse.element.getElement('searchresults-only0');
+          if (element) {
+            element.execute(query);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("CSE not ready yet:", e);
+      }
+      return false;
+    }
+
+    // Try every 300ms until CSE loads
+    let attempts = 0;
+    const maxAttempts = 17;
+    const interval = setInterval(() => {
+      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
+    }, 300);
+  </script>
+</body>
+</html>
