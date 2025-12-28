@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mirdhuna Chat</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mirdhuna Chat • Nov 21, 2025</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --primary:#6366f1;
-  --bg:#f1f5f9;
-  --card:#ffffffee;
-  --radius:18px;
+  --primary-dark:#4f46e5;
+  --accent:#ec4899;
+  --bg:linear-gradient(135deg,#f0f9ff,#e0e7ff);
+  --card:rgba(255,255,255,.9);
+  --radius:20px;
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Inter,sans-serif;
-  background:linear-gradient(135deg,#eef2ff,#fdf2f8);
+  background:var(--bg);
   height:100vh;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
 
 /* HEADER */
@@ -31,25 +35,35 @@ header{
   align-items:center;
   gap:12px;
   padding:14px 16px;
-  background:linear-gradient(90deg,#6366f1,#ec4899);
+  background:linear-gradient(90deg,#8b5cf6,#ec4899);
   color:white;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
 }
 header img{
-  width:42px;
-  height:42px;
+  width:44px;
+  height:44px;
   border-radius:50%;
-  border:2px solid white;
+  border:2px solid #fff;
 }
-.header-info{
+.header-text{
   flex:1;
 }
-.header-info h3{
+.header-text h3{
   margin:0;
-  font-size:16px;
+  font-size:17px;
 }
-.header-info span{
+.header-text span{
   font-size:12px;
   opacity:.9;
+}
+.header-btn{
+  background:rgba(255,255,255,.25);
+  border:none;
+  padding:8px 12px;
+  border-radius:14px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
 }
 
 /* CHAT */
@@ -57,49 +71,98 @@ header img{
   flex:1;
   overflow-y:auto;
   padding:16px;
-  padding-bottom:140px;
+  padding-bottom:150px;
 }
 .message{
   background:var(--card);
   padding:16px;
   border-radius:var(--radius);
-  margin-bottom:14px;
   box-shadow:0 6px 16px rgba(0,0,0,.08);
+  margin-bottom:14px;
 }
-.message img.profile{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-}
-.header-line{
+.message .header{
   display:flex;
   gap:10px;
   align-items:center;
 }
+.message img.profile{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:2px solid var(--primary);
+}
+.name-line{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.admin-tag{
+  background:var(--accent);
+  color:white;
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:6px;
+}
+.meta{
+  font-size:12px;
+  color:#64748b;
+}
 .content{
   margin-top:8px;
+  line-height:1.5;
 }
 .media{
   margin-top:10px;
-  border-radius:14px;
-  overflow:hidden;
   position:relative;
 }
-.media video,
-.media img{
+.media img,
+.media video{
   width:100%;
-  max-height:260px;
+  max-height:280px;
   object-fit:cover;
+  border-radius:16px;
 }
-.play-btn{
+.play-overlay{
   position:absolute;
   inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:60px;
+  font-size:64px;
   color:white;
-  background:rgba(0,0,0,.3);
+  background:rgba(0,0,0,.35);
+  pointer-events:none;
+}
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.actions button{
+  flex:1;
+  border:none;
+  border-radius:12px;
+  padding:8px;
+  font-size:13px;
+  cursor:pointer;
+}
+.reply-btn{background:#dbeafe}
+.like-btn{background:#dcfce7}
+.dislike-btn{background:#fee2e2}
+.delete-btn{background:#fde8ff}
+
+/* REPLIES */
+.replies-section{
+  margin-top:10px;
+  border-top:1px dashed #cbd5e1;
+  padding-top:8px;
+}
+.reply-inline{
+  background:#f1f5f9;
+  border-radius:12px;
+  padding:6px 10px;
+  margin-top:6px;
 }
 
 /* COMPOSER */
@@ -107,16 +170,16 @@ header img{
   position:fixed;
   left:0;
   right:0;
-  bottom:18px;
+  bottom:20px;
   margin:auto;
   width:96%;
   max-width:900px;
   background:white;
-  border-radius:26px;
   padding:10px;
+  border-radius:26px;
   display:flex;
   gap:8px;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
 }
 .composer input{
   flex:1;
@@ -126,8 +189,8 @@ header img{
   font-size:15px;
 }
 .icon-btn{
-  width:44px;
-  height:44px;
+  width:46px;
+  height:46px;
   border-radius:50%;
   border:none;
   background:#eef2ff;
@@ -135,7 +198,7 @@ header img{
   cursor:pointer;
 }
 
-/* PROFILE POPUP */
+/* POPUPS */
 .popup{
   position:fixed;
   inset:0;
@@ -143,6 +206,7 @@ header img{
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:1000;
 }
 .popup-content{
   background:white;
@@ -152,10 +216,10 @@ header img{
   text-align:center;
 }
 .popup-content img{
-  width:80px;
-  height:80px;
+  width:90px;
+  height:90px;
   border-radius:50%;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 .popup-content input{
   width:100%;
@@ -177,34 +241,65 @@ header img{
 <body>
 
 <header>
-  <img id="headerPic" src="">
-  <div class="header-info">
+  <button id="adminBtn" class="header-btn">🔐</button>
+  <img id="headerPic">
+  <div class="header-text">
     <h3 id="headerName">Mirdhuna Chat</h3>
     <span>Online</span>
   </div>
+  <button id="refreshBtn" class="header-btn">🔄</button>
 </header>
 
-<div id="chatBox"></div>
+<div id="chatBox">
+  <div class="message" style="text-align:center;opacity:.6">
+    Welcome to Mirdhuna Chat — Nov 21, 2025
+  </div>
+</div>
 
-<!-- COMPOSER -->
 <div class="composer">
   <button class="icon-btn" id="giftBtn">🎁</button>
-  <button class="icon-btn" id="mediaBtn">🖼️</button>
+  <button class="icon-btn" id="cameraBtn">📷</button>
+  <button class="icon-btn" id="galleryBtn">🖼️</button>
   <input id="msg" placeholder="Type a message…">
-  <button class="icon-btn" id="sendBtn">➤</button>
+  <button class="icon-btn" id="send">➤</button>
 </div>
+
+<!-- FILE INPUTS -->
+<input id="cameraInput" type="file" accept="image/*,video/*" capture hidden>
+<input id="galleryInput" type="file" accept="image/*,video/*" hidden>
 
 <!-- PROFILE -->
 <div class="popup" id="profilePopup">
   <div class="popup-content">
     <img id="profilePreview">
-    <input id="nameInput" placeholder="Your name">
-    <input type="file" id="photoInput" accept="image/*">
+    <input id="name" placeholder="Your name">
+    <input id="photo" type="file" accept="image/*">
     <button id="saveProfile">Save Profile</button>
   </div>
 </div>
 
-<input type="file" id="mediaInput" accept="image/*,video/*" hidden>
+<!-- REPLY -->
+<div class="popup" id="replyPopup">
+  <div class="popup-content">
+    <h3>Reply</h3>
+    <input id="replyText" placeholder="Type reply…">
+    <button id="sendReply">Send</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="popup" id="adminPopup">
+  <div class="popup-content">
+    <h3>Admin Login</h3>
+    <input id="adminPass" type="password">
+    <button id="adminLoginBtn">Login</button>
+  </div>
+</div>
+
+<!-- MEDIA MODAL -->
+<div class="popup" id="mediaModal">
+  <div class="popup-content" id="mediaContent"></div>
+</div>
 
 <script type="module" src="chat.js"></script>
 </body>
