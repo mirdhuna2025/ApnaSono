@@ -1,17 +1,17 @@
 // chat.js — Modern Firebase Chat (Mirdhuna Chat • Nov 21, 2025)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js  ";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase, ref, push, onValue, update, remove, get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js  ";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js  ";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // 🔐 Firebase Config (Same as yours)
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
   authDomain: "mirdhuna-25542.firebaseapp.com",
-  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com  ",
+  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
   projectId: "mirdhuna-25542",
   storageBucket: "mirdhuna-25542.appspot.com",
   messagingSenderId: "575924409876",
@@ -81,7 +81,7 @@ document.getElementById("saveProfile").onclick = async () => {
   user = { name, photoURL, isAdmin: false };
   localStorage.setItem("chatUser", JSON.stringify(user));
   profilePopup.style.display = "none";
-  profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${name}`;
+  profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
   renderMessages(); // refresh UI
 };
 
@@ -95,7 +95,7 @@ document.getElementById("adminLoginBtn").onclick = () => {
     localStorage.setItem("chatUser", JSON.stringify(user));
     adminPopup.style.display = "none";
     adminPanel.style.display = "block";
-    profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin  ";
+    profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
     alert("✅ Admin login successful!");
     renderMessages(); // refresh to show delete buttons
   } else {
@@ -129,7 +129,7 @@ document.getElementById("send").onclick = async () => {
 
     const newMsg = {
       user: user.name,
-      photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${user.name}`,
+      photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
       isAdmin: user.isAdmin || false,
       text: text || "",
       mediaUrl,
@@ -280,7 +280,7 @@ function renderMessages(data) {
 
     div.innerHTML = `
       <div class="header">
-        <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=  ' + (msg.user || 'user')}" alt="${msg.user}">
+        <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}">
         <div>
           <div class="name-line">
             <strong>${msg.user || 'Anonymous'}</strong>
