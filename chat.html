@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mirdhuna Chat • Nov 21, 2025</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com  ">
+  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ========== GLOBAL ========== */
     :root {
@@ -16,27 +16,25 @@
       --accent: #ec4899;
       --bg-gradient: linear-gradient(135deg, #f0f9ff, #e0e7ff);
       --card-bg: rgba(255, 255, 255, 0.85);
-      --glass: rgba(255, 255, 255, 0.7);
       --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.12);
-      --border-radius: 24px;
-      --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.12);
+      --border-radius: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
       font-family: 'Inter', sans-serif;
+      margin: 0;
       background: var(--bg-gradient);
-      color: #1e293b;
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      color: #1e293b;
     }
 
     /* ========== HEADER ========== */
@@ -44,45 +42,15 @@
       position: sticky;
       top: 0;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      align-items: center;
+      padding: 14px 16px;
       background: linear-gradient(90deg, #8b5cf6, #ec4899);
       color: white;
       z-index: 100;
       box-shadow: var(--shadow-md);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    #headerProfile {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(255, 255, 255, 0.7);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    #headerProfile:hover {
-      transform: scale(1.08);
-    }
-
-    .header-info {
-      text-align: left;
-    }
-
-    #headerName {
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 1.2;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     #chatTitle {
@@ -90,14 +58,14 @@
       font-size: 18px;
       text-align: center;
       flex: 1;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.5px;
     }
 
     .header-btn {
       background: rgba(255, 255, 255, 0.2);
       border: none;
-      padding: 8px 16px;
-      border-radius: 16px;
+      padding: 8px 14px;
+      border-radius: 14px;
       color: white;
       font-weight: 600;
       font-size: 14px;
@@ -113,6 +81,21 @@
       transform: translateY(-1px);
     }
 
+    #profileBtn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    #profileBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+    }
+
     /* ========== CHAT CONTAINER ========== */
     .chat-container {
       flex: 1;
@@ -126,38 +109,38 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      padding: 20px 16px;
-      padding-bottom: 130px;
+      gap: 16px;
+      padding: 16px;
+      padding-bottom: 80px;
     }
 
     /* ========== MESSAGE ========== */
     .message {
-      background: var(--glass);
-      padding: 20px;
+      background: var(--card-bg);
+      padding: 18px;
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
       position: relative;
       animation: fadeIn 0.4s ease-out;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .message .header {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 10px;
     }
 
     .message img.profile {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       border: 2px solid var(--primary);
       flex-shrink: 0;
@@ -166,9 +149,9 @@
     .name-line {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 15px;
       color: #1e293b;
     }
 
@@ -185,143 +168,102 @@
       font-size: 12px;
       color: #64748b;
       font-weight: 500;
-      margin-top: 2px;
     }
 
     .content {
-      font-size: 15.5px;
-      margin: 10px 0;
+      font-size: 15px;
+      margin: 8px 0;
       color: #334155;
       word-break: break-word;
-      line-height: 1.55;
+      line-height: 1.5;
       white-space: pre-wrap;
     }
 
-    /* Media: image/video */
     .media-content {
       max-width: 100%;
-      max-height: 320px;
-      border-radius: 18px;
-      margin: 12px 0;
+      max-height: 300px;
+      border-radius: 16px;
+      margin: 10px 0;
       cursor: pointer;
       transition: var(--transition);
       object-fit: cover;
       border: 1px solid #e2e8f0;
-      position: relative;
     }
 
-    .video-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .media-content:hover .video-overlay {
-      opacity: 1;
-    }
-
-    .play-btn {
-      width: 56px;
-      height: 56px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: var(--primary);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    .media-content:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
 
     .replies-section {
-      margin-top: 16px;
-      padding-top: 14px;
+      margin-top: 14px;
+      padding-top: 12px;
       border-top: 1px dashed #cbd5e1;
     }
 
     .reply-inline {
-      background: #f8fafc;
-      padding: 10px 14px;
-      border-radius: 16px;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 14px;
       font-size: 14px;
-      margin-top: 8px;
+      margin-top: 6px;
       color: #475569;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .reply-inline strong {
       color: var(--primary-dark);
-      min-width: max-content;
-    }
-
-    .reply-gift {
-      font-size: 18px;
-      margin-left: 4px;
     }
 
     .actions {
       display: flex;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 12px;
       flex-wrap: wrap;
     }
 
     .actions button {
       flex: 1;
-      min-width: 72px;
-      padding: 10px 14px;
+      min-width: 60px;
+      padding: 8px 12px;
       border: none;
-      border-radius: 14px;
-      font-size: 13.5px;
+      border-radius: 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .reply-btn { background: #dbeafe; color: #1d4ed8; }
     .like-btn { background: #dcfce7; color: #16a34a; }
     .dislike-btn { background: #fee2e2; color: #dc2626; }
     .delete-btn { background: #fde8ff; color: #c026d3; }
-    .gift-btn { background: #fef3c7; color: #d97706; }
 
     .actions button:hover {
       transform: translateY(-2px);
-      filter: brightness(1.08);
+      filter: brightness(1.05);
     }
 
     /* ========== COMPOSER ========== */
     .composer {
-      position: fixed;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 40px);
-      max-width: 600px;
+      position: sticky;
+      bottom: 0;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
+      gap: 10px;
+      padding: 14px;
       background: white;
-      border-radius: 32px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14);
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
       z-index: 500;
     }
 
-    .media-btn, .gift-btn {
-      width: 50px;
-      height: 50px;
+    .media-btn {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: #f1f5f9;
       border: none;
@@ -333,16 +275,16 @@
       transition: var(--transition);
     }
 
-    .media-btn:hover, .gift-btn:hover {
+    .media-btn:hover {
       background: #e2e8f0;
-      transform: scale(1.12);
+      transform: scale(1.1);
     }
 
     #msg {
       flex: 1;
-      padding: 14px 20px;
-      border-radius: 26px;
-      border: 1px solid #e2e8f0;
+      padding: 14px 18px;
+      border-radius: 24px;
+      border: 1px solid #cbd5e1;
       outline: none;
       font-size: 15px;
       background: #f8fafc;
@@ -351,12 +293,12 @@
 
     #msg:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
     #send {
-      width: 54px;
-      height: 54px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: var(--primary);
       color: white;
@@ -371,7 +313,7 @@
 
     #send:hover {
       background: var(--primary-dark);
-      transform: scale(1.1);
+      transform: scale(1.08);
     }
 
     /* ========== POPUPS ========== */
@@ -381,7 +323,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.5);
       display: none;
       justify-content: center;
       align-items: center;
@@ -390,27 +332,27 @@
 
     .popup-content {
       background: white;
-      padding: 32px;
-      border-radius: 28px;
-      width: 94%;
-      max-width: 440px;
+      padding: 28px;
+      border-radius: 24px;
+      width: 92%;
+      max-width: 400px;
       text-align: center;
       position: relative;
       box-shadow: var(--shadow-md);
-      animation: popIn 0.35s ease-out;
+      animation: popIn 0.3s ease-out;
     }
 
     @keyframes popIn {
-      from { opacity: 0; transform: scale(0.88); }
+      from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
     }
 
     .closeBtn {
       position: absolute;
-      top: 20px;
-      right: 22px;
+      top: 16px;
+      right: 18px;
       cursor: pointer;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: bold;
       color: #94a3b8;
       transition: var(--transition);
@@ -422,48 +364,19 @@
     }
 
     .popup-content h3 {
-      margin: 0 0 24px;
+      margin: 0 0 20px;
       color: #1e293b;
       font-weight: 700;
-      font-size: 20px;
     }
 
-    .profile-preview {
-      margin-bottom: 20px;
-    }
-
-    .preview-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin: 0 auto 16px;
-      object-fit: cover;
-      border: 3px solid var(--primary);
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      color: #94a3b8;
-    }
-
-    .preview-name {
-      font-size: 18px;
-      font-weight: 600;
-      color: #334155;
-      min-height: 24px;
-    }
-
-    .popup-content input[type="text"],
-    .popup-content input[type="password"] {
+    .popup-content input {
       width: 100%;
-      padding: 14px 18px;
+      padding: 14px;
       margin-bottom: 16px;
-      border-radius: 16px;
+      border-radius: 14px;
       border: 1px solid #cbd5e1;
       font-size: 15px;
       outline: none;
-      background: #fafbff;
     }
 
     .popup-content input:focus {
@@ -473,9 +386,9 @@
 
     .popup-content button {
       width: 100%;
-      padding: 15px;
+      padding: 14px;
       border: none;
-      border-radius: 16px;
+      border-radius: 14px;
       background: var(--primary);
       color: white;
       font-weight: 600;
@@ -495,7 +408,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.94);
+      background: rgba(0, 0, 0, 0.92);
       display: none;
       justify-content: center;
       align-items: center;
@@ -505,9 +418,9 @@
 
     .media-modal .closeBtn {
       position: absolute;
-      top: 32px;
-      right: 32px;
-      font-size: 38px;
+      top: 24px;
+      right: 24px;
+      font-size: 36px;
       color: white;
       cursor: pointer;
       z-index: 2001;
@@ -517,55 +430,53 @@
     .media-modal video {
       max-width: 95%;
       max-height: 85vh;
-      border-radius: 20px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
       object-fit: contain;
     }
 
-    /* ========== GIFT POPUP ========== */
-    #giftPopup .popup-content {
-      max-width: 90vw;
-      padding: 24px;
-    }
-
-    .gift-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 14px;
-      margin: 16px 0;
-    }
-
-    .gift-btn-item {
-      width: 56px;
-      height: 56px;
-      font-size: 24px;
-      border-radius: 16px;
-      background: #f8fafc;
+    /* ========== ADMIN PANEL ========== */
+    #adminPanel {
+      position: fixed;
+      top: 70px;
+      right: 12px;
+      width: 360px;
+      max-height: 480px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      display: none;
+      z-index: 300;
+      box-shadow: var(--shadow-md);
       border: 1px solid #e2e8f0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
     }
 
-    .gift-btn-item:hover {
-      transform: scale(1.15);
-      background: #e0e7ff;
-      border-color: var(--primary);
+    #adminPanel h4 {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 18px;
     }
 
     /* ========== MOBILE OPTIMIZATION ========== */
     @media (max-width: 768px) {
       .composer {
-        width: calc(100% - 32px);
+        padding: 12px;
       }
       #msg {
-        font-size: 14.5px;
+        padding: 12px 16px;
+        font-size: 14px;
       }
-      .message { padding: 18px; }
-      .header-btn { font-size: 13px; padding: 7px 12px; }
-      .meta { font-size: 11.5px; }
+      .message {
+        padding: 16px;
+      }
+      .header-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+      .meta {
+        font-size: 11px;
+      }
     }
 
     /* Hidden file inputs */
@@ -576,17 +487,9 @@
 </head>
 <body>
   <header>
-    <div class="header-left">
-      <img id="headerProfile" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
-      <div class="header-info">
-        <div id="headerName">Guest</div>
-        <div class="meta">Online</div>
-      </div>
-    </div>
-
-    <div id="chatTitle">Mirdhuna Chat <button id="refreshBtn" class="header-btn">🔄 Refresh</button></div>
-    
     <button id="adminBtn" class="header-btn">🔐 Admin</button>
+    <div id="chatTitle">Mirdhuna Chat <button id="refreshBtn" class="header-btn">🔄 Refresh</button></div>
+    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default  " alt="Profile" />
   </header>
 
   <div class="chat-container">
@@ -596,11 +499,9 @@
       </div>
     </div>
 
-    <!-- Floating Composer -->
     <div class="composer">
       <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
       <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
-      <button id="giftBtn" class="gift-btn" title="Send Gift">🎁</button>
       <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
       <input id="galleryInput" type="file" accept="image/*,video/*">
       <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
@@ -614,9 +515,6 @@
       <span class="closeBtn" id="replyClose">×</span>
       <h3>💬 Reply to Message</h3>
       <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
-      <div style="margin:16px 0;">
-        <button id="replyGiftBtn" class="gift-btn" style="width:auto; padding:8px 16px; font-size:14px;">🎁 Add Gift</button>
-      </div>
       <button id="sendReply">Send Reply</button>
     </div>
   </div>
@@ -626,12 +524,6 @@
     <div class="popup-content">
       <span class="closeBtn" id="profileClose">×</span>
       <h3>👋 Set Your Profile</h3>
-      
-      <div class="profile-preview">
-        <div class="preview-avatar" id="previewAvatar">👤</div>
-        <div class="preview-name" id="previewName">—</div>
-      </div>
-
       <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
       <input id="photo" type="file" accept="image/*" />
       <button id="saveProfile">✓ Save Profile</button>
@@ -648,16 +540,10 @@
     </div>
   </div>
 
-  <!-- Gift Selector -->
-  <div class="popup" id="giftPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="giftClose">×</span>
-      <h3>🎁 Choose a Gift</h3>
-      <div class="gift-grid" id="giftGrid">
-        <!-- populated by JS -->
-      </div>
-      <button id="sendGift" style="display:none;">✓ Send Gift</button>
-    </div>
+  <!-- Admin Panel (minimal placeholder) -->
+  <div id="adminPanel">
+    <h4>🛡️ Admin Dashboard</h4>
+    <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
   </div>
 
   <!-- Media Viewer -->
@@ -668,4 +554,4 @@
 
   <script type="module" src="chat.js"></script>
 </body>
-</html>
+</html>   wait i am giving you chat.js also
