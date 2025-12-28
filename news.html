@@ -3,129 +3,360 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sono Village News Today</title>
+  <title>Sono Village News Today 🌾 | Jhajha, Jamui</title>
+  <meta name="description" content="Latest local news, updates, events, and public notices from Sono, Jhajha, Jamui, Bihar." />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>">
 
   <style>
+    :root {
+      --primary: #1e5631;
+      --primary-dark: #163f26;
+      --accent: #4caf50;
+      --light: #f8fff9;
+      --gray: #777;
+      --border: #e0e0e0;
+      --card-bg: #ffffff;
+      --shadow: 0 4px 16px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #222;
+      font-family: 'Segoe UI', 'Noto Sans', sans-serif;
+      background: linear-gradient(135deg, #f0f9f1 0%, #e6f4e8 100%);
+      color: #333;
       margin: 0;
       padding: 0;
+      line-height: 1.6;
     }
 
     header {
+      background: var(--primary);
+      color: white;
       text-align: center;
-      padding: 20px;
-      background-color: #ffffff;
-      border-bottom: 1px solid #ddd;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      padding: 24px 16px 32px;
+      position: relative;
+      overflow: hidden;
     }
 
-    h1 {
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      right: -60px;
+      width: 300px;
+      height: 300px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .logo {
+      font-size: 2.4rem;
       margin: 0;
-      font-size: 1.8rem;
-      color: #222;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
 
-    p {
-      margin: 4px 0 0;
-      color: #666;
+    .tagline {
+      margin: 8px 0 0;
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .location {
       font-size: 0.95rem;
+      margin-top: 6px;
+      opacity: 0.85;
     }
 
     .content {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 0 16px;
+      max-width: 960px;
+      margin: -40px auto 40px;
+      padding: 0 20px;
     }
 
-    /* Google Search appearance overrides */
-    .gcse-search, .gcse-searchresults {
-      width: 100% !important;
+    .search-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      text-align: center;
     }
 
-    .gsc-control-cse {
-      background: transparent !important;
-      border: none !important;
-      padding: 0 !important;
+    .search-title {
+      font-size: 1.4rem;
+      color: var(--primary-dark);
+      margin: 0 0 12px;
     }
 
-    .gsc-webResult.gsc-result {
-      background: #fff !important;
-      border: 1px solid #ddd !important;
-      border-radius: 8px !important;
-      padding: 16px !important;
-      margin-bottom: 12px !important;
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
     }
 
-    .gs-title a {
-      color: #0056b3 !important;
-      text-decoration: none !important;
-      font-weight: 600 !important;
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(30, 86, 49, 0.2);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
     }
 
-    .gs-title a:hover {
-      text-decoration: underline !important;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    .gs-snippet {
-      color: #333 !important;
-      line-height: 1.5 !important;
-      font-size: 0.95rem !important;
+    .results-container {
+      display: none;
+      /* Will be shown via JS */
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-count {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .news-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .news-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      color: var(--primary-dark);
+      margin: 0;
+      padding: 18px 20px 10px;
+      font-weight: 700;
+    }
+
+    .card-title a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-title a:hover {
+      color: var(--accent);
+    }
+
+    .card-snippet {
+      padding: 0 20px 16px;
+      color: var(--gray);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .card-url {
+      padding: 12px 20px;
+      background: #f5fbf6;
+      font-size: 0.85rem;
+      color: #555;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .card-url i {
+      margin-right: 6px;
+      color: #888;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      display: none;
+    }
+
+    .no-results i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: #ccc;
     }
 
     footer {
       text-align: center;
-      font-size: 0.85rem;
-      color: #888;
-      margin: 30px 0;
+      padding: 24px 0 32px;
+      color: #666;
+      font-size: 0.9rem;
     }
 
-    /* ⚠️ Removed floating button styles — no #newsBtn CSS */
+    @media (max-width: 768px) {
+      .logo { font-size: 2rem; }
+      .tagline { font-size: 1rem; }
+      .content { margin-top: -20px; }
+    }
+
+    /* Google CSE override — hide default */
+    .gsc-control-cse,
+    .gsc-resultsbox-visible,
+    .gsc-adBlock,
+    .gsc-adBlockNoHeight,
+    .gsc-wrapper {
+      display: none !important;
+    }
   </style>
 </head>
 
 <body>
-
+  <header>
+    <h1 class="logo">Sono Village News Today</h1>
+    <p class="tagline">Your trusted source for local updates in Sono, Jhajha, Jamui</p>
+    <p class="location">📍 Sono, Jhajha Block • Jamui District • Bihar</p>
+  </header>
 
   <div class="content">
-    <!-- Google CSE -->
-    <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-    <div class="gcse-searchresults-only" data-query=""></div>
+    <section class="search-section">
+      <h2 class="search-title">📰 Latest Public Updates & News</h2>
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Fetching latest news from Sono, Jhajha, Jamui...</p>
+      </div>
+
+      <div id="results" class="results-container">
+        <div class="results-header">
+          <span class="result-count">0 results found</span>
+        </div>
+        <div id="news-cards"></div>
+      </div>
+
+      <div id="no-results" class="no-results">
+        <div>🔍</div>
+        <h3>No News Found</h3>
+        <p>Try adjusting search terms or check back later.</p>
+      </div>
+    </section>
   </div>
 
+  <footer>
+    <p>© 2025 Sono Village News Today | Powered by Google Custom Search</p>
+    <p style="margin-top:6px; font-size:0.85rem; color:#888;">Real-time updates • Verified local sources</p>
+  </footer>
 
-
-  <!-- ✅ Button and its click handler removed -->
-
-  <!-- Script Section -->
+  <!-- Google CSE - with callback -->
   <script>
-    // Google CSE auto query
-    function runSearch() {
-      const query = "sono jhajha jamui";
-      try {
-        if (window.google && google.search && google.search.cse) {
-          const element = google.search.cse.element.getElement('searchresults-only0');
+    window.__gcse = {
+      callback: function() {
+        document.getElementById('loading').style.display = 'none';
+        try {
+          const element = google.search.cse.element.getElement('sono-search-results');
           if (element) {
-            element.execute(query);
-            return true;
+            element.execute("sono jhajha jamui public app");
           }
+        } catch (e) {
+          console.error("CSE execution failed:", e);
         }
-      } catch (e) {
-        console.warn("CSE not ready yet:", e);
       }
-      return false;
-    }
+    };
+  </script>
+  <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
+  <div class="gcse-searchresults-only" id="sono-search-results" style="display:none;"></div>
 
-    // Try every 300ms until CSE loads
-    let attempts = 0;
-    const maxAttempts = 17;
-    const interval = setInterval(() => {
-      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
-    }, 300);
+  <script>
+    // Custom rendering after CSE loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const newsCardsContainer = document.getElementById('news-cards');
+      const resultsContainer = document.getElementById('results');
+      const noResultsEl = document.getElementById('no-results');
+      const resultCountEl = document.querySelector('.result-count');
+
+      // Listen for Google CSE results using MutationObserver (best practice)
+      const observer = new MutationObserver(() => {
+        // Wait for results to render in hidden div
+        setTimeout(() => {
+          const cseResults = document.querySelector('#sono-search-results .gsc-results');
+          if (!cseResults) return;
+
+          // Parse results
+          const resultItems = cseResults.querySelectorAll('.gsc-webResult');
+          const cards = [];
+
+          resultItems.forEach(item => {
+            const titleEl = item.querySelector('.gs-title a');
+            const snippetEl = item.querySelector('.gs-snippet');
+            const urlEl = item.querySelector('.gs-visibleUrl');
+
+            if (!titleEl || !snippetEl || !urlEl) return;
+
+            const title = titleEl.textContent.trim();
+            const url = urlEl.textContent.trim();
+            let snippet = snippetEl.textContent.trim();
+
+            // Clean snippet (remove "Sono Jhajha Jamui" repetition)
+            snippet = snippet.replace(/sono\s+jhajha\s+jamui\s*/gi, '').trim();
+            if (snippet.length > 200) {
+              snippet = snippet.substring(0, 197) + '...';
+            }
+
+            cards.push(`
+              <article class="news-card">
+                <h3 class="card-title"><a href="${titleEl.href}" target="_blank" rel="noopener">${title}</a></h3>
+                <p class="card-snippet">${snippet || 'No summary available.'}</p>
+                <div class="card-url">
+                  <span>${url}</span>
+                </div>
+              </article>
+            `);
+          });
+
+          // Update UI
+          if (cards.length > 0) {
+            newsCardsContainer.innerHTML = cards.join('');
+            resultCountEl.textContent = `${cards.length} ${cards.length === 1 ? 'result' : 'results'} found`;
+            resultsContainer.style.display = 'block';
+          } else {
+            noResultsEl.style.display = 'block';
+          }
+
+          observer.disconnect(); // run once
+        }, 300);
+      });
+
+      // Observe the hidden CSE container
+      const targetNode = document.getElementById('sono-search-results');
+      if (targetNode) {
+        observer.observe(targetNode, { childList: true, subtree: true });
+      }
+    });
   </script>
 </body>
 </html>
