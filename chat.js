@@ -1,4 +1,4 @@
-// chat.js — Modern Firebase Chat (Mirdhuna Chat • Fixed Media Picker)
+// chat.js — Modern Firebase Chat (Mirdhuna Chat • Updated Full Version)
 
 // ==============================
 // Firebase Imports
@@ -44,8 +44,8 @@ const ADMIN_AVATAR = getAvatarUrl("admin", ADMIN_AVATAR_STYLE);
 // State
 // ==============================
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
-let fileToSend = null;
 let replyToMsg = null;
+let fileToSend = null;
 
 // ==============================
 // DOM Elements
@@ -61,8 +61,8 @@ const profilePopup = document.getElementById("profilePopup");
 const nameInput = document.getElementById("name");
 const photoInput = document.getElementById("photo");
 
-const adminBtn = document.getElementById("adminBtn");
 const adminPopup = document.getElementById("adminPopup");
+const adminBtn = document.getElementById("adminBtn");
 const adminPassInput = document.getElementById("adminPass");
 const adminPanel = document.getElementById("adminPanel");
 
@@ -73,7 +73,7 @@ const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
 
 // ==============================
-// Initial Profile Image
+// Initial Profile Button
 // ==============================
 if (user) {
   profileBtn.src = user.photoURL || (user.isAdmin ? ADMIN_AVATAR : getAvatarUrl(user.name));
@@ -83,7 +83,7 @@ if (user) {
 }
 
 // ==============================
-// FILE INPUT (FIXED – MOBILE SAFE)
+// FILE INPUT FIX (NO JS CLICK)
 // ==============================
 cameraInput.addEventListener("change", e => {
   if (e.target.files && e.target.files[0]) {
@@ -98,7 +98,7 @@ galleryInput.addEventListener("change", e => {
 });
 
 // ==============================
-// Profile
+// Profile Setup
 // ==============================
 document.getElementById("profileClose").onclick = () => {
   profilePopup.style.display = "none";
@@ -110,7 +110,7 @@ profileBtn.onclick = () => {
 
 document.getElementById("saveProfile").onclick = async () => {
   const name = nameInput.value.trim();
-  if (!name) return alert("Please enter your name");
+  if (!name) return alert("⚠️ Please enter your name");
 
   let photoURL = user?.photoURL || "";
 
@@ -147,14 +147,15 @@ document.getElementById("adminLoginBtn").onclick = () => {
     adminPanel.style.display = "block";
     profileBtn.src = ADMIN_AVATAR;
     adminPopup.style.display = "none";
-    alert("Admin logged in");
+    alert("✅ Admin login successful!");
+    renderMessages(lastSnapshot);
   } else {
-    alert("Wrong password");
+    alert("❌ Wrong password");
   }
 };
 
 // ==============================
-// SEND MESSAGE (TEXT + MEDIA)
+// Send Message
 // ==============================
 document.getElementById("send").onclick = async () => {
   if (!user) return profilePopup.style.display = "flex";
@@ -187,11 +188,40 @@ document.getElementById("send").onclick = async () => {
     mediaType,
     mediaName,
     timestamp: Date.now(),
+    replies: {},
     likes: 0,
     dislikes: 0
   });
 
   msgInput.value = "";
+};
+
+// ==============================
+// Reply System
+// ==============================
+window.replyMessage = key => {
+  replyToMsg = key;
+  replyPopup.style.display = "flex";
+  replyText.value = "";
+  replyText.focus();
+};
+
+document.getElementById("replyClose").onclick = () => {
+  replyPopup.style.display = "none";
+  replyToMsg = null;
+};
+
+document.getElementById("sendReply").onclick = async () => {
+  if (!replyText.value.trim() || !replyToMsg) return;
+
+  await push(ref(db, `messages/${replyToMsg}/replies`), {
+    user: user.name,
+    text: replyText.value.trim(),
+    timestamp: Date.now()
+  });
+
+  replyPopup.style.display = "none";
+  replyToMsg = null;
 };
 
 // ==============================
@@ -213,8 +243,8 @@ window.dislikeMessage = async key => {
 // Delete (Admin)
 // ==============================
 window.deleteMessage = async key => {
-  if (!user?.isAdmin) return alert("Admin only");
-  if (!confirm("Delete message?")) return;
+  if (!user?.isAdmin) return alert("🔒 Only admins can delete messages");
+  if (!confirm("Delete this message?")) return;
   await remove(ref(db, `messages/${key}`));
 };
 
@@ -228,41 +258,73 @@ document.getElementById("mediaClose").onclick = () => {
 
 window.showMedia = (url, type) => {
   mediaContent.innerHTML = "";
-  if (type.startsWith("image")) {
+  if (type?.startsWith("image")) {
     mediaContent.innerHTML = `<img src="${url}">`;
-  } else if (type.startsWith("video")) {
-    mediaContent.innerHTML = `<video src="${url}" controls autoplay></video>`;
+  } else if (type?.startsWith("video")) {
+    mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
   }
   mediaModal.style.display = "flex";
 };
 
 // ==============================
+// Timestamp Formatter
+// ==============================
+function formatTimestamp(ts) {
+  if (!ts) return "Just now";
+  return new Date(ts).toLocaleString("en-US", {
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+// ==============================
 // Render Messages
 // ==============================
+let lastSnapshot = {};
+
 function renderMessages(data = {}) {
+  lastSnapshot = data;
   chatBox.innerHTML = "";
 
   Object.entries(data)
     .sort((a, b) => a[1].timestamp - b[1].timestamp)
     .forEach(([key, msg]) => {
+
+      let repliesHTML = "";
+      if (msg.replies) {
+        repliesHTML = `<div class="replies-section">`;
+        Object.values(msg.replies).forEach(r => {
+          repliesHTML += `<div class="reply-inline"><b>${r.user}</b>: ${r.text}</div>`;
+        });
+        repliesHTML += `</div>`;
+      }
+
       const div = document.createElement("div");
       div.className = "message";
-
       div.innerHTML = `
         <div class="header">
-          <img class="profile" src="${msg.photo}">
+          <img class="profile" src="${msg.photo || getAvatarUrl(msg.user)}">
           <div>
             <strong>${msg.user}</strong>
-            ${msg.isAdmin ? "<span class='admin-tag'>Admin</span>" : ""}
-            <div class="meta">${new Date(msg.timestamp).toLocaleString()}</div>
+            ${msg.isAdmin ? `<span class="admin-tag">Admin</span>` : ""}
+            <div class="meta">${formatTimestamp(msg.timestamp)}</div>
           </div>
         </div>
+
         ${msg.text ? `<div class="content">${msg.text}</div>` : ""}
         ${msg.mediaUrl ? `<img class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}','${msg.mediaType}')">` : ""}
+        ${repliesHTML}
+
         <div class="actions">
+          <button onclick="replyMessage('${key}')">💬 Reply</button>
           <button onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
           <button onclick="dislikeMessage('${key}')">👎 ${msg.dislikes || 0}</button>
-          ${user?.isAdmin ? `<button onclick="deleteMessage('${key}')">🗑️</button>` : ""}
+          ${user?.isAdmin ? `<button onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ""}
         </div>
       `;
       chatBox.appendChild(div);
@@ -275,5 +337,21 @@ function renderMessages(data = {}) {
 // Realtime Listener
 // ==============================
 onValue(ref(db, "messages"), snap => {
-  renderMessages(snap.val());
+  renderMessages(snap.val() || {});
 });
+
+// ==============================
+// Manual Refresh
+// ==============================
+document.getElementById("refreshBtn").onclick = async () => {
+  const snap = await get(ref(db, "messages"));
+  renderMessages(snap.val() || {});
+  alert("✅ Chat refreshed");
+};
+
+// ==============================
+// Admin Panel Visibility
+// ==============================
+if (user?.isAdmin) {
+  adminPanel.style.display = "block";
+}
