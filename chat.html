@@ -369,7 +369,8 @@
       font-weight: 700;
     }
 
-    .popup-content input {
+    .popup-content input[type="text"],
+    .popup-content input[type="password"] {
       width: 100%;
       padding: 14px;
       margin-bottom: 16px;
@@ -399,6 +400,51 @@
 
     .popup-content button:hover {
       background: var(--primary-dark);
+    }
+
+    /* Profile Photo Section */
+    .profile-photo-section {
+      margin: 16px 0;
+    }
+
+    .profile-photo-section label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    #choosePhotoBtn {
+      background: #f1f5f9;
+      color: #334155;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      margin-bottom: 12px;
+      transition: var(--transition);
+    }
+
+    #choosePhotoBtn:hover {
+      background: #e2e8f0;
+    }
+
+    .photo-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto;
+      border: 2px solid #e2e8f0;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     /* ========== MEDIA MODAL ========== */
@@ -458,6 +504,13 @@
       font-size: 18px;
     }
 
+    /* Hidden file inputs */
+    #cameraInput,
+    #galleryInput,
+    #photo {
+      display: none;
+    }
+
     /* ========== MOBILE OPTIMIZATION ========== */
     @media (max-width: 768px) {
       .composer {
@@ -477,11 +530,9 @@
       .meta {
         font-size: 11px;
       }
-    }
-
-    /* Hidden file inputs */
-    #cameraInput, #galleryInput, #photo {
-      display: none;
+      .popup-content {
+        padding: 20px;
+      }
     }
   </style>
 </head>
@@ -525,7 +576,15 @@
       <span class="closeBtn" id="profileClose">×</span>
       <h3>👋 Set Your Profile</h3>
       <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
-      <input id="photo" type="file" accept="image/*" />
+      
+      <!-- Profile Photo Upload UI -->
+      <div class="profile-photo-section">
+        <label for="choosePhotoBtn">Profile Picture (optional):</label>
+        <input type="file" id="photo" accept="image/*" />
+        <button type="button" id="choosePhotoBtn">📸 Choose Photo</button>
+        <div id="photoPreview" class="photo-preview"></div>
+      </div>
+
       <button id="saveProfile">✓ Save Profile</button>
     </div>
   </div>
@@ -540,7 +599,7 @@
     </div>
   </div>
 
-  <!-- Admin Panel (minimal placeholder) -->
+  <!-- Admin Panel -->
   <div id="adminPanel">
     <h4>🛡️ Admin Dashboard</h4>
     <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
