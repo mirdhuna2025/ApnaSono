@@ -7,7 +7,7 @@ import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// 🔐 Firebase Config (Same as yours)
+// 🔐 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
   authDomain: "mirdhuna-25542.firebaseapp.com",
@@ -22,12 +22,31 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
+// 🧠 Avatar Helpers
+const USER_AVATAR_STYLE = "thumbs";
+const ADMIN_AVATAR_STYLE = "bottts-neutral";
+
+function getAvatarUrl(name, style = USER_AVATAR_STYLE) {
+  return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(name || 'user')}`;
+}
+
+const ADMIN_AVATAR = getAvatarUrl("admin", ADMIN_AVATAR_STYLE);
+
 // 🧠 State
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
+
+// Update profile button on initial load
+const profileBtn = document.getElementById("profileBtn");
+if (user) {
+  profileBtn.src = user.photoURL || (user.isAdmin ? ADMIN_AVATAR : getAvatarUrl(user.name));
+} else {
+  profileBtn.src = getAvatarUrl("Guest");
+}
+
 let replyToMsg = null;
 let fileToSend = null;
 
-// 🖼️ DOM Elements
+// 🖼️ DOM Elements (only declare once)
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const cameraBtn = document.getElementById("cameraBtn");
@@ -35,7 +54,6 @@ const galleryBtn = document.getElementById("galleryBtn");
 const cameraInput = document.getElementById("cameraInput");
 const galleryInput = document.getElementById("galleryInput");
 const profilePopup = document.getElementById("profilePopup");
-const profileBtn = document.getElementById("profileBtn");
 const nameInput = document.getElementById("name");
 const photoInput = document.getElementById("photo");
 const adminPopup = document.getElementById("adminPopup");
@@ -57,13 +75,13 @@ galleryInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.file
 // 👤 Profile Setup
 document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
 if (!user) profilePopup.style.display = "flex";
-if (user?.photoURL) profileBtn.src = user.photoURL;
 
 profileBtn.onclick = () => profilePopup.style.display = "flex";
 
 document.getElementById("saveProfile").onclick = async () => {
   const name = nameInput.value.trim();
   if (!name) return alert("⚠️ Please enter your name");
+  
   let photoURL = user?.photoURL || "";
   if (photoInput.files[0]) {
     try {
@@ -78,11 +96,13 @@ document.getElementById("saveProfile").onclick = async () => {
       return;
     }
   }
+
   user = { name, photoURL, isAdmin: false };
   localStorage.setItem("chatUser", JSON.stringify(user));
+  
   profilePopup.style.display = "none";
-  profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
-  renderMessages(); // refresh UI
+  profileBtn.src = photoURL || getAvatarUrl(name);
+  renderMessages();
 };
 
 // 🔐 Admin Login
@@ -91,13 +111,13 @@ adminBtn.onclick = () => adminPopup.style.display = "flex";
 
 document.getElementById("adminLoginBtn").onclick = () => {
   if (adminPassInput.value === "sanu0000") {
-    user = { name: "Admin", photoURL: "", isAdmin: true };
+    user = { name: "Admin", photoURL: ADMIN_AVATAR, isAdmin: true };
     localStorage.setItem("chatUser", JSON.stringify(user));
     adminPopup.style.display = "none";
     adminPanel.style.display = "block";
-    profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
+    profileBtn.src = ADMIN_AVATAR;
     alert("✅ Admin login successful!");
-    renderMessages(); // refresh to show delete buttons
+    renderMessages();
   } else {
     alert("❌ Wrong password. Try again.");
   }
@@ -124,12 +144,17 @@ document.getElementById("send").onclick = async () => {
       mediaType = file.type;
       mediaName = file.name;
       fileToSend = null;
-      cameraInput.value = ""; galleryInput.value = "";
+      cameraInput.value = ""; 
+      galleryInput.value = "";
     }
+
+    const userPhoto = user.isAdmin 
+      ? ADMIN_AVATAR 
+      : (user.photoURL || getAvatarUrl(user.name));
 
     const newMsg = {
       user: user.name,
-      photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
+      photo: userPhoto,
       isAdmin: user.isAdmin || false,
       text: text || "",
       mediaUrl,
@@ -230,7 +255,7 @@ window.showMedia = (url, type) => {
   mediaModal.style.display = "flex";
 };
 
-// 🕒 Format timestamp as "11/21/2025, 10:56:08 PM"
+// 🕒 Format timestamp
 function formatTimestamp(ts) {
   if (!ts) return "Just now";
   const d = new Date(ts);
@@ -242,7 +267,7 @@ function formatTimestamp(ts) {
     minute: "2-digit",
     second: "2-digit",
     hour12: true
-  }).replace(",", ",");
+  });
 }
 
 // 🎨 Render Messages
@@ -251,14 +276,13 @@ function renderMessages(data) {
   chatBox.innerHTML = "";
   const messages = data || {};
 
-  // Sort chronologically
   const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
 
   sorted.forEach(([key, msg]) => {
     const div = document.createElement("div");
     div.className = "message";
 
-    // Build replies HTML
+    // Replies
     let repliesHTML = "";
     if (msg.replies && Object.keys(msg.replies).length > 0) {
       repliesHTML = `<div class="replies-section"><strong>Replies:</strong>`;
@@ -268,7 +292,7 @@ function renderMessages(data) {
       repliesHTML += `</div>`;
     }
 
-    // Build media HTML
+    // Media
     let mediaHTML = "";
     if (msg.mediaUrl) {
       if (msg.mediaType?.startsWith("video")) {
@@ -278,9 +302,12 @@ function renderMessages(data) {
       }
     }
 
+    // Fallback avatar if missing
+    const avatar = msg.photo || getAvatarUrl(msg.user);
+
     div.innerHTML = `
       <div class="header">
-        <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}">
+        <img class="profile" src="${avatar}" alt="${msg.user || 'User'}">
         <div>
           <div class="name-line">
             <strong>${msg.user || 'Anonymous'}</strong>
@@ -302,7 +329,6 @@ function renderMessages(data) {
     chatBox.appendChild(div);
   });
 
-  // Auto-scroll to bottom
   setTimeout(() => {
     chatBox.scrollTop = chatBox.scrollHeight;
   }, 100);
@@ -328,5 +354,7 @@ document.getElementById("refreshBtn").onclick = async () => {
   }
 };
 
-// ✅ Initial load
-if (user?.isAdmin) adminPanel.style.display = "block";s
+// ✅ Initial Admin Panel Visibility
+if (user?.isAdmin) {
+  adminPanel.style.display = "block";
+}
