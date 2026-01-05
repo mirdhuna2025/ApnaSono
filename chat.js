@@ -1,4 +1,4 @@
-// chat.js — Modern Firebase Chat (Mirdhuna Chat • Nov 21, 2025)
+// chat.js — Mirdhuna Chat (Clean Version • Jan 5, 2026)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase, ref, push, onValue, update, remove, get
@@ -7,7 +7,6 @@ import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// 🔐 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
   authDomain: "mirdhuna-25542.firebaseapp.com",
@@ -22,16 +21,13 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// 🧠 Avatar Helpers
 function getAvatarUrl(name, style = "thumbs") {
   return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(name || 'user')}`;
 }
 const ADMIN_AVATAR = getAvatarUrl("admin", "bottts-neutral");
 
-// 🧠 State
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 
-// 🖼️ DOM Elements
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const cameraBtn = document.getElementById("cameraBtn");
@@ -53,7 +49,6 @@ const replyText = document.getElementById("replyText");
 const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
 
-// 👤 Set initial profile button
 if (user) {
   profileBtn.src = user.photoURL || (user.isAdmin ? ADMIN_AVATAR : getAvatarUrl(user.name));
 } else {
@@ -63,68 +58,50 @@ if (user) {
 let replyToMsg = null;
 let fileToSend = null;
 
-// 📸 Media Selection (for chat attachments)
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
 cameraInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
 galleryInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
 
-// 🖼️ Profile Photo Upload UI
-if (choosePhotoBtn) {
-  choosePhotoBtn.onclick = () => photoInput.click();
-}
+if (choosePhotoBtn) choosePhotoBtn.onclick = () => photoInput.click();
 
 photoInput.onchange = (e) => {
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = (event) => {
-      photoPreview.innerHTML = `<img src="${event.target.result}" alt="Preview" />`;
-    };
+    reader.onload = ev => photoPreview.innerHTML = `<img src="${ev.target.result}" />`;
     reader.readAsDataURL(file);
-  } else {
-    photoPreview.innerHTML = "";
-  }
+  } else photoPreview.innerHTML = "";
 };
 
-// 👤 Profile Setup
 document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
 if (!user) profilePopup.style.display = "flex";
-
 profileBtn.onclick = () => profilePopup.style.display = "flex";
 
 document.getElementById("saveProfile").onclick = async () => {
   const name = nameInput.value.trim();
   if (!name) return alert("⚠️ Please enter your name");
-
   let photoURL = user?.photoURL || "";
   if (photoInput.files[0]) {
     try {
       const file = photoInput.files[0];
-      const path = `profiles/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
+      const sref = sRef(storage, `profiles/${Date.now()}_${file.name}`);
       await uploadBytes(sref, file);
       photoURL = await getDownloadURL(sref);
     } catch (err) {
-      alert("❌ Failed to upload photo. Try again.");
-      console.error(err);
+      alert("❌ Photo upload failed.");
       return;
     }
   }
-
   user = { name, photoURL, isAdmin: false };
   localStorage.setItem("chatUser", JSON.stringify(user));
-  
-  // Update UI
   profilePopup.style.display = "none";
   profileBtn.src = photoURL || getAvatarUrl(name);
   renderMessages();
 };
 
-// 🔐 Admin Login
 document.getElementById("adminClose")?.onclick = () => adminPopup.style.display = "none";
 adminBtn?.onclick = () => adminPopup.style.display = "flex";
-
 document.getElementById("adminLoginBtn")?.onclick = () => {
   if (adminPassInput.value === "sanu0000") {
     user = { name: "Admin", photoURL: ADMIN_AVATAR, isAdmin: true };
@@ -134,39 +111,27 @@ document.getElementById("adminLoginBtn")?.onclick = () => {
     profileBtn.src = ADMIN_AVATAR;
     alert("✅ Admin login successful!");
     renderMessages();
-  } else {
-    alert("❌ Wrong password. Try again.");
-  }
+  } else alert("❌ Wrong password.");
 };
 
-// ✉️ Send Message
 document.getElementById("send").onclick = async () => {
-  if (!user) {
-    profilePopup.style.display = "flex";
-    return;
-  }
-
+  if (!user) return profilePopup.style.display = "flex";
   const text = msgInput.value.trim();
   if (!text && !fileToSend) return;
-
   try {
     let mediaUrl = "", mediaType = "", mediaName = "";
     if (fileToSend) {
       const file = fileToSend;
-      const path = `uploads/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
+      const sref = sRef(storage, `uploads/${Date.now()}_${file.name}`);
       await uploadBytes(sref, file);
       mediaUrl = await getDownloadURL(sref);
       mediaType = file.type;
       mediaName = file.name;
       fileToSend = null;
-      cameraInput.value = "";
-      galleryInput.value = "";
+      cameraInput.value = ""; galleryInput.value = "";
     }
-
     const userPhoto = user.photoURL || (user.isAdmin ? ADMIN_AVATAR : getAvatarUrl(user.name));
-
-    const newMsg = {
+    await push(ref(db, "messages"), {
       user: user.name,
       photo: userPhoto,
       isAdmin: user.isAdmin || false,
@@ -178,159 +143,88 @@ document.getElementById("send").onclick = async () => {
       replies: {},
       likes: 0,
       dislikes: 0
-    };
-
-    await push(ref(db, "messages"), newMsg);
+    });
     msgInput.value = "";
   } catch (err) {
-    alert("❌ Failed to send message. Check connection.");
-    console.error(err);
+    alert("❌ Message failed.");
   }
 };
 
-// 💬 Reply Handling
 document.getElementById("replyClose")?.onclick = () => {
-  replyPopup.style.display = "none";
-  replyToMsg = null;
+  replyPopup.style.display = "none"; replyToMsg = null;
 };
-
 window.replyMessage = (key) => {
-  replyToMsg = key;
-  replyPopup.style.display = "flex";
-  replyText.value = "";
-  replyText.focus();
+  replyToMsg = key; replyPopup.style.display = "flex"; replyText.value = ""; replyText.focus();
 };
-
 document.getElementById("sendReply")?.onclick = async () => {
   if (!replyText.value.trim() || !replyToMsg) return;
-  try {
-    const replyRef = ref(db, `messages/${replyToMsg}/replies`);
-    await push(replyRef, {
-      user: user.name,
-      text: replyText.value.trim(),
-      timestamp: Date.now()
-    });
-    replyPopup.style.display = "none";
-    replyToMsg = null;
-  } catch (err) {
-    alert("❌ Failed to send reply.");
-    console.error(err);
-  }
+  await push(ref(db, `messages/${replyToMsg}/replies`), {
+    user: user.name, text: replyText.value.trim(), timestamp: Date.now()
+  });
+  replyPopup.style.display = "none"; replyToMsg = null;
 };
 
-// 👍👎 Reactions
 window.likeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { likes: (val.likes || 0) + 1 });
-  } catch (err) { console.error(err); }
+  const snap = await get(ref(db, `messages/${key}`));
+  if (snap.exists()) await update(ref(db, `messages/${key}`), { likes: (snap.val().likes || 0) + 1 });
 };
-
 window.dislikeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { dislikes: (val.dislikes || 0) + 1 });
-  } catch (err) { console.error(err); }
+  const snap = await get(ref(db, `messages/${key}`));
+  if (snap.exists()) await update(ref(db, `messages/${key}`), { dislikes: (snap.val().dislikes || 0) + 1 });
 };
 
-// 🗑️ Delete (Admin only)
 window.deleteMessage = async (key) => {
-  if (!user?.isAdmin) return alert("🔒 Only admins can delete messages.");
-  if (!confirm("⚠️ Are you sure you want to delete this message?")) return;
-  try {
-    await remove(ref(db, `messages/${key}`));
-  } catch (err) {
-    alert("❌ Delete failed.");
-    console.error(err);
-  }
+  if (!user?.isAdmin) return alert("🔒 Admin only.");
+  if (confirm("⚠️ Delete this message?")) await remove(ref(db, `messages/${key}`));
 };
 
-// 🖼️ Media Modal
 document.getElementById("mediaClose")?.onclick = () => {
-  mediaModal.style.display = "none";
-  mediaContent.innerHTML = "";
+  mediaModal.style.display = "none"; mediaContent.innerHTML = "";
 };
-
 window.showMedia = (url, type) => {
-  mediaContent.innerHTML = "";
-  if (type?.startsWith("image")) {
-    mediaContent.innerHTML = `<img src="${url}" alt="Shared media" />`;
-  } else if (type?.startsWith("video")) {
-    mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
-  } else {
-    mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
-  }
+  mediaContent.innerHTML = type?.startsWith("image")
+    ? `<img src="${url}" />`
+    : type?.startsWith("video")
+    ? `<video src="${url}" controls autoplay playsinline></video>`
+    : `<p style="color:white">Unsupported</p>`;
   mediaModal.style.display = "flex";
 };
 
-// 🕒 Format timestamp
 function formatTimestamp(ts) {
-  if (!ts) return "Just now";
-  return new Date(ts).toLocaleString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  });
+  return ts ? new Date(ts).toLocaleString("en-US", {
+    month: "2-digit", day: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+  }) : "Just now";
 }
 
-// 🎨 Render Messages
 function renderMessages(data) {
   if (!chatBox) return;
   chatBox.innerHTML = "";
   const messages = data || {};
-
   const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
-
   sorted.forEach(([key, msg]) => {
+    const avatar = msg.photo || getAvatarUrl(msg.user);
+    const repliesHTML = msg.replies ? Object.values(msg.replies).map(r =>
+      `<div class="reply-inline"><strong>${r.user}</strong>: ${r.text}</div>`
+    ).join("") : "";
+    const mediaHTML = msg.mediaUrl ? (
+      msg.mediaType?.startsWith("video")
+        ? `<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')"></video>`
+        : `<img class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', 'image')"/>`
+    ) : "";
     const div = document.createElement("div");
     div.className = "message";
-
-    // Replies
-    let repliesHTML = "";
-    if (msg.replies && Object.keys(msg.replies).length > 0) {
-      repliesHTML = `<div class="replies-section"><strong>Replies:</strong>`;
-      Object.values(msg.replies).forEach(r => {
-        repliesHTML += `<div class="reply-inline"><strong>${r.user}</strong>: ${r.text}</div>`;
-      });
-      repliesHTML += `</div>`;
-    }
-
-    // Media
-    let mediaHTML = "";
-    if (msg.mediaUrl) {
-      if (msg.mediaType?.startsWith("video")) {
-        mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')"></video>`;
-      } else {
-        mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')"/>`;
-      }
-    }
-
-    const avatar = msg.photo || getAvatarUrl(msg.user);
-
     div.innerHTML = `
       <div class="header">
         <img class="profile" src="${avatar}" alt="${msg.user || 'User'}">
         <div>
-          <div class="name-line">
-            <strong>${msg.user || 'Anonymous'}</strong>
-            ${msg.isAdmin ? '<span class="admin-tag">Admin</span>' : ''}
-          </div>
+          <div class="name-line"><strong>${msg.user || 'Anonymous'}</strong>${msg.isAdmin ? '<span class="admin-tag">Admin</span>' : ''}</div>
           <div class="meta">${formatTimestamp(msg.timestamp)}</div>
         </div>
       </div>
       ${msg.text ? `<div class="content">${msg.text}</div>` : ''}
       ${mediaHTML}
-      ${repliesHTML}
+      ${repliesHTML ? `<div class="replies-section"><strong>Replies:</strong>${repliesHTML}</div>` : ''}
       <div class="actions">
         <button class="reply-btn" onclick="replyMessage('${key}')">💬 Reply</button>
         <button class="like-btn" onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
@@ -340,31 +234,22 @@ function renderMessages(data) {
     `;
     chatBox.appendChild(div);
   });
-
-  setTimeout(() => {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }, 100);
+  setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
 }
 
-// 🔄 Real-time listener
-onValue(ref(db, "messages"), (snapshot) => {
-  renderMessages(snapshot.val());
-}, (error) => {
-  console.error("Firebase sync error:", error);
-  alert("⚠️ Connection issue. Try refreshing.");
+onValue(ref(db, "messages"), snap => renderMessages(snap.val()), err => {
+  console.error("Firebase error:", err);
+  alert("⚠️ Connection issue.");
 });
 
-// ♻️ Manual Refresh
 document.getElementById("refreshBtn")?.onclick = async () => {
   try {
-    const snapshot = await get(ref(db, "messages"));
-    renderMessages(snapshot.val());
-    alert("✅ Chat refreshed!");
-  } catch (err) {
-    alert("❌ Refresh failed. Check internet.");
-    console.error(err);
+    const snap = await get(ref(db, "messages"));
+    renderMessages(snap.val());
+    alert("✅ Refreshed!");
+  } catch (e) {
+    alert("❌ Refresh failed.");
   }
 };
 
-// ✅ Initial Admin Panel Visibility
 if (user?.isAdmin) adminPanel.style.display = "block";
