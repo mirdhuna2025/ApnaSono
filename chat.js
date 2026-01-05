@@ -264,7 +264,7 @@ window.showMedia = (url, type) => {
   } else if (type?.startsWith("video")) {
     mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
   } else {
-    mediaContent.innerHTML = `<p style="color:white">Unsupported media</p>`;
+    mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
   }
   mediaModal.style.display = "flex";
 };
