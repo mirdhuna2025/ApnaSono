@@ -3,62 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mirdhuna</title>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #FFFFE0; }
-    div { width: 100%; }
-  </style>
+  <title>Apna Sono - Premium Marketplace</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Header Section -->
+  <header class="header" id="header"></header>
 
- 
-  <div data-html="headerlogo.html"></div>
-  <div data-html="weather.html"></div>
-  <div data-html="slider.html"></div>
-  <div data-html="offer.html"></div>
-   
-    <div data-html="stickybar.html"></div>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar"></nav>
 
- 
+  <!-- Main Content -->
+  <main class="main-content">
+    <section id="home-section" class="section active">
+      <div class="hero">
+        <h1 class="hero-title">Apna Sono</h1>
+        <p class="hero-subtitle">Local Marketplace. Premium Experience.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="navigateToSection('chat')">Chat Now</button>
+          <button class="btn btn-secondary" onclick="navigateToSection('sell')">Start Selling</button>
+        </div>
+      </div>
+    </section>
 
+    <section id="chat-section" class="section">
+      <div id="chat-container"></div>
+    </section>
 
+    <section id="sell-section" class="section">
+      <div id="sell-container"></div>
+    </section>
 
+    <section id="news-section" class="section">
+      <div id="news-container"></div>
+    </section>
+  </main>
 
-  <script>
-    async function loadSection(div){
-      const file = div.getAttribute('data-html');
-      try{
-        const res = await fetch(file);
-        if(!res.ok) throw new Error(`Cannot load ${file}`);
-        const text = await res.text();
+  <!-- Footer -->
+  <footer class="footer" id="footer"></footer>
 
-        const temp = document.createElement('div');
-        temp.innerHTML = text;
+  <!-- Hidden file inputs -->
+  <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-        // Append style tags to head
-        temp.querySelectorAll('style').forEach(s => document.head.appendChild(s));
-
-        // Insert HTML without styles
-        div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
-
-        // Append JS file if exists
-        const jsFile = file.replace('.html', '.js');
-        fetch(jsFile).then(r=>{
-          if(r.ok){
-            const script = document.createElement('script');
-            script.type = 'module';  // Important for Firebase
-            script.src = jsFile;
-            document.body.appendChild(script);
-          }
-        }).catch(()=>{});
-
-      } catch(e){
-        console.error(e);
-      }
-    }
-
-    document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
-  </script>
-
+  <script src="app.js"></script>
 </body>
 </html>
+
