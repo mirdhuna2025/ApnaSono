@@ -1,4 +1,6 @@
 // ========== FIREBASE CONFIGURATION ==========
+console.log("chat.js loaded successfully");
+
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
   authDomain: "instantchat-f8b1e.firebaseapp.com",
