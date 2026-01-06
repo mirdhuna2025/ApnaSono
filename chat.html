@@ -3,22 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mirdhuna Chat • Nov 21, 2025</title>
+  <title>InstantChat - Modern Messaging</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ========== GLOBAL ========== */
+    /* ========== DESIGN TOKENS & COLORS ========== */
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #8b5cf6;
-      --accent: #ec4899;
-      --bg-gradient: linear-gradient(135deg, #f0f9ff, #e0e7ff);
-      --card-bg: rgba(255, 255, 255, 0.85);
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.12);
-      --border-radius: 20px;
+      --primary: #0095f6;
+      --primary-dark: #0085d6;
+      --secondary: #f02e55;
+      --accent: #405de6;
+      --success: #31a24c;
+      --warning: #ffa500;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --bg-tertiary: #efefef;
+      --text-primary: #262626;
+      --text-secondary: #65676b;
+      --text-tertiary: #a8aaad;
+      --border-color: #dbdbdb;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 50%;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -26,591 +37,815 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: 'Inter', sans-serif;
+    html, body {
       margin: 0;
-      background: var(--bg-gradient);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      color: #1e293b;
+      padding: 0;
+      height: 100%;
+      width: 100%;
     }
 
-    /* ========== HEADER ========== */
+    body {
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* ========== HEADER/NAVBAR ========== */
     header {
       position: sticky;
       top: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 16px;
-      background: linear-gradient(90deg, #8b5cf6, #ec4899);
-      color: white;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
       z-index: 100;
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      height: 56px;
     }
 
-    #chatTitle {
-      font-weight: 700;
-      font-size: 18px;
-      text-align: center;
-      flex: 1;
-      letter-spacing: -0.5px;
-    }
-
-    .header-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      padding: 8px 14px;
-      border-radius: 14px;
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header-btn:hover {
-      background: rgba(255, 255, 255, 0.35);
-      transform: translateY(-1px);
-    }
-
-    #profileBtn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    #profileBtn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-    }
-
-    /* ========== CHAT CONTAINER ========== */
-    .chat-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px;
-      padding-bottom: 80px;
-    }
-
-    /* ========== MESSAGE ========== */
-    .message {
-      background: var(--card-bg);
-      padding: 18px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.6);
-      position: relative;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message .header {
+    .header-left {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 10px;
+      flex: 1;
     }
 
-    .message img.profile {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-      flex-shrink: 0;
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
     }
 
-    .name-line {
+    .header-right {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #1e293b;
     }
 
-    .admin-tag {
-      background: var(--accent);
-      color: white;
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: #64748b;
-      font-weight: 500;
-    }
-
-    .content {
-      font-size: 15px;
-      margin: 8px 0;
-      color: #334155;
-      word-break: break-word;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .media-content {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 16px;
-      margin: 10px 0;
-      cursor: pointer;
-      transition: var(--transition);
-      object-fit: cover;
-      border: 1px solid #e2e8f0;
-    }
-
-    .media-content:hover {
-      transform: scale(1.01);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    .replies-section {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed #cbd5e1;
-    }
-
-    .reply-inline {
-      background: #f1f5f9;
-      padding: 8px 12px;
-      border-radius: 14px;
-      font-size: 14px;
-      margin-top: 6px;
-      color: #475569;
-    }
-
-    .reply-inline strong {
-      color: var(--primary-dark);
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .actions button {
-      flex: 1;
-      min-width: 60px;
-      padding: 8px 12px;
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
       border: none;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 18px;
       cursor: pointer;
-      transition: var(--transition);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: var(--transition);
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .profile-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--border-color);
+      object-fit: cover;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .profile-btn:hover {
+      border-color: var(--primary);
+    }
+
+    /* ========== MAIN CONTAINER ========== */
+    .chat-wrapper {
+      display: flex;
+      height: calc(100vh - 56px);
+      flex-direction: column;
+    }
+
+    /* ========== CHAT BOX ========== */
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+
+    /* ========== MESSAGES ========== */
+    .message-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      object-fit: cover;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .message-username {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .message-time {
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+
+    .admin-badge {
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .message-text {
+      background: var(--bg-tertiary);
+      padding: 10px 14px;
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      word-break: break-word;
+      max-width: 320px;
+      line-height: 1.4;
+    }
+
+    .message-media {
+      border-radius: var(--radius-lg);
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid var(--border-color);
+    }
+
+    .message-media:hover {
+      opacity: 0.95;
+      box-shadow: var(--shadow-md);
+    }
+
+    .message-video {
+      width: 100%;
+      max-width: 300px;
+      border-radius: var(--radius-lg);
+      background: #000;
+      cursor: pointer;
+    }
+
+    .video-play-overlay {
+      position: relative;
+      display: inline-block;
+    }
+
+    .video-play-overlay::after {
+      content: '▶';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 32px;
+      opacity: 0.8;
+    }
+
+    .message-replies {
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .reply-item {
+      padding: 4px 0;
+      display: flex;
+      gap: 6px;
+    }
+
+    .reply-username {
+      font-weight: 600;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .reply-text {
+      color: var(--text-secondary);
+      flex: 1;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
       gap: 4px;
     }
 
-    .reply-btn { background: #dbeafe; color: #1d4ed8; }
-    .like-btn { background: #dcfce7; color: #16a34a; }
-    .dislike-btn { background: #fee2e2; color: #dc2626; }
-    .delete-btn { background: #fde8ff; color: #c026d3; }
+    .action-btn-reply {
+      background: #e0f2ff;
+      color: var(--primary);
+    }
 
-    .actions button:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
+    .action-btn-like {
+      background: #ffe0e6;
+      color: var(--secondary);
+    }
+
+    .action-btn-dislike {
+      background: #ffe0e0;
+      color: #d93c5e;
+    }
+
+    .action-btn-delete {
+      background: #f0e6ff;
+      color: var(--accent);
+    }
+
+    .action-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .counter-badge {
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
     }
 
     /* ========== COMPOSER ========== */
     .composer {
-      position: sticky;
-      bottom: 0;
       display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px;
-      background: white;
-      border-top: 1px solid #e2e8f0;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-      z-index: 500;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      z-index: 50;
+    }
+
+    .media-controls {
+      display: flex;
+      gap: 6px;
     }
 
     .media-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #f1f5f9;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
       border: none;
-      font-size: 20px;
+      background: var(--bg-secondary);
+      color: var(--primary);
+      font-size: 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: var(--transition);
+      flex-shrink: 0;
     }
 
     .media-btn:hover {
-      background: #e2e8f0;
-      transform: scale(1.1);
+      background: var(--bg-tertiary);
+      transform: scale(1.05);
     }
 
-    #msg {
+    .media-btn:active {
+      background: var(--border-color);
+    }
+
+    #msgInput {
       flex: 1;
-      padding: 14px 18px;
-      border-radius: 24px;
-      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       outline: none;
-      font-size: 15px;
-      background: #f8fafc;
+      font-size: 14px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: inherit;
+      resize: none;
+      max-height: 100px;
       transition: var(--transition);
     }
 
-    #msg:focus {
+    #msgInput:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.1);
     }
 
-    #send {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
+    #msgInput::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .send-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      border: none;
       background: var(--primary);
       color: white;
-      border: none;
-      font-size: 20px;
+      font-size: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: var(--transition);
+      flex-shrink: 0;
     }
 
-    #send:hover {
+    .send-btn:hover {
       background: var(--primary-dark);
-      transform: scale(1.08);
+      transform: scale(1.05);
     }
 
-    /* ========== POPUPS ========== */
-    .popup {
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ========== MODALS & POPUPS ========== */
+    .modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.4);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
 
-    .popup-content {
-      background: white;
-      padding: 28px;
-      border-radius: 24px;
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-primary);
+      padding: 24px;
+      border-radius: var(--radius-lg);
       width: 92%;
-      max-width: 400px;
-      text-align: center;
+      max-width: 380px;
       position: relative;
-      box-shadow: var(--shadow-md);
-      animation: popIn 0.3s ease-out;
+      box-shadow: var(--shadow-lg);
+      animation: modalSlideIn 0.3s ease-out;
     }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
 
-    .closeBtn {
-      position: absolute;
-      top: 16px;
-      right: 18px;
-      cursor: pointer;
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
       font-size: 24px;
-      font-weight: bold;
-      color: #94a3b8;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: var(--transition);
     }
 
-    .closeBtn:hover {
-      color: #ef4444;
+    .modal-close:hover {
+      color: var(--text-primary);
       transform: rotate(90deg);
     }
 
-    .popup-content h3 {
-      margin: 0 0 20px;
-      color: #1e293b;
-      font-weight: 700;
+    .form-group {
+      margin-bottom: 14px;
     }
 
-    .popup-content input[type="text"],
-    .popup-content input[type="password"] {
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
       width: 100%;
-      padding: 14px;
-      margin-bottom: 16px;
-      border-radius: 14px;
-      border: 1px solid #cbd5e1;
-      font-size: 15px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: inherit;
       outline: none;
+      transition: var(--transition);
     }
 
-    .popup-content input:focus {
+    .form-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.1);
     }
 
-    .popup-content button {
+    .form-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .profile-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--border-color);
+      object-fit: cover;
+      margin: 12px auto;
+    }
+
+    .form-btn {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       border: none;
-      border-radius: 14px;
+      border-radius: var(--radius-md);
       background: var(--primary);
       color: white;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       transition: var(--transition);
+      margin-top: 8px;
     }
 
-    .popup-content button:hover {
+    .form-btn:hover {
       background: var(--primary-dark);
     }
 
-    /* Profile Photo Section */
-    .profile-photo-section {
-      margin: 16px 0;
+    .form-btn:active {
+      transform: scale(0.98);
     }
 
-    .profile-photo-section label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: #475569;
-    }
-
-    #choosePhotoBtn {
-      background: #f1f5f9;
-      color: #334155;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #cbd5e1;
-      cursor: pointer;
-      font-weight: 500;
-      width: 100%;
-      margin-bottom: 12px;
-      transition: var(--transition);
-    }
-
-    #choosePhotoBtn:hover {
-      background: #e2e8f0;
-    }
-
-    .photo-preview {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin: 0 auto;
-      border: 2px solid #e2e8f0;
-    }
-
-    .photo-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* ========== MEDIA MODAL ========== */
-    .media-modal {
+    /* ========== MEDIA VIEWER ========== */
+    .media-viewer {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(0, 0, 0, 0.95);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 2000;
-      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease-out;
     }
 
-    .media-modal .closeBtn {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      font-size: 36px;
-      color: white;
-      cursor: pointer;
-      z-index: 2001;
+    .media-viewer.active {
+      display: flex;
     }
 
-    .media-modal img,
-    .media-modal video {
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .media-viewer-container {
+      position: relative;
       max-width: 95%;
+      max-height: 95%;
+    }
+
+    .media-viewer img,
+    .media-viewer video {
+      max-width: 100%;
       max-height: 85vh;
-      border-radius: 18px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
       object-fit: contain;
+      border-radius: var(--radius-md);
     }
 
-    /* ========== ADMIN PANEL ========== */
-    #adminPanel {
-      position: fixed;
-      top: 70px;
-      right: 12px;
-      width: 360px;
-      max-height: 480px;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      display: none;
-      z-index: 300;
-      box-shadow: var(--shadow-md);
-      border: 1px solid #e2e8f0;
+    .media-viewer-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: white;
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
     }
 
-    #adminPanel h4 {
-      margin: 0 0 16px;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 18px;
+    .media-viewer-close:hover {
+      background: rgba(0, 0, 0, 0.7);
     }
 
-    /* Hidden file inputs */
-    #cameraInput,
-    #galleryInput,
-    #photo {
+    /* ========== HIDDEN INPUTS ========== */
+    input[type="file"] {
       display: none;
     }
 
-    /* ========== MOBILE OPTIMIZATION ========== */
+    /* ========== WELCOME SCREEN ========== */
+    .welcome-placeholder {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-tertiary);
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .welcome-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .welcome-text {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* ========== MOBILE RESPONSIVE ========== */
     @media (max-width: 768px) {
-      .composer {
+      header {
+        padding: 10px 12px;
+        height: 52px;
+      }
+
+      .header-title {
+        font-size: 16px;
+      }
+
+      .chat-box {
         padding: 12px;
+        gap: 10px;
       }
-      #msg {
-        padding: 12px 16px;
-        font-size: 14px;
+
+      .message-text {
+        max-width: 240px;
       }
-      .message {
-        padding: 16px;
+
+      .message-media {
+        max-height: 250px;
       }
-      .header-btn {
-        padding: 6px 10px;
-        font-size: 13px;
-      }
-      .meta {
-        font-size: 11px;
-      }
-      .popup-content {
+
+      .modal-content {
+        max-width: 90%;
         padding: 20px;
+      }
+
+      .composer {
+        padding: 10px 12px;
+        gap: 6px;
+      }
+
+      #msgInput {
+        font-size: 13px;
+        padding: 9px 12px;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .chat-box {
+        padding: 10px;
+      }
+
+      .composer {
+        padding: 8px 12px;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <button id="adminBtn" class="header-btn">🔐 Admin</button>
-    <div id="chatTitle">Mirdhuna Chat <button id="refreshBtn" class="header-btn">🔄 Refresh</button></div>
-    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
+    <div class="header-left">
+      <h1 class="header-title">InstantChat</h1>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="adminBtn" title="Admin">🔐</button>
+      <button class="icon-btn" id="usersBtn" title="Users">👥</button>
+      <button class="icon-btn" id="refreshBtn" title="Refresh">🔄</button>
+      <img id="profileBtn" class="profile-btn" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" alt="Profile" title="Profile Settings" />
+    </div>
   </header>
 
-  <div class="chat-container">
+  <div class="chat-wrapper">
     <div class="chat-box" id="chatBox">
-      <div class="message" style="text-align:center; opacity:0.7">
-        <div class="content">💬 Welcome to Mirdhuna Chat — Nov 21, 2025</div>
+      <div class="welcome-placeholder">
+        <div class="welcome-icon">💬</div>
+        <div class="welcome-text">InstantChat - Modern Messaging<br><span style="font-size: 12px; color: var(--text-tertiary);">Set your profile to get started</span></div>
       </div>
     </div>
 
     <div class="composer">
-      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
-      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
-      <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
-      <input id="galleryInput" type="file" accept="image/*,video/*">
-      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
-      <button id="send" title="Send message">➤</button>
-    </div>
-  </div>
-
-  <!-- Reply Popup -->
-  <div class="popup" id="replyPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="replyClose">×</span>
-      <h3>💬 Reply to Message</h3>
-      <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
-      <button id="sendReply">Send Reply</button>
-    </div>
-  </div>
-
-  <!-- Profile Setup -->
-  <div class="popup" id="profilePopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="profileClose">×</span>
-      <h3>👋 Set Your Profile</h3>
-      <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
-      
-      <!-- Profile Photo Upload UI -->
-      <div class="profile-photo-section">
-        <label for="choosePhotoBtn">Profile Picture (optional):</label>
-        <input type="file" id="photo" accept="image/*" />
-        <button type="button" id="choosePhotoBtn">📸 Choose Photo</button>
-        <div id="photoPreview" class="photo-preview"></div>
+      <div class="media-controls">
+        <button class="media-btn" id="cameraBtn" title="Take Photo">📷</button>
+        <button class="media-btn" id="galleryBtn" title="Upload Media">🖼️</button>
       </div>
-
-      <button id="saveProfile">✓ Save Profile</button>
+      <input id="msgInput" type="text" placeholder="Message…" maxlength="500" />
+      <button class="send-btn" id="sendBtn" title="Send">➤</button>
+      <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment" />
+      <input id="galleryInput" type="file" accept="image/*,video/*" />
+      <input id="profilePhotoInput" type="file" accept="image/*" />
     </div>
   </div>
 
-  <!-- Admin Login -->
-  <div class="popup" id="adminPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="adminClose">×</span>
-      <h3>🔐 Admin Access</h3>
-      <input id="adminPass" type="password" placeholder="Enter admin password" />
-      <button id="adminLoginBtn">🔓 Login</button>
+  <!-- Profile Modal -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Profile Setup</h2>
+        <button class="modal-close" data-modal="profileModal">×</button>
+      </div>
+      <img id="profilePreview" class="profile-preview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" alt="Profile" />
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input id="nameInput" class="form-input" type="text" placeholder="Your name" maxlength="30" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bio</label>
+        <input id="bioInput" class="form-input" type="text" placeholder="Add a bio (optional)" maxlength="100" />
+      </div>
+      <button class="form-btn" id="uploadPhotoBtn">📷 Change Photo</button>
+      <button class="form-btn" id="saveProfileBtn">✓ Save Profile</button>
     </div>
   </div>
 
-  <!-- Admin Panel -->
-  <div id="adminPanel">
-    <h4>🛡️ Admin Dashboard</h4>
-    <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
+  <!-- Admin Modal -->
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Admin Access</h2>
+        <button class="modal-close" data-modal="adminModal">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="adminPassword" class="form-input" type="password" placeholder="Enter admin password" />
+      </div>
+      <button class="form-btn" id="adminLoginBtn">🔓 Login</button>
+    </div>
+  </div>
+
+  <!-- Reply Modal -->
+  <div class="modal" id="replyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Reply to Message</h2>
+        <button class="modal-close" data-modal="replyModal">×</button>
+      </div>
+      <div class="form-group">
+        <input id="replyInput" class="form-input" type="text" placeholder="Type your reply…" maxlength="300" />
+      </div>
+      <button class="form-btn" id="sendReplyBtn">Send Reply</button>
+    </div>
+  </div>
+
+  <!-- User Profiles View -->
+  <div class="modal" id="usersModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Active Users</h2>
+        <button class="modal-close" data-modal="usersModal">×</button>
+      </div>
+      <div id="usersList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+        <div style="text-align: center; color: var(--text-tertiary); padding: 20px;">Loading users...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Card Modal -->
+  <div class="modal" id="userProfileModal">
+    <div class="modal-content" style="text-align: center;">
+      <div class="modal-header">
+        <h2 class="modal-title">User Profile</h2>
+        <button class="modal-close" data-modal="userProfileModal">×</button>
+      </div>
+      <img id="userProfilePhoto" class="profile-preview" src="/placeholder.svg" alt="User" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary);" />
+      <h3 id="userProfileName" style="margin: 16px 0 4px; color: var(--text-primary);">Username</h3>
+      <p id="userProfileBio" style="color: var(--text-secondary); font-size: 14px; margin: 0 0 16px;">Bio information</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; padding: 16px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary);" id="userMessageCount">0</div>
+          <div style="font-size: 12px; color: var(--text-tertiary);">Messages</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary);" id="userLikeCount">0</div>
+          <div style="font-size: 12px; color: var(--text-tertiary);">Likes</div>
+        </div>
+      </div>
+      <button class="form-btn" id="closeProfileCardBtn" style="margin-top: 12px;">Close</button>
+    </div>
   </div>
 
   <!-- Media Viewer -->
-  <div class="media-modal" id="mediaModal">
-    <span class="closeBtn" id="mediaClose">×</span>
-    <div id="mediaContent"></div>
+  <div class="media-viewer" id="mediaViewer">
+    <div class="media-viewer-container">
+      <button class="media-viewer-close">×</button>
+      <div id="mediaViewerContent"></div>
+    </div>
   </div>
 
-  <script type="module" src="chat.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
+
