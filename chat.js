@@ -1,332 +1,631 @@
-// chat.js — Modern Firebase Chat (Mirdhuna Chat • Nov 21, 2025)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase, ref, push, onValue, update, remove, get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import {
-  getStorage, ref as sRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-// 🔐 Firebase Config (Same as yours)
+// ========== FIREBASE CONFIGURATION ==========
 const firebaseConfig = {
-  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain: "mirdhuna-25542.firebaseapp.com",
-  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-  projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.appspot.com",
-  messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
-
-// 🧠 State
-let user = JSON.parse(localStorage.getItem("chatUser")) || null;
-let replyToMsg = null;
-let fileToSend = null;
-
-// 🖼️ DOM Elements
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msg");
-const cameraBtn = document.getElementById("cameraBtn");
-const galleryBtn = document.getElementById("galleryBtn");
-const cameraInput = document.getElementById("cameraInput");
-const galleryInput = document.getElementById("galleryInput");
-const profilePopup = document.getElementById("profilePopup");
-const profileBtn = document.getElementById("profileBtn");
-const nameInput = document.getElementById("name");
-const photoInput = document.getElementById("photo");
-const adminPopup = document.getElementById("adminPopup");
-const adminBtn = document.getElementById("adminBtn");
-const adminPassInput = document.getElementById("adminPass");
-const adminPanel = document.getElementById("adminPanel");
-const replyPopup = document.getElementById("replyPopup");
-const replyText = document.getElementById("replyText");
-const mediaModal = document.getElementById("mediaModal");
-const mediaContent = document.getElementById("mediaContent");
-
-// 📸 Media Selection
-cameraBtn.onclick = () => cameraInput.click();
-galleryBtn.onclick = () => galleryInput.click();
-
-cameraInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
-galleryInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
-
-// 👤 Profile Setup
-document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
-if (!user) profilePopup.style.display = "flex";
-if (user?.photoURL) profileBtn.src = user.photoURL;
-
-profileBtn.onclick = () => profilePopup.style.display = "flex";
-
-document.getElementById("saveProfile").onclick = async () => {
-  const name = nameInput.value.trim();
-  if (!name) return alert("⚠️ Please enter your name");
-  let photoURL = user?.photoURL || "";
-  if (photoInput.files[0]) {
-    try {
-      const file = photoInput.files[0];
-      const path = `profiles/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
-      await uploadBytes(sref, file);
-      photoURL = await getDownloadURL(sref);
-    } catch (err) {
-      alert("❌ Failed to upload photo. Try again.");
-      console.error(err);
-      return;
-    }
-  }
-  user = { name, photoURL, isAdmin: false };
-  localStorage.setItem("chatUser", JSON.stringify(user));
-  profilePopup.style.display = "none";
-  profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
-  renderMessages(); // refresh UI
-};
-
-// 🔐 Admin Login
-document.getElementById("adminClose").onclick = () => adminPopup.style.display = "none";
-adminBtn.onclick = () => adminPopup.style.display = "flex";
-
-document.getElementById("adminLoginBtn").onclick = () => {
-  if (adminPassInput.value === "sanu0000") {
-    user = { name: "Admin", photoURL: "", isAdmin: true };
-    localStorage.setItem("chatUser", JSON.stringify(user));
-    adminPopup.style.display = "none";
-    adminPanel.style.display = "block";
-    profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
-    alert("✅ Admin login successful!");
-    renderMessages(); // refresh to show delete buttons
-  } else {
-    alert("❌ Wrong password. Try again.");
-  }
-};
-
-// ✉️ Send Message
-document.getElementById("send").onclick = async () => {
-  if (!user) {
-    profilePopup.style.display = "flex";
-    return;
-  }
-
-  const text = msgInput.value.trim();
-  if (!text && !fileToSend) return;
-
-  try {
-    let mediaUrl = "", mediaType = "", mediaName = "";
-    if (fileToSend) {
-      const file = fileToSend;
-      const path = `uploads/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
-      await uploadBytes(sref, file);
-      mediaUrl = await getDownloadURL(sref);
-      mediaType = file.type;
-      mediaName = file.name;
-      fileToSend = null;
-      cameraInput.value = ""; galleryInput.value = "";
-    }
-
-    const newMsg = {
-      user: user.name,
-      photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
-      isAdmin: user.isAdmin || false,
-      text: text || "",
-      mediaUrl,
-      mediaType,
-      mediaName,
-      timestamp: Date.now(),
-      replies: {},
-      likes: 0,
-      dislikes: 0
-    };
-
-    await push(ref(db, "messages"), newMsg);
-    msgInput.value = "";
-  } catch (err) {
-    alert("❌ Failed to send message. Check connection.");
-    console.error(err);
-  }
-};
-
-// 💬 Reply Handling
-document.getElementById("replyClose").onclick = () => {
-  replyPopup.style.display = "none";
-  replyToMsg = null;
-};
-
-window.replyMessage = (key) => {
-  replyToMsg = key;
-  replyPopup.style.display = "flex";
-  replyText.value = "";
-  replyText.focus();
-};
-
-document.getElementById("sendReply").onclick = async () => {
-  if (!replyText.value.trim() || !replyToMsg) return;
-  try {
-    const replyRef = ref(db, `messages/${replyToMsg}/replies`);
-    await push(replyRef, {
-      user: user.name,
-      text: replyText.value.trim(),
-      timestamp: Date.now()
-    });
-    replyPopup.style.display = "none";
-    replyToMsg = null;
-  } catch (err) {
-    alert("❌ Failed to send reply.");
-    console.error(err);
-  }
-};
-
-// 👍👎 Reactions
-window.likeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { likes: (val.likes || 0) + 1 });
-  } catch (err) { console.error(err); }
-};
-
-window.dislikeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { dislikes: (val.dislikes || 0) + 1 });
-  } catch (err) { console.error(err); }
-};
-
-// 🗑️ Delete (Admin only)
-window.deleteMessage = async (key) => {
-  if (!user?.isAdmin) return alert("🔒 Only admins can delete messages.");
-  if (!confirm("⚠️ Are you sure you want to delete this message? This cannot be undone.")) return;
-  try {
-    await remove(ref(db, `messages/${key}`));
-  } catch (err) {
-    alert("❌ Delete failed.");
-    console.error(err);
-  }
-};
-
-// 🖼️ Media Modal
-document.getElementById("mediaClose").onclick = () => {
-  mediaModal.style.display = "none";
-  mediaContent.innerHTML = "";
-};
-
-window.showMedia = (url, type) => {
-  mediaContent.innerHTML = "";
-  if (type?.startsWith("image")) {
-    mediaContent.innerHTML = `<img src="${url}" alt="Shared media" />`;
-  } else if (type?.startsWith("video")) {
-    mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
-  } else {
-    mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
-  }
-  mediaModal.style.display = "flex";
-};
-
-// 🕒 Format timestamp as "11/21/2025, 10:56:08 PM"
-function formatTimestamp(ts) {
-  if (!ts) return "Just now";
-  const d = new Date(ts);
-  return d.toLocaleString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  }).replace(",", ",");
+  apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
+  authDomain: "instantchat-f8b1e.firebaseapp.com",
+  projectId: "instantchat-f8b1e",
+  storageBucket: "instantchat-f8b1e.appspot.com",
+  messagingSenderId: "702833571971",
+  appId: "1:702833571971:web:3b4f9c1d4e8f2a5b6c",
 }
 
-// 🎨 Render Messages
-function renderMessages(data) {
-  if (!chatBox) return;
-  chatBox.innerHTML = "";
-  const messages = data || {};
+// Initialize Firebase (simple mock for standalone HTML/JS)
+const db = {
+  messages: [],
+  users: {},
+}
 
-  // Sort chronologically
-  const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
+// ========== STATE MANAGEMENT ==========
+let currentUser = null
+let isAdmin = false
+let replyingToMsgId = null
+let allMessages = []
+const videoAutoplayEnabled = true
 
-  sorted.forEach(([key, msg]) => {
-    const div = document.createElement("div");
-    div.className = "message";
+// ========== INITIALIZATION ==========
+document.addEventListener("DOMContentLoaded", () => {
+  initializeApp()
+  setupEventListeners()
+  loadUserProfile()
+  loadMessages()
+  startAutoRefresh()
+})
 
-    // Build replies HTML
-    let repliesHTML = "";
-    if (msg.replies && Object.keys(msg.replies).length > 0) {
-      repliesHTML = `<div class="replies-section"><strong>Replies:</strong>`;
-      Object.values(msg.replies).forEach(r => {
-        repliesHTML += `<div class="reply-inline"><strong>${r.user}</strong>: ${r.text}</div>`;
-      });
-      repliesHTML += `</div>`;
+function initializeApp() {
+  // Request notification permission
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission()
+  }
+
+  // Check if user profile exists
+  const savedProfile = localStorage.getItem("userProfile")
+  if (!savedProfile) {
+    openModal("profileModal")
+  }
+}
+
+function setupEventListeners() {
+  // Header buttons
+  document.getElementById("profileBtn").addEventListener("click", () => openModal("profileModal"))
+  document.getElementById("adminBtn").addEventListener("click", () => openModal("adminModal"))
+  document.getElementById("usersBtn").addEventListener("click", loadAndShowUsers)
+  document.getElementById("refreshBtn").addEventListener("click", () => location.reload())
+
+  // Message composer
+  document.getElementById("sendBtn").addEventListener("click", sendMessage)
+  document.getElementById("msgInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
     }
+  })
 
-    // Build media HTML
-    let mediaHTML = "";
-    if (msg.mediaUrl) {
-      if (msg.mediaType?.startsWith("video")) {
-        mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" poster="${msg.mediaUrl.replace('.mp4', '.jpg')}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')"></video>`;
-      } else {
-        mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')"/>`;
+  // Media buttons
+  document.getElementById("cameraBtn").addEventListener("click", () => {
+    document.getElementById("cameraInput").click()
+  })
+  document.getElementById("galleryBtn").addEventListener("click", () => {
+    document.getElementById("galleryInput").click()
+  })
+
+  document.getElementById("cameraInput").addEventListener("change", (e) => handleMediaUpload(e, "camera"))
+  document.getElementById("galleryInput").addEventListener("change", (e) => handleMediaUpload(e, "gallery"))
+
+  // Profile modal
+  document.getElementById("uploadPhotoBtn").addEventListener("click", () => {
+    document.getElementById("profilePhotoInput").click()
+  })
+  document.getElementById("profilePhotoInput").addEventListener("change", handleProfilePhotoChange)
+  document.getElementById("saveProfileBtn").addEventListener("click", saveProfile)
+
+  // Admin modal
+  document.getElementById("adminLoginBtn").addEventListener("click", adminLogin)
+
+  // Reply modal
+  document.getElementById("sendReplyBtn").addEventListener("click", sendReply)
+
+  // Modal closes
+  document.querySelectorAll(".modal-close").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const modalId = e.target.dataset.modal
+      closeModal(modalId)
+    })
+  })
+
+  // Media viewer close
+  document.querySelector(".media-viewer-close").addEventListener("click", closeMediaViewer)
+  document.getElementById("mediaViewer").addEventListener("click", (e) => {
+    if (e.target.id === "mediaViewer") closeMediaViewer()
+  })
+
+  // User profile card close
+  document.getElementById("closeProfileCardBtn").addEventListener("click", () => closeModal("userProfileModal"))
+}
+
+// ========== PROFILE MANAGEMENT ==========
+function loadUserProfile() {
+  const saved = localStorage.getItem("userProfile")
+  if (saved) {
+    currentUser = JSON.parse(saved)
+    updateProfileUI()
+  }
+}
+
+function updateProfileUI() {
+  if (currentUser) {
+    document.getElementById("profileBtn").src =
+      currentUser.photo || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+    document.getElementById("nameInput").value = currentUser.name || ""
+    document.getElementById("bioInput").value = currentUser.bio || ""
+    document.getElementById("profilePreview").src =
+      currentUser.photo || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+  }
+}
+
+function handleProfilePhotoChange(e) {
+  const file = e.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      currentUser = currentUser || {}
+      currentUser.photo = event.target.result
+      document.getElementById("profilePreview").src = currentUser.photo
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+function saveProfile() {
+  const name = document.getElementById("nameInput").value.trim()
+  const bio = document.getElementById("bioInput").value.trim()
+
+  if (!name) {
+    alert("Please enter a username")
+    return
+  }
+
+  currentUser = {
+    id: Date.now().toString(),
+    name: name,
+    bio: bio,
+    photo: currentUser?.photo || "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
+    joinedAt: currentUser?.joinedAt || new Date().toISOString(),
+  }
+
+  localStorage.setItem("userProfile", JSON.stringify(currentUser))
+  updateProfileUI()
+  closeModal("profileModal")
+  showNotification("Profile updated!", { icon: "✓" })
+}
+
+// ========== MESSAGE OPERATIONS ==========
+function sendMessage() {
+  const input = document.getElementById("msgInput")
+  const text = input.value.trim()
+
+  if (!currentUser) {
+    alert("Please set your profile first")
+    openModal("profileModal")
+    return
+  }
+
+  if (!text) {
+    return
+  }
+
+  const message = {
+    id: Date.now().toString(),
+    userId: currentUser.id,
+    username: currentUser.name,
+    userPhoto: currentUser.photo,
+    text: text,
+    type: "text",
+    timestamp: new Date().toISOString(),
+    likes: 0,
+    dislikes: 0,
+    replies: [],
+    isAdmin: isAdmin,
+  }
+
+  allMessages.push(message)
+  saveMessages()
+  renderMessages()
+  input.value = ""
+  scrollChatToBottom()
+}
+
+function handleMediaUpload(e, type) {
+  const file = e.target.files[0]
+  if (file && currentUser) {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const message = {
+        id: Date.now().toString(),
+        userId: currentUser.id,
+        username: currentUser.name,
+        userPhoto: currentUser.photo,
+        text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
+        type: file.type.includes("image") ? "image" : "video",
+        media: event.target.result,
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        dislikes: 0,
+        replies: [],
+        isAdmin: isAdmin,
       }
+
+      allMessages.push(message)
+      saveMessages()
+      renderMessages()
+      scrollChatToBottom()
+      showNotification("Media uploaded!", { icon: "📸" })
     }
-
-    div.innerHTML = `
-      <div class="header">
-        <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}">
-        <div>
-          <div class="name-line">
-            <strong>${msg.user || 'Anonymous'}</strong>
-            ${msg.isAdmin ? '<span class="admin-tag">Admin</span>' : ''}
-          </div>
-          <div class="meta">${formatTimestamp(msg.timestamp)}</div>
-        </div>
-      </div>
-      ${msg.text ? `<div class="content">${msg.text}</div>` : ''}
-      ${mediaHTML}
-      ${repliesHTML}
-      <div class="actions">
-        <button class="reply-btn" onclick="replyMessage('${key}')">💬 Reply</button>
-        <button class="like-btn" onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
-        <button class="dislike-btn" onclick="dislikeMessage('${key}')">👎 ${msg.dislikes || 0}</button>
-        ${user?.isAdmin ? `<button class="delete-btn" onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ''}
-      </div>
-    `;
-    chatBox.appendChild(div);
-  });
-
-  // Auto-scroll to bottom
-  setTimeout(() => {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }, 100);
+    reader.readAsDataURL(file)
+  }
 }
 
-// 🔄 Real-time listener
-onValue(ref(db, "messages"), (snapshot) => {
-  renderMessages(snapshot.val());
-}, (error) => {
-  console.error("Firebase sync error:", error);
-  alert("⚠️ Connection issue. Try refreshing.");
-});
+// ========== REPLY SYSTEM ==========
+function replyToMessage(msgId) {
+  replyingToMsgId = msgId
+  openModal("replyModal")
+}
 
-// ♻️ Manual Refresh
-document.getElementById("refreshBtn").onclick = async () => {
-  try {
-    const snapshot = await get(ref(db, "messages"));
-    renderMessages(snapshot.val());
-    alert("✅ Chat refreshed!");
-  } catch (err) {
-    alert("❌ Refresh failed. Check internet.");
-    console.error(err);
+function sendReply() {
+  if (!replyingToMsgId || !currentUser) return
+
+  const replyText = document.getElementById("replyInput").value.trim()
+  if (!replyText) return
+
+  const message = allMessages.find((m) => m.id === replyingToMsgId)
+  if (message) {
+    message.replies = message.replies || []
+    message.replies.push({
+      userId: currentUser.id,
+      username: currentUser.name,
+      text: replyText,
+      timestamp: new Date().toISOString(),
+    })
+
+    saveMessages()
+    renderMessages()
+    document.getElementById("replyInput").value = ""
+    closeModal("replyModal")
+    replyingToMsgId = null
+    showNotification("Reply sent!", { icon: "💬" })
   }
-};
+}
 
-// ✅ Initial load
-if (user?.isAdmin) adminPanel.style.display = "block";
+// ========== MESSAGE RENDERING ==========
+function renderMessages() {
+  const chatBox = document.getElementById("chatBox")
+  chatBox.innerHTML = ""
+
+  if (allMessages.length === 0) {
+    chatBox.innerHTML = `
+      <div class="welcome-placeholder">
+        <div class="welcome-icon">💬</div>
+        <div class="welcome-text">No messages yet<br><span style="font-size: 12px; color: var(--text-tertiary);">Be the first to say something!</span></div>
+      </div>
+    `
+    return
+  }
+
+  allMessages.forEach((msg) => {
+    const messageGroup = document.createElement("div")
+    messageGroup.className = "message-group"
+    messageGroup.id = `msg-${msg.id}`
+
+    const avatar = document.createElement("img")
+    avatar.className = "message-avatar"
+    avatar.src = msg.userPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+    avatar.alt = msg.username
+    avatar.style.cursor = "pointer"
+    avatar.addEventListener("click", () => viewUserProfile(msg.userId, msg.username, msg.userPhoto))
+
+    const content = document.createElement("div")
+    content.className = "message-content"
+
+    const header = document.createElement("div")
+    header.className = "message-header"
+
+    const username = document.createElement("span")
+    username.className = "message-username"
+    username.textContent = msg.username
+
+    const time = document.createElement("span")
+    time.className = "message-time"
+    time.textContent = formatTime(msg.timestamp)
+
+    header.appendChild(username)
+    if (msg.isAdmin) {
+      const adminBadge = document.createElement("span")
+      adminBadge.className = "admin-badge"
+      adminBadge.textContent = "ADMIN"
+      header.appendChild(adminBadge)
+    }
+    header.appendChild(time)
+
+    const messageBody = document.createElement("div")
+
+    if (msg.type === "text") {
+      const textDiv = document.createElement("div")
+      textDiv.className = "message-text"
+      textDiv.textContent = msg.text
+      messageBody.appendChild(textDiv)
+    } else if (msg.type === "image") {
+      const img = document.createElement("img")
+      img.className = "message-media"
+      img.src = msg.media
+      img.alt = "Image"
+      img.addEventListener("click", () => viewMedia(msg.media, "image"))
+      messageBody.appendChild(img)
+    } else if (msg.type === "video") {
+      const videoContainer = document.createElement("div")
+      videoContainer.className = "video-play-overlay"
+      const video = document.createElement("video")
+      video.className = "message-video"
+      video.src = msg.media
+      video.controls = true
+      video.muted = !videoAutoplayEnabled
+      video.id = `video-${msg.id}`
+      videoContainer.appendChild(video)
+      videoContainer.addEventListener("click", () => viewMedia(msg.media, "video"))
+      messageBody.appendChild(videoContainer)
+    }
+
+    if (msg.type === "video") {
+      setTimeout(() => {
+        const videoElement = document.getElementById(`video-${msg.id}`)
+        if (videoElement) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                videoElement.play()
+                videoElement.muted = !videoAutoplayEnabled
+              } else {
+                videoElement.pause()
+              }
+            })
+          })
+          observer.observe(videoElement)
+        }
+      }, 100)
+    }
+
+    if (msg.replies && msg.replies.length > 0) {
+      const repliesDiv = document.createElement("div")
+      repliesDiv.className = "message-replies"
+      msg.replies.forEach((reply) => {
+        const replyItem = document.createElement("div")
+        replyItem.className = "reply-item"
+        replyItem.innerHTML = `<span class="reply-username">${reply.username}:</span><span class="reply-text">${reply.text}</span>`
+        repliesDiv.appendChild(replyItem)
+      })
+      messageBody.appendChild(repliesDiv)
+    }
+
+    const actions = document.createElement("div")
+    actions.className = "message-actions"
+
+    const likeBtn = document.createElement("button")
+    likeBtn.className = "action-btn action-btn-like"
+    likeBtn.innerHTML = `❤️ ${msg.likes}`
+    likeBtn.addEventListener("click", () => likeMessage(msg.id))
+
+    const dislikeBtn = document.createElement("button")
+    dislikeBtn.className = "action-btn action-btn-dislike"
+    dislikeBtn.innerHTML = `👎 ${msg.dislikes}`
+    dislikeBtn.addEventListener("click", () => dislikeMessage(msg.id))
+
+    const replyBtn = document.createElement("button")
+    replyBtn.className = "action-btn action-btn-reply"
+    replyBtn.innerHTML = "💬 Reply"
+    replyBtn.addEventListener("click", () => replyToMessage(msg.id))
+
+    actions.appendChild(likeBtn)
+    actions.appendChild(dislikeBtn)
+    actions.appendChild(replyBtn)
+
+    if (currentUser && currentUser.id === msg.userId && isAdmin) {
+      const deleteBtn = document.createElement("button")
+      deleteBtn.className = "action-btn action-btn-delete"
+      deleteBtn.innerHTML = "🗑️ Delete"
+      deleteBtn.addEventListener("click", () => deleteMessage(msg.id))
+      actions.appendChild(deleteBtn)
+    }
+
+    content.appendChild(header)
+    content.appendChild(messageBody)
+    content.appendChild(actions)
+
+    messageGroup.appendChild(avatar)
+    messageGroup.appendChild(content)
+
+    chatBox.appendChild(messageGroup)
+  })
+
+  setupMediaViewerClicks()
+}
+
+// ========== MESSAGE ACTIONS ==========
+function likeMessage(msgId) {
+  const message = allMessages.find((m) => m.id === msgId)
+  if (message) {
+    message.likes = (message.likes || 0) + 1
+    saveMessages()
+    renderMessages()
+  }
+}
+
+function dislikeMessage(msgId) {
+  const message = allMessages.find((m) => m.id === msgId)
+  if (message) {
+    message.dislikes = (message.dislikes || 0) + 1
+    saveMessages()
+    renderMessages()
+  }
+}
+
+function deleteMessage(msgId) {
+  if (confirm("Delete this message?")) {
+    allMessages = allMessages.filter((m) => m.id !== msgId)
+    saveMessages()
+    renderMessages()
+  }
+}
+
+// ========== USER PROFILES ==========
+function viewUserProfile(userId, username, userPhoto) {
+  const userMessages = allMessages.filter((m) => m.userId === userId)
+  const totalLikes = userMessages.reduce((sum, msg) => sum + (msg.likes || 0), 0)
+
+  document.getElementById("userProfilePhoto").src =
+    userPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+  document.getElementById("userProfileName").textContent = username
+  document.getElementById("userMessageCount").textContent = userMessages.length
+  document.getElementById("userLikeCount").textContent = totalLikes
+
+  openModal("userProfileModal")
+}
+
+function loadAndShowUsers() {
+  const usersList = document.getElementById("usersList")
+  const uniqueUsers = new Map()
+
+  allMessages.forEach((msg) => {
+    if (!uniqueUsers.has(msg.userId)) {
+      uniqueUsers.set(msg.userId, {
+        id: msg.userId,
+        name: msg.username,
+        photo: msg.userPhoto,
+      })
+    }
+  })
+
+  if (uniqueUsers.size === 0) {
+    usersList.innerHTML =
+      '<div style="text-align: center; color: var(--text-tertiary); padding: 20px;">No active users yet</div>'
+  } else {
+    usersList.innerHTML = ""
+    uniqueUsers.forEach((user) => {
+      const userCard = document.createElement("div")
+      userCard.style.cssText =
+        "display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);"
+      userCard.innerHTML = `
+        <img src="${user.photo}" alt="${user.name}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;" />
+        <span style="flex: 1; font-weight: 500;">${user.name}</span>
+      `
+      userCard.addEventListener("mouseenter", () => (userCard.style.background = "var(--bg-tertiary)"))
+      userCard.addEventListener("mouseleave", () => (userCard.style.background = "var(--bg-secondary)"))
+      userCard.addEventListener("click", () => {
+        viewUserProfile(user.id, user.name, user.photo)
+        closeModal("usersModal")
+      })
+      usersList.appendChild(userCard)
+    })
+  }
+
+  openModal("usersModal")
+}
+
+// ========== ADMIN SYSTEM ==========
+function adminLogin() {
+  const password = document.getElementById("adminPassword").value
+  if (password === "admin123") {
+    isAdmin = true
+    closeModal("adminModal")
+    document.getElementById("adminPassword").value = ""
+    showNotification("Admin access granted!", { icon: "🔐" })
+  } else {
+    alert("Invalid password")
+  }
+}
+
+// ========== STORAGE MANAGEMENT ==========
+function saveMessages() {
+  localStorage.setItem("chatMessages", JSON.stringify(allMessages))
+}
+
+function loadMessages() {
+  const saved = localStorage.getItem("chatMessages")
+  allMessages = saved ? JSON.parse(saved) : []
+  renderMessages()
+}
+
+// ========== UTILITY FUNCTIONS ==========
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add("active")
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove("active")
+}
+
+function viewMedia(src, type) {
+  const viewer = document.getElementById("mediaViewer")
+  const content = document.getElementById("mediaViewerContent")
+
+  if (type === "image") {
+    content.innerHTML = `<img src="${src}" alt="Image" />`
+  } else {
+    content.innerHTML = `<video src="${src}" controls style="max-width: 100%; max-height: 85vh;"></video>`
+  }
+
+  viewer.classList.add("active")
+}
+
+function closeMediaViewer() {
+  document.getElementById("mediaViewer").classList.remove("active")
+  document.getElementById("mediaViewerContent").innerHTML = ""
+}
+
+function setupMediaViewerClicks() {
+  document.querySelectorAll(".message-media, .message-video").forEach((el) => {
+    if (!el.hasClickListener) {
+      el.hasClickListener = true
+      el.addEventListener("click", (e) => {
+        e.stopPropagation()
+      })
+    }
+  })
+}
+
+function formatTime(timestamp) {
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+
+  if (diffMins < 1) return "just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`
+  if (diffMins < 10080) return `${Math.floor(diffMins / 1440)}d ago`
+
+  return date.toLocaleDateString()
+}
+
+function scrollChatToBottom() {
+  const chatBox = document.getElementById("chatBox")
+  chatBox.scrollTop = chatBox.scrollHeight
+}
+
+function showNotification(title, options = {}) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, options)
+  }
+}
+
+function startAutoRefresh() {
+  setInterval(() => {
+    loadMessages()
+  }, 3000)
+}
+
+// ========== EMOJI REACTIONS ==========
+const emojiReactions = ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "💯"]
+
+// ========== CHAT STATISTICS ==========
+function getChatStats() {
+  const users = new Set()
+  const totalMessages = allMessages.length
+  let totalLikes = 0
+
+  allMessages.forEach((msg) => {
+    users.add(msg.userId)
+    totalLikes += msg.likes || 0
+  })
+
+  return {
+    totalMessages,
+    uniqueUsers: users.size,
+    totalLikes,
+    averageLikesPerMessage: (totalLikes / totalMessages).toFixed(2) || 0,
+  }
+}
+
+// ========== EXPORT/BACKUP ==========
+window.exportChat = () => {
+  const stats = getChatStats()
+  const data = {
+    messages: allMessages,
+    statistics: stats,
+    exportedAt: new Date().toISOString(),
+  }
+
+  const json = JSON.stringify(data, null, 2)
+  const blob = new Blob([json], { type: "application/json" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `chat-export-${Date.now()}.json`
+  a.click()
+  showNotification("Chat exported!", { icon: "📥" })
+}
+
+window.clearChat = () => {
+  if (isAdmin && confirm("Clear all messages? This cannot be undone.")) {
+    allMessages = []
+    saveMessages()
+    renderMessages()
+    showNotification("Chat cleared", { icon: "🗑️" })
+  }
+}
