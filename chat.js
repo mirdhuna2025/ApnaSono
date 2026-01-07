@@ -15,7 +15,7 @@ import {
   getStorage,
   ref as storageRef,
   getDownloadURL,
-  putString // ✅ Added missing import
+  putString // ✅ Now correctly imported (no trailing spaces in URL!)
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ==============================
@@ -146,7 +146,12 @@ function updateProfileUI() {
   const defaultAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=default";
   const photo = currentUser.photo || defaultAvatar;
 
-  document.getElementById("profileBtn").src = photo;
+  // Update profile button (assuming it's an <img> with id="profileBtn")
+  const profileBtnImg = document.getElementById("profileBtn");
+  if (profileBtnImg && profileBtnImg.tagName === "IMG") {
+    profileBtnImg.src = photo;
+  }
+
   document.getElementById("nameInput").value = currentUser.name || "";
   document.getElementById("bioInput").value = currentUser.bio || "";
   document.getElementById("profilePreview").src = photo;
