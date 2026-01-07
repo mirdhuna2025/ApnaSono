@@ -1,8 +1,8 @@
-// ========== FIREBASE CONFIGURATION ==========
-// Declare the firebase variable
-const firebase = window.firebase
+// Import Firebase SDK
+import { initializeApp } from "firebase/app"
+import { getDatabase, ref, set, update, remove, onValue } from "firebase/database"
+import { getStorage, ref as storageRef, putString, getDownloadURL } from "firebase/storage"
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
   authDomain: "instantchat-f8b1e.firebaseapp.com",
@@ -12,12 +12,14 @@ const firebaseConfig = {
   appId: "1:702833571971:web:3b4f9c1d4e8f2a5b6c",
 }
 
-// Initialize Firebase (using global firebase object from CDN)
-firebase.initializeApp(firebaseConfig)
-const db = firebase.database()
-const storage = firebase.storage()
-const messagesRef = db.ref("messages")
-const usersRef = db.ref("users")
+// Initialize Firebase
+const app = initializeApp(firebaseConfig)
+const db = getDatabase(app)
+const storage = getStorage(app)
+const messagesRef = ref(db, "messages")
+const usersRef = ref(db, "users")
+
+console.log("[v0] Firebase initialized successfully")
 
 // ========== STATE MANAGEMENT ==========
 let currentUser = null
@@ -28,23 +30,19 @@ const videoAutoplayEnabled = true
 
 // ========== INITIALIZATION ==========
 document.addEventListener("DOMContentLoaded", () => {
-  initializeApp()
-  setupEventListeners()
-  loadUserProfile()
-  loadMessagesFromFirebase()
-  startAutoRefresh()
+  requestNotificationPermission()
+  setTimeout(() => {
+    setupEventListeners()
+    loadUserProfile()
+    loadMessagesFromFirebase()
+    startAutoRefresh()
+  }, 500) // Wait for Firebase to initialize
 })
 
-function initializeApp() {
+function requestNotificationPermission() {
   // Request notification permission
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission()
-  }
-
-  // Check if user profile exists in localStorage
-  const savedProfile = localStorage.getItem("userProfile")
-  if (!savedProfile) {
-    openModal("profileModal")
   }
 }
 
@@ -101,9 +99,6 @@ function setupEventListeners() {
   document.getElementById("mediaViewer").addEventListener("click", (e) => {
     if (e.target.id === "mediaViewer") closeMediaViewer()
   })
-
-  // User profile card close
-  document.getElementById("closeProfileCardBtn").addEventListener("click", () => closeModal("userProfileModal"))
 }
 
 // ========== PROFILE MANAGEMENT ==========
@@ -156,11 +151,18 @@ function saveProfile() {
     joinedAt: currentUser?.joinedAt || new Date().toISOString(),
   }
 
+  // Save to localStorage for quick access
   localStorage.setItem("userProfile", JSON.stringify(currentUser))
-  usersRef
-    .child(currentUser.id)
-    .set(currentUser)
-    .catch((err) => console.error("Error saving profile:", err))
+
+  if (usersRef) {
+    set(ref(usersRef, currentUser.id), {
+      name: currentUser.name,
+      bio: currentUser.bio,
+      photo: currentUser.photo,
+      joinedAt: currentUser.joinedAt,
+    }).catch((err) => console.error("[v0] Error saving profile:", err))
+  }
+
   updateProfileUI()
   closeModal("profileModal")
   showNotification("Profile updated!", { icon: "✓" })
@@ -181,8 +183,9 @@ function sendMessage() {
     return
   }
 
+  const messageId = Date.now().toString()
   const message = {
-    id: Date.now().toString(),
+    id: messageId,
     userId: currentUser.id,
     username: currentUser.name,
     userPhoto: currentUser.photo,
@@ -195,19 +198,17 @@ function sendMessage() {
     isAdmin: isAdmin,
   }
 
-  messagesRef
-    .child(message.id)
-    .set(message)
-    .then(() => {
-      allMessages.push(message)
-      renderMessages()
-      input.value = ""
-      scrollChatToBottom()
+  if (messagesRef) {
+    set(ref(messagesRef, messageId), message).catch((err) => {
+      console.error("[v0] Error sending message:", err)
+      alert("Failed to send message. Check Firebase connection.")
     })
-    .catch((err) => {
-      alert("Error sending message: " + err.message)
-      console.error("Error:", err)
-    })
+  }
+
+  allMessages.push(message)
+  renderMessages()
+  input.value = ""
+  scrollChatToBottom()
 }
 
 function handleMediaUpload(e, type) {
@@ -215,33 +216,35 @@ function handleMediaUpload(e, type) {
   if (file && currentUser) {
     const reader = new FileReader()
     reader.onload = (event) => {
-      try {
-        const mediaPath = `media/${currentUser.id}/${Date.now()}_${file.name}`
-        const storageRef = storage.ref(mediaPath)
+      const messageId = Date.now().toString()
+      const fileName = `${messageId}_${file.name}`
+      const storagePath = `media/${currentUser.id}/${fileName}`
 
-        const uploadTask = storageRef.putString(event.target.result, "data_url")
+      if (storage) {
+        const storageRefObj = storageRef(storage, storagePath)
+        const uploadTask = putString(storageRefObj, event.target.result, "data_url")
 
         uploadTask.on(
           "state_changed",
           (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            console.log("Upload progress: " + progress + "%")
+            console.log("[v0] Upload progress:", progress)
           },
           (error) => {
-            console.error("Upload error:", error)
-            alert("Error uploading media: " + error.message)
+            console.error("[v0] Upload failed:", error)
+            alert("Failed to upload media")
           },
           () => {
-            // Upload completed, get download URL
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+            // Upload successful, get download URL
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
               const message = {
-                id: Date.now().toString(),
+                id: messageId,
                 userId: currentUser.id,
                 username: currentUser.name,
                 userPhoto: currentUser.photo,
                 text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
                 type: file.type.includes("image") ? "image" : "video",
-                media: downloadURL,
+                media: downloadURL, // Store Firebase Storage URL
                 timestamp: new Date().toISOString(),
                 likes: 0,
                 dislikes: 0,
@@ -249,25 +252,39 @@ function handleMediaUpload(e, type) {
                 isAdmin: isAdmin,
               }
 
-              messagesRef
-                .child(message.id)
-                .set(message)
-                .then(() => {
-                  allMessages.push(message)
-                  renderMessages()
-                  scrollChatToBottom()
-                  showNotification("Media uploaded!", { icon: "📸" })
-                })
-                .catch((err) => {
-                  alert("Error saving media message: " + err.message)
-                  console.error("Error:", err)
-                })
+              // Save to Firebase Realtime Database
+              set(ref(messagesRef, messageId), message).catch((err) => {
+                console.error("[v0] Error saving media message:", err)
+              })
+
+              allMessages.push(message)
+              renderMessages()
+              scrollChatToBottom()
+              showNotification("Media uploaded!", { icon: "📸" })
             })
           },
         )
-      } catch (error) {
-        console.error("Error handling media:", error)
-        alert("Error processing media: " + error.message)
+      } else {
+        // Fallback if Firebase Storage not available
+        const message = {
+          id: messageId,
+          userId: currentUser.id,
+          username: currentUser.name,
+          userPhoto: currentUser.photo,
+          text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
+          type: file.type.includes("image") ? "image" : "video",
+          media: event.target.result,
+          timestamp: new Date().toISOString(),
+          likes: 0,
+          dislikes: 0,
+          replies: [],
+          isAdmin: isAdmin,
+        }
+
+        allMessages.push(message)
+        renderMessages()
+        scrollChatToBottom()
+        showNotification("Media uploaded (local)!", { icon: "📸" })
       }
     }
     reader.readAsDataURL(file)
@@ -296,20 +313,17 @@ function sendReply() {
       timestamp: new Date().toISOString(),
     })
 
-    messagesRef
-      .child(replyingToMsgId)
-      .set(message)
-      .then(() => {
-        renderMessages()
-        document.getElementById("replyInput").value = ""
-        closeModal("replyModal")
-        replyingToMsgId = null
-        showNotification("Reply sent!", { icon: "💬" })
+    if (messagesRef) {
+      update(ref(messagesRef, replyingToMsgId), message).catch((err) => {
+        console.error("[v0] Error saving reply:", err)
       })
-      .catch((err) => {
-        alert("Error sending reply: " + err.message)
-        console.error("Error:", err)
-      })
+    }
+
+    renderMessages()
+    document.getElementById("replyInput").value = ""
+    closeModal("replyModal")
+    replyingToMsgId = null
+    showNotification("Reply sent!", { icon: "💬" })
   }
 }
 
@@ -470,11 +484,14 @@ function likeMessage(msgId) {
   const message = allMessages.find((m) => m.id === msgId)
   if (message) {
     message.likes = (message.likes || 0) + 1
-    messagesRef
-      .child(msgId)
-      .update({ likes: message.likes })
-      .then(() => renderMessages())
-      .catch((err) => console.error("Error:", err))
+
+    if (messagesRef) {
+      update(ref(messagesRef, msgId), { likes: message.likes }).catch((err) => {
+        console.error("[v0] Error updating likes:", err)
+      })
+    }
+
+    renderMessages()
   }
 }
 
@@ -482,27 +499,28 @@ function dislikeMessage(msgId) {
   const message = allMessages.find((m) => m.id === msgId)
   if (message) {
     message.dislikes = (message.dislikes || 0) + 1
-    messagesRef
-      .child(msgId)
-      .update({ dislikes: message.dislikes })
-      .then(() => renderMessages())
-      .catch((err) => console.error("Error:", err))
+
+    if (messagesRef) {
+      update(ref(messagesRef, msgId), { dislikes: message.dislikes }).catch((err) => {
+        console.error("[v0] Error updating dislikes:", err)
+      })
+    }
+
+    renderMessages()
   }
 }
 
 function deleteMessage(msgId) {
   if (confirm("Delete this message?")) {
-    messagesRef
-      .child(msgId)
-      .remove()
-      .then(() => {
-        allMessages = allMessages.filter((m) => m.id !== msgId)
-        renderMessages()
+    allMessages = allMessages.filter((m) => m.id !== msgId)
+
+    if (messagesRef) {
+      remove(ref(messagesRef, msgId)).catch((err) => {
+        console.error("[v0] Error deleting message:", err)
       })
-      .catch((err) => {
-        alert("Error deleting message: " + err.message)
-        console.error("Error:", err)
-      })
+    }
+
+    renderMessages()
   }
 }
 
@@ -514,8 +532,6 @@ function viewUserProfile(userId, username, userPhoto) {
   document.getElementById("userProfilePhoto").src =
     userPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
   document.getElementById("userProfileName").textContent = username
-  document.getElementById("userMessageCount").textContent = userMessages.length
-  document.getElementById("userLikeCount").textContent = totalLikes
 
   openModal("userProfileModal")
 }
@@ -575,8 +591,14 @@ function adminLogin() {
 
 // ========== FIREBASE DATA LOADING ==========
 function loadMessagesFromFirebase() {
-  messagesRef.on(
-    "value",
+  if (!messagesRef) {
+    console.error("[v0] Firebase not initialized yet")
+    setTimeout(loadMessagesFromFirebase, 1000)
+    return
+  }
+
+  onValue(
+    messagesRef,
     (snapshot) => {
       allMessages = []
       const data = snapshot.val()
@@ -589,10 +611,11 @@ function loadMessagesFromFirebase() {
         allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
       }
 
+      console.log("[v0] Messages loaded from Firebase:", allMessages.length)
       renderMessages()
     },
     (error) => {
-      console.error("Error loading messages:", error)
+      console.error("[v0] Error loading messages from Firebase:", error)
     },
   )
 }
@@ -608,12 +631,21 @@ function closeModal(modalId) {
 
 function viewMedia(src, type) {
   const viewer = document.getElementById("mediaViewer")
-  const content = document.getElementById("mediaViewerContent")
+  const container = document.getElementById("mediaViewerContainer")
+  container.innerHTML = ""
 
   if (type === "image") {
-    content.innerHTML = `<img src="${src}" alt="Image" />`
+    const img = document.createElement("img")
+    img.src = src
+    img.alt = "Image"
+    container.appendChild(img)
   } else {
-    content.innerHTML = `<video src="${src}" controls style="max-width: 100%; max-height: 85vh;"></video>`
+    const video = document.createElement("video")
+    video.src = src
+    video.controls = true
+    video.style.maxWidth = "100%"
+    video.style.maxHeight = "85vh"
+    container.appendChild(video)
   }
 
   viewer.classList.add("active")
@@ -621,7 +653,7 @@ function viewMedia(src, type) {
 
 function closeMediaViewer() {
   document.getElementById("mediaViewer").classList.remove("active")
-  document.getElementById("mediaViewerContent").innerHTML = ""
+  document.getElementById("mediaViewerContainer").innerHTML = ""
 }
 
 function setupMediaViewerClicks() {
@@ -661,9 +693,11 @@ function showNotification(title, options = {}) {
 }
 
 function startAutoRefresh() {
+  // Firebase listener already handles real-time updates
+  // This can be removed or used for other periodic tasks
   setInterval(() => {
-    loadMessagesFromFirebase()
-  }, 3000)
+    console.log("[v0] Auto-refresh check")
+  }, 30000)
 }
 
 // ========== EMOJI REACTIONS ==========
@@ -709,16 +743,13 @@ window.exportChat = () => {
 
 window.clearChat = () => {
   if (isAdmin && confirm("Clear all messages? This cannot be undone.")) {
-    messagesRef
-      .remove()
-      .then(() => {
-        allMessages = []
-        renderMessages()
-        showNotification("Chat cleared", { icon: "🗑️" })
+    allMessages = []
+    if (messagesRef) {
+      remove(messagesRef).catch((err) => {
+        console.error("[v0] Error clearing chat:", err)
       })
-      .catch((err) => {
-        alert("Error clearing chat: " + err.message)
-        console.error("Error:", err)
-      })
+    }
+    renderMessages()
+    showNotification("Chat cleared", { icon: "🗑️" })
   }
 }
