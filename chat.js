@@ -1,11 +1,8 @@
 // ========== FIREBASE CONFIGURATION ==========
-console.log("chat.js loaded successfully")
+// Declare the firebase variable
+const firebase = window.firebase
 
-// Import Firebase library
-const firebase = require("firebase/app")
-require("firebase/database")
-require("firebase/storage")
-
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
   authDomain: "instantchat-f8b1e.firebaseapp.com",
@@ -15,6 +12,7 @@ const firebaseConfig = {
   appId: "1:702833571971:web:3b4f9c1d4e8f2a5b6c",
 }
 
+// Initialize Firebase (using global firebase object from CDN)
 firebase.initializeApp(firebaseConfig)
 const db = firebase.database()
 const storage = firebase.storage()
@@ -216,7 +214,7 @@ function handleMediaUpload(e, type) {
   const file = e.target.files[0]
   if (file && currentUser) {
     const reader = new FileReader()
-    reader.onload = async (event) => {
+    reader.onload = (event) => {
       try {
         const mediaPath = `media/${currentUser.id}/${Date.now()}_${file.name}`
         const storageRef = storage.ref(mediaPath)
@@ -226,7 +224,6 @@ function handleMediaUpload(e, type) {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            // Progress tracking (optional)
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
             console.log("Upload progress: " + progress + "%")
           },
@@ -234,37 +231,38 @@ function handleMediaUpload(e, type) {
             console.error("Upload error:", error)
             alert("Error uploading media: " + error.message)
           },
-          async () => {
-            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL()
+          () => {
+            // Upload completed, get download URL
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              const message = {
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                username: currentUser.name,
+                userPhoto: currentUser.photo,
+                text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
+                type: file.type.includes("image") ? "image" : "video",
+                media: downloadURL,
+                timestamp: new Date().toISOString(),
+                likes: 0,
+                dislikes: 0,
+                replies: [],
+                isAdmin: isAdmin,
+              }
 
-            const message = {
-              id: Date.now().toString(),
-              userId: currentUser.id,
-              username: currentUser.name,
-              userPhoto: currentUser.photo,
-              text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
-              type: file.type.includes("image") ? "image" : "video",
-              media: downloadURL,
-              timestamp: new Date().toISOString(),
-              likes: 0,
-              dislikes: 0,
-              replies: [],
-              isAdmin: isAdmin,
-            }
-
-            messagesRef
-              .child(message.id)
-              .set(message)
-              .then(() => {
-                allMessages.push(message)
-                renderMessages()
-                scrollChatToBottom()
-                showNotification("Media uploaded!", { icon: "📸" })
-              })
-              .catch((err) => {
-                alert("Error saving media message: " + err.message)
-                console.error("Error:", err)
-              })
+              messagesRef
+                .child(message.id)
+                .set(message)
+                .then(() => {
+                  allMessages.push(message)
+                  renderMessages()
+                  scrollChatToBottom()
+                  showNotification("Media uploaded!", { icon: "📸" })
+                })
+                .catch((err) => {
+                  alert("Error saving media message: " + err.message)
+                  console.error("Error:", err)
+                })
+            })
           },
         )
       } catch (error) {
