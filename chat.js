@@ -1,7 +1,5 @@
 // Import Firebase SDK
-import { initializeApp } from "firebase/app"
-import { getDatabase, ref, set, update, remove, onValue } from "firebase/database"
-import { getStorage, ref as storageRef, putString, getDownloadURL } from "firebase/storage"
+const firebase = window.firebase
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
