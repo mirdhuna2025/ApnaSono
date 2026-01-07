@@ -1,5 +1,10 @@
 // ========== FIREBASE CONFIGURATION ==========
-console.log("chat.js loaded successfully");
+console.log("chat.js loaded successfully")
+
+// Import Firebase library
+const firebase = require("firebase/app")
+require("firebase/database")
+require("firebase/storage")
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
@@ -10,11 +15,11 @@ const firebaseConfig = {
   appId: "1:702833571971:web:3b4f9c1d4e8f2a5b6c",
 }
 
-// Initialize Firebase (simple mock for standalone HTML/JS)
-const db = {
-  messages: [],
-  users: {},
-}
+firebase.initializeApp(firebaseConfig)
+const db = firebase.database()
+const storage = firebase.storage()
+const messagesRef = db.ref("messages")
+const usersRef = db.ref("users")
 
 // ========== STATE MANAGEMENT ==========
 let currentUser = null
@@ -28,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeApp()
   setupEventListeners()
   loadUserProfile()
-  loadMessages()
+  loadMessagesFromFirebase()
   startAutoRefresh()
 })
 
@@ -38,7 +43,7 @@ function initializeApp() {
     Notification.requestPermission()
   }
 
-  // Check if user profile exists
+  // Check if user profile exists in localStorage
   const savedProfile = localStorage.getItem("userProfile")
   if (!savedProfile) {
     openModal("profileModal")
@@ -154,6 +159,10 @@ function saveProfile() {
   }
 
   localStorage.setItem("userProfile", JSON.stringify(currentUser))
+  usersRef
+    .child(currentUser.id)
+    .set(currentUser)
+    .catch((err) => console.error("Error saving profile:", err))
   updateProfileUI()
   closeModal("profileModal")
   showNotification("Profile updated!", { icon: "✓" })
@@ -188,38 +197,80 @@ function sendMessage() {
     isAdmin: isAdmin,
   }
 
-  allMessages.push(message)
-  saveMessages()
-  renderMessages()
-  input.value = ""
-  scrollChatToBottom()
+  messagesRef
+    .child(message.id)
+    .set(message)
+    .then(() => {
+      allMessages.push(message)
+      renderMessages()
+      input.value = ""
+      scrollChatToBottom()
+    })
+    .catch((err) => {
+      alert("Error sending message: " + err.message)
+      console.error("Error:", err)
+    })
 }
 
 function handleMediaUpload(e, type) {
   const file = e.target.files[0]
   if (file && currentUser) {
     const reader = new FileReader()
-    reader.onload = (event) => {
-      const message = {
-        id: Date.now().toString(),
-        userId: currentUser.id,
-        username: currentUser.name,
-        userPhoto: currentUser.photo,
-        text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
-        type: file.type.includes("image") ? "image" : "video",
-        media: event.target.result,
-        timestamp: new Date().toISOString(),
-        likes: 0,
-        dislikes: 0,
-        replies: [],
-        isAdmin: isAdmin,
-      }
+    reader.onload = async (event) => {
+      try {
+        const mediaPath = `media/${currentUser.id}/${Date.now()}_${file.name}`
+        const storageRef = storage.ref(mediaPath)
 
-      allMessages.push(message)
-      saveMessages()
-      renderMessages()
-      scrollChatToBottom()
-      showNotification("Media uploaded!", { icon: "📸" })
+        const uploadTask = storageRef.putString(event.target.result, "data_url")
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            // Progress tracking (optional)
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            console.log("Upload progress: " + progress + "%")
+          },
+          (error) => {
+            console.error("Upload error:", error)
+            alert("Error uploading media: " + error.message)
+          },
+          async () => {
+            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL()
+
+            const message = {
+              id: Date.now().toString(),
+              userId: currentUser.id,
+              username: currentUser.name,
+              userPhoto: currentUser.photo,
+              text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
+              type: file.type.includes("image") ? "image" : "video",
+              media: downloadURL,
+              timestamp: new Date().toISOString(),
+              likes: 0,
+              dislikes: 0,
+              replies: [],
+              isAdmin: isAdmin,
+            }
+
+            messagesRef
+              .child(message.id)
+              .set(message)
+              .then(() => {
+                allMessages.push(message)
+                renderMessages()
+                scrollChatToBottom()
+                showNotification("Media uploaded!", { icon: "📸" })
+              })
+              .catch((err) => {
+                alert("Error saving media message: " + err.message)
+                console.error("Error:", err)
+              })
+          },
+        )
+      } catch (error) {
+        console.error("Error handling media:", error)
+        alert("Error processing media: " + error.message)
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -247,12 +298,20 @@ function sendReply() {
       timestamp: new Date().toISOString(),
     })
 
-    saveMessages()
-    renderMessages()
-    document.getElementById("replyInput").value = ""
-    closeModal("replyModal")
-    replyingToMsgId = null
-    showNotification("Reply sent!", { icon: "💬" })
+    messagesRef
+      .child(replyingToMsgId)
+      .set(message)
+      .then(() => {
+        renderMessages()
+        document.getElementById("replyInput").value = ""
+        closeModal("replyModal")
+        replyingToMsgId = null
+        showNotification("Reply sent!", { icon: "💬" })
+      })
+      .catch((err) => {
+        alert("Error sending reply: " + err.message)
+        console.error("Error:", err)
+      })
   }
 }
 
@@ -413,8 +472,11 @@ function likeMessage(msgId) {
   const message = allMessages.find((m) => m.id === msgId)
   if (message) {
     message.likes = (message.likes || 0) + 1
-    saveMessages()
-    renderMessages()
+    messagesRef
+      .child(msgId)
+      .update({ likes: message.likes })
+      .then(() => renderMessages())
+      .catch((err) => console.error("Error:", err))
   }
 }
 
@@ -422,16 +484,27 @@ function dislikeMessage(msgId) {
   const message = allMessages.find((m) => m.id === msgId)
   if (message) {
     message.dislikes = (message.dislikes || 0) + 1
-    saveMessages()
-    renderMessages()
+    messagesRef
+      .child(msgId)
+      .update({ dislikes: message.dislikes })
+      .then(() => renderMessages())
+      .catch((err) => console.error("Error:", err))
   }
 }
 
 function deleteMessage(msgId) {
   if (confirm("Delete this message?")) {
-    allMessages = allMessages.filter((m) => m.id !== msgId)
-    saveMessages()
-    renderMessages()
+    messagesRef
+      .child(msgId)
+      .remove()
+      .then(() => {
+        allMessages = allMessages.filter((m) => m.id !== msgId)
+        renderMessages()
+      })
+      .catch((err) => {
+        alert("Error deleting message: " + err.message)
+        console.error("Error:", err)
+      })
   }
 }
 
@@ -502,15 +575,28 @@ function adminLogin() {
   }
 }
 
-// ========== STORAGE MANAGEMENT ==========
-function saveMessages() {
-  localStorage.setItem("chatMessages", JSON.stringify(allMessages))
-}
+// ========== FIREBASE DATA LOADING ==========
+function loadMessagesFromFirebase() {
+  messagesRef.on(
+    "value",
+    (snapshot) => {
+      allMessages = []
+      const data = snapshot.val()
 
-function loadMessages() {
-  const saved = localStorage.getItem("chatMessages")
-  allMessages = saved ? JSON.parse(saved) : []
-  renderMessages()
+      if (data) {
+        Object.keys(data).forEach((key) => {
+          allMessages.push(data[key])
+        })
+        // Sort messages by timestamp
+        allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      }
+
+      renderMessages()
+    },
+    (error) => {
+      console.error("Error loading messages:", error)
+    },
+  )
 }
 
 // ========== UTILITY FUNCTIONS ==========
@@ -578,7 +664,7 @@ function showNotification(title, options = {}) {
 
 function startAutoRefresh() {
   setInterval(() => {
-    loadMessages()
+    loadMessagesFromFirebase()
   }, 3000)
 }
 
@@ -625,9 +711,16 @@ window.exportChat = () => {
 
 window.clearChat = () => {
   if (isAdmin && confirm("Clear all messages? This cannot be undone.")) {
-    allMessages = []
-    saveMessages()
-    renderMessages()
-    showNotification("Chat cleared", { icon: "🗑️" })
+    messagesRef
+      .remove()
+      .then(() => {
+        allMessages = []
+        renderMessages()
+        showNotification("Chat cleared", { icon: "🗑️" })
+      })
+      .catch((err) => {
+        alert("Error clearing chat: " + err.message)
+        console.error("Error:", err)
+      })
   }
 }
