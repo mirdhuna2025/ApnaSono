@@ -1,6 +1,27 @@
-// Import Firebase SDK
-const firebase = window.firebase
+// ==============================
+// Firebase v10.12.2 (MODULE)
+// ==============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
+import {
+  getDatabase,
+  ref,
+  set,
+  update,
+  remove,
+  onValue,
+  get
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"
+
+// ==============================
+// Firebase Config
+// ==============================
 const firebaseConfig = {
   apiKey: "AIzaSyDjhzzGE1jJ-U1lG3b8v3KqYN5oZyIpzHU",
   authDomain: "instantchat-f8b1e.firebaseapp.com",
@@ -10,55 +31,97 @@ const firebaseConfig = {
   appId: "1:702833571971:web:3b4f9c1d4e8f2a5b6c",
 }
 
+// ==============================
 // Initialize Firebase
+// ==============================
 const app = initializeApp(firebaseConfig)
 const db = getDatabase(app)
 const storage = getStorage(app)
+
+// Database references
 const messagesRef = ref(db, "messages")
 const usersRef = ref(db, "users")
 
-console.log("[v0] Firebase initialized successfully")
+console.log("[v10.12.2] Firebase initialized")
 
-// ========== STATE MANAGEMENT ==========
+// ==============================
+// STATE MANAGEMENT
+// ==============================
 let currentUser = null
 let isAdmin = false
 let replyingToMsgId = null
 let allMessages = []
 const videoAutoplayEnabled = true
+let messagesListenerAttached = false
 
-// ========== INITIALIZATION ==========
+// ==============================
+// INITIALIZATION
+// ==============================
 document.addEventListener("DOMContentLoaded", () => {
   requestNotificationPermission()
-  setTimeout(() => {
-    setupEventListeners()
-    loadUserProfile()
-    loadMessagesFromFirebase()
-    startAutoRefresh()
-  }, 500) // Wait for Firebase to initialize
+  setupEventListeners()
+  loadUserProfile()
+  loadMessagesFromFirebase()
 })
 
+// ==============================
+// NOTIFICATION PERMISSION
+// ==============================
 function requestNotificationPermission() {
-  // Request notification permission
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission()
   }
 }
 
+// ==============================
+// EVENT LISTENERS
+// ==============================
 function setupEventListeners() {
   // Header buttons
-  document.getElementById("profileBtn").addEventListener("click", () => openModal("profileModal"))
-  document.getElementById("adminBtn").addEventListener("click", () => openModal("adminModal"))
-  document.getElementById("usersBtn").addEventListener("click", loadAndShowUsers)
-  document.getElementById("refreshBtn").addEventListener("click", () => location.reload())
+  document.getElementById("profileBtn")?.addEventListener("click", () => openModal("profileModal"))
+  document.getElementById("adminBtn")?.addEventListener("click", () => openModal("adminModal"))
+  document.getElementById("usersBtn")?.addEventListener("click", loadAndShowUsers)
+  document.getElementById("refreshBtn")?.addEventListener("click", () => location.reload())
 
   // Message composer
-  document.getElementById("sendBtn").addEventListener("click", sendMessage)
-  document.getElementById("msgInput").addEventListener("keypress", (e) => {
+  document.getElementById("sendBtn")?.addEventListener("click", sendMessage)
+  document.getElementById("msgInput")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
   })
+
+  // Media buttons
+  document.getElementById("cameraBtn")?.addEventListener("click", () => {
+    document.getElementById("cameraInput")?.click()
+  })
+
+  document.getElementById("galleryBtn")?.addEventListener("click", () => {
+    document.getElementById("galleryInput")?.click()
+  })
+}
+
+// ==============================
+// LOAD MESSAGES (REALTIME – SAFE)
+// ==============================
+function loadMessagesFromFirebase() {
+  if (messagesListenerAttached) return
+  messagesListenerAttached = true
+
+  onValue(messagesRef, (snapshot) => {
+    allMessages = []
+
+    snapshot.forEach((child) => {
+      allMessages.push({
+        id: child.key,
+        ...child.val(),
+      })
+    })
+
+    renderMessages()
+  })
+}
 
   // Media buttons
   document.getElementById("cameraBtn").addEventListener("click", () => {
