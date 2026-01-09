@@ -15,7 +15,7 @@ import {
   getStorage,
   ref as storageRef,
   getDownloadURL,
-  putString // ✅ Now correctly imported (no trailing spaces in URL!)
+  uploadString // ✅ FIXED: In v10, use uploadString instead of putString
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ==============================
@@ -50,7 +50,7 @@ let currentUser = null;
 let isAdmin = false;
 let replyingToMsgId = null;
 let allMessages = [];
-const videoAutoplayEnabled = true; // Note: browsers require muted for autoplay
+const videoAutoplayEnabled = true; 
 let messagesListenerAttached = false;
 
 // ==============================
@@ -76,13 +76,11 @@ function requestNotificationPermission() {
 // EVENT LISTENERS
 // ==============================
 function setupEventListeners() {
-  // Header buttons
   document.getElementById("profileBtn")?.addEventListener("click", () => openModal("profileModal"));
   document.getElementById("adminBtn")?.addEventListener("click", () => openModal("adminModal"));
   document.getElementById("usersBtn")?.addEventListener("click", loadAndShowUsers);
   document.getElementById("refreshBtn")?.addEventListener("click", () => location.reload());
 
-  // Message composer
   document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
   document.getElementById("msgInput")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -91,7 +89,6 @@ function setupEventListeners() {
     }
   });
 
-  // Media buttons
   document.getElementById("cameraBtn")?.addEventListener("click", () => {
     document.getElementById("cameraInput")?.click();
   });
@@ -101,20 +98,15 @@ function setupEventListeners() {
   document.getElementById("cameraInput")?.addEventListener("change", (e) => handleMediaUpload(e, "camera"));
   document.getElementById("galleryInput")?.addEventListener("change", (e) => handleMediaUpload(e, "gallery"));
 
-  // Profile modal
   document.getElementById("uploadPhotoBtn")?.addEventListener("click", () => {
     document.getElementById("profilePhotoInput")?.click();
   });
   document.getElementById("profilePhotoInput")?.addEventListener("change", handleProfilePhotoChange);
   document.getElementById("saveProfileBtn")?.addEventListener("click", saveProfile);
 
-  // Admin modal
   document.getElementById("adminLoginBtn")?.addEventListener("click", adminLogin);
-
-  // Reply modal
   document.getElementById("sendReplyBtn")?.addEventListener("click", sendReply);
 
-  // Modal closes
   document.querySelectorAll(".modal-close").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const modalId = e.target.dataset.modal;
@@ -122,7 +114,6 @@ function setupEventListeners() {
     });
   });
 
-  // Media viewer close
   document.querySelector(".media-viewer-close")?.addEventListener("click", closeMediaViewer);
   document.getElementById("mediaViewer")?.addEventListener("click", (e) => {
     if (e.target.id === "mediaViewer") closeMediaViewer();
@@ -146,7 +137,6 @@ function updateProfileUI() {
   const defaultAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=default";
   const photo = currentUser.photo || defaultAvatar;
 
-  // Update profile button (assuming it's an <img> with id="profileBtn")
   const profileBtnImg = document.getElementById("profileBtn");
   if (profileBtnImg && profileBtnImg.tagName === "IMG") {
     profileBtnImg.src = photo;
@@ -181,7 +171,7 @@ function saveProfile() {
   }
 
   currentUser = {
-    id: Date.now().toString(),
+    id: currentUser?.id || Date.now().toString(),
     name: name,
     bio: bio,
     photo: currentUser?.photo || defaultAvatar,
@@ -190,14 +180,12 @@ function saveProfile() {
 
   localStorage.setItem("userProfile", JSON.stringify(currentUser));
 
-  if (usersRef) {
-    set(ref(usersRef, currentUser.id), {
-      name: currentUser.name,
-      bio: currentUser.bio,
-      photo: currentUser.photo,
-      joinedAt: currentUser.joinedAt,
-    }).catch((err) => console.error("[v0] Error saving profile:", err));
-  }
+  set(ref(db, `users/${currentUser.id}`), {
+    name: currentUser.name,
+    bio: currentUser.bio,
+    photo: currentUser.photo,
+    joinedAt: currentUser.joinedAt,
+  }).catch((err) => console.error("Error saving profile:", err));
 
   updateProfileUI();
   closeModal("profileModal");
@@ -235,16 +223,13 @@ function sendMessage() {
   };
 
   set(ref(messagesRef, messageId), message).catch((err) => {
-    console.error("[v0] Error sending message:", err);
-    alert("Failed to send message. Check Firebase connection.");
+    console.error("Error sending message:", err);
   });
 
-  allMessages.push(message);
-  renderMessages();
-  if (input) input.value = "";
-  scrollChatToBottom();
+  input.value = "";
 }
 
+// ✅ CORRECTED MEDIA UPLOAD FOR v10
 function handleMediaUpload(e, type) {
   const file = e.target.files[0];
   if (!file || !currentUser) return;
@@ -257,67 +242,35 @@ function handleMediaUpload(e, type) {
 
     if (storage) {
       const storageRefObj = storageRef(storage, storagePath);
-      const uploadTask = putString(storageRefObj, event.target.result, "data_url");
+      
+      // ✅ Using uploadString (v10 modular) instead of putString
+      uploadString(storageRefObj, event.target.result, "data_url")
+        .then((snapshot) => {
+          return getDownloadURL(snapshot.ref);
+        })
+        .then((downloadURL) => {
+          const message = {
+            id: messageId,
+            userId: currentUser.id,
+            username: currentUser.name,
+            userPhoto: currentUser.photo,
+            text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
+            type: file.type.includes("image") ? "image" : "video",
+            media: downloadURL,
+            timestamp: new Date().toISOString(),
+            likes: 0,
+            dislikes: 0,
+            replies: [],
+            isAdmin: isAdmin,
+          };
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("[v0] Upload progress:", progress);
-        },
-        (error) => {
-          console.error("[v0] Upload failed:", error);
-          alert("Failed to upload media");
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            const message = {
-              id: messageId,
-              userId: currentUser.id,
-              username: currentUser.name,
-              userPhoto: currentUser.photo,
-              text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
-              type: file.type.includes("image") ? "image" : "video",
-              media: downloadURL,
-              timestamp: new Date().toISOString(),
-              likes: 0,
-              dislikes: 0,
-              replies: [],
-              isAdmin: isAdmin,
-            };
-
-            set(ref(messagesRef, messageId), message).catch((err) => {
-              console.error("[v0] Error saving media message:", err);
-            });
-
-            allMessages.push(message);
-            renderMessages();
-            scrollChatToBottom();
-            showNotification("Media uploaded!", { icon: "📸" });
-          });
-        }
-      );
-    } else {
-      // Fallback (shouldn't happen if Firebase initialized)
-      const message = {
-        id: messageId,
-        userId: currentUser.id,
-        username: currentUser.name,
-        userPhoto: currentUser.photo,
-        text: `[${file.type.includes("image") ? "Image" : "Video"}]`,
-        type: file.type.includes("image") ? "image" : "video",
-        media: event.target.result,
-        timestamp: new Date().toISOString(),
-        likes: 0,
-        dislikes: 0,
-        replies: [],
-        isAdmin: isAdmin,
-      };
-
-      allMessages.push(message);
-      renderMessages();
-      scrollChatToBottom();
-      showNotification("Media uploaded (local)!", { icon: "📸" });
+          set(ref(messagesRef, messageId), message);
+          showNotification("Media uploaded!", { icon: "📸" });
+        })
+        .catch((error) => {
+          console.error("Upload failed:", error);
+          alert("Failed to upload media. Check Storage rules.");
+        });
     }
   };
   reader.readAsDataURL(file);
@@ -340,20 +293,19 @@ function sendReply() {
 
   const message = allMessages.find((m) => m.id === replyingToMsgId);
   if (message) {
-    message.replies = message.replies || [];
-    message.replies.push({
+    const replies = message.replies || [];
+    replies.push({
       userId: currentUser.id,
       username: currentUser.name,
       text: replyText,
       timestamp: new Date().toISOString(),
     });
 
-    update(ref(messagesRef, replyingToMsgId), message).catch((err) => {
-      console.error("[v0] Error saving reply:", err);
+    update(ref(messagesRef, replyingToMsgId), { replies }).catch((err) => {
+      console.error("Error saving reply:", err);
     });
 
-    renderMessages();
-    if (replyInput) replyInput.value = "";
+    replyInput.value = "";
     closeModal("replyModal");
     replyingToMsgId = null;
     showNotification("Reply sent!", { icon: "💬" });
@@ -361,31 +313,26 @@ function sendReply() {
 }
 
 // ==============================
-// LOAD MESSAGES (REALTIME – WITH SORTING)
+// LOAD MESSAGES (REALTIME)
 // ==============================
 function loadMessagesFromFirebase() {
   if (messagesListenerAttached) return;
   messagesListenerAttached = true;
 
-  onValue(
-    messagesRef,
-    (snapshot) => {
-      allMessages = [];
-      const data = snapshot.val();
+  onValue(messagesRef, (snapshot) => {
+    allMessages = [];
+    const data = snapshot.val();
 
-      if (data) {
-        Object.keys(data).forEach((key) => {
-          allMessages.push({ id: key, ...data[key] });
-        });
-        allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-      }
-
-      renderMessages();
-    },
-    (error) => {
-      console.error("[v0] Error loading messages from Firebase:", error);
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        allMessages.push({ id: key, ...data[key] });
+      });
+      allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     }
-  );
+
+    renderMessages();
+    scrollChatToBottom();
+  });
 }
 
 // ==============================
@@ -417,8 +364,6 @@ function renderMessages() {
     const avatar = document.createElement("img");
     avatar.className = "message-avatar";
     avatar.src = msg.userPhoto || defaultAvatar;
-    avatar.alt = msg.username;
-    avatar.style.cursor = "pointer";
     avatar.addEventListener("click", () => viewUserProfile(msg.userId, msg.username, msg.userPhoto));
 
     const content = document.createElement("div");
@@ -455,38 +400,16 @@ function renderMessages() {
       const img = document.createElement("img");
       img.className = "message-media";
       img.src = msg.media;
-      img.alt = "Image";
       img.addEventListener("click", () => viewMedia(msg.media, "image"));
       messageBody.appendChild(img);
     } else if (msg.type === "video") {
-      const videoContainer = document.createElement("div");
-      videoContainer.className = "video-play-overlay";
       const video = document.createElement("video");
       video.className = "message-video";
       video.src = msg.media;
       video.controls = true;
-      video.muted = true; // ✅ Required for autoplay in most browsers
-      video.id = `video-${msg.id}`;
-      videoContainer.appendChild(video);
-      videoContainer.addEventListener("click", () => viewMedia(msg.media, "video"));
-      messageBody.appendChild(videoContainer);
-
-      // Auto-play/pause on visibility
-      setTimeout(() => {
-        const videoElement = document.getElementById(`video-${msg.id}`);
-        if (videoElement) {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                videoElement.play().catch(() => {}); // mute required
-              } else {
-                videoElement.pause();
-              }
-            });
-          });
-          observer.observe(videoElement);
-        }
-      }, 100);
+      video.muted = true;
+      video.addEventListener("click", () => viewMedia(msg.media, "video"));
+      messageBody.appendChild(video);
     }
 
     // Replies
@@ -502,156 +425,64 @@ function renderMessages() {
       messageBody.appendChild(repliesDiv);
     }
 
-    // Actions
     const actions = document.createElement("div");
     actions.className = "message-actions";
 
     const likeBtn = document.createElement("button");
-    likeBtn.className = "action-btn action-btn-like";
+    likeBtn.className = "action-btn";
     likeBtn.innerHTML = `❤️ ${msg.likes || 0}`;
-    likeBtn.addEventListener("click", () => likeMessage(msg.id));
-
-    const dislikeBtn = document.createElement("button");
-    dislikeBtn.className = "action-btn action-btn-dislike";
-    dislikeBtn.innerHTML = `👎 ${msg.dislikes || 0}`;
-    dislikeBtn.addEventListener("click", () => dislikeMessage(msg.id));
+    likeBtn.onclick = () => likeMessage(msg.id);
 
     const replyBtn = document.createElement("button");
-    replyBtn.className = "action-btn action-btn-reply";
+    replyBtn.className = "action-btn";
     replyBtn.innerHTML = "💬 Reply";
-    replyBtn.addEventListener("click", () => replyToMessage(msg.id));
+    replyBtn.onclick = () => replyToMessage(msg.id);
 
     actions.appendChild(likeBtn);
-    actions.appendChild(dislikeBtn);
     actions.appendChild(replyBtn);
 
-    if (currentUser && currentUser.id === msg.userId && isAdmin) {
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "action-btn action-btn-delete";
-      deleteBtn.innerHTML = "🗑️ Delete";
-      deleteBtn.addEventListener("click", () => deleteMessage(msg.id));
-      actions.appendChild(deleteBtn);
+    if (isAdmin) {
+      const delBtn = document.createElement("button");
+      delBtn.className = "action-btn";
+      delBtn.innerHTML = "🗑️";
+      delBtn.onclick = () => deleteMessage(msg.id);
+      actions.appendChild(delBtn);
     }
 
     content.appendChild(header);
     content.appendChild(messageBody);
     content.appendChild(actions);
-
     messageGroup.appendChild(avatar);
     messageGroup.appendChild(content);
-
     chatBox.appendChild(messageGroup);
   });
-
-  setupMediaViewerClicks();
 }
 
 // ==============================
-// MESSAGE ACTIONS
+// ACTIONS (Global)
 // ==============================
-function likeMessage(msgId) {
+window.likeMessage = (msgId) => {
   const message = allMessages.find((m) => m.id === msgId);
   if (message) {
-    message.likes = (message.likes || 0) + 1;
-    update(ref(messagesRef, msgId), { likes: message.likes }).catch(console.error);
-    renderMessages();
+    update(ref(db, `messages/${msgId}`), { likes: (message.likes || 0) + 1 });
   }
-}
+};
 
-function dislikeMessage(msgId) {
-  const message = allMessages.find((m) => m.id === msgId);
-  if (message) {
-    message.dislikes = (message.dislikes || 0) + 1;
-    update(ref(messagesRef, msgId), { dislikes: message.dislikes }).catch(console.error);
-    renderMessages();
-  }
-}
-
-function deleteMessage(msgId) {
+window.deleteMessage = (msgId) => {
   if (confirm("Delete this message?")) {
-    allMessages = allMessages.filter((m) => m.id !== msgId);
-    remove(ref(messagesRef, msgId)).catch(console.error);
-    renderMessages();
+    remove(ref(db, `messages/${msgId}`));
   }
-}
+};
 
 // ==============================
-// USER PROFILES
-// ==============================
-function viewUserProfile(userId, username, userPhoto) {
-  const defaultAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=default";
-  document.getElementById("userProfilePhoto").src = userPhoto || defaultAvatar;
-  document.getElementById("userProfileName").textContent = username;
-  openModal("userProfileModal");
-}
-
-function loadAndShowUsers() {
-  const usersList = document.getElementById("usersList");
-  if (!usersList) return;
-
-  const uniqueUsers = new Map();
-  allMessages.forEach((msg) => {
-    if (!uniqueUsers.has(msg.userId)) {
-      uniqueUsers.set(msg.userId, {
-        id: msg.userId,
-        name: msg.username,
-        photo: msg.userPhoto,
-      });
-    }
-  });
-
-  if (uniqueUsers.size === 0) {
-    usersList.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 20px;">No active users yet</div>';
-  } else {
-    usersList.innerHTML = "";
-    uniqueUsers.forEach((user) => {
-      const userCard = document.createElement("div");
-      userCard.style.cssText = "display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);";
-      userCard.innerHTML = `
-        <img src="${user.photo || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"}" 
-             alt="${user.name}" 
-             style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;" />
-        <span style="flex: 1; font-weight: 500;">${user.name}</span>
-      `;
-      userCard.addEventListener("mouseenter", () => (userCard.style.background = "var(--bg-tertiary)"));
-      userCard.addEventListener("mouseleave", () => (userCard.style.background = "var(--bg-secondary)"));
-      userCard.addEventListener("click", () => {
-        viewUserProfile(user.id, user.name, user.photo);
-        closeModal("usersModal");
-      });
-      usersList.appendChild(userCard);
-    });
-  }
-
-  openModal("usersModal");
-}
-
-// ==============================
-// ADMIN SYSTEM
-// ==============================
-function adminLogin() {
-  const password = document.getElementById("adminPassword")?.value;
-  if (password === "admin123") {
-    isAdmin = true;
-    closeModal("adminModal");
-    if (document.getElementById("adminPassword")) document.getElementById("adminPassword").value = "";
-    showNotification("Admin access granted!", { icon: "🔐" });
-  } else {
-    alert("Invalid password");
-  }
-}
-
-// ==============================
-// UTILITY FUNCTIONS
+// MODALS & MEDIA VIEWER
 // ==============================
 function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.add("active");
+  document.getElementById(modalId)?.classList.add("active");
 }
 
 function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove("active");
+  document.getElementById(modalId)?.classList.remove("active");
 }
 
 function viewMedia(src, type) {
@@ -659,53 +490,58 @@ function viewMedia(src, type) {
   const container = document.getElementById("mediaViewerContainer");
   if (!viewer || !container) return;
 
-  container.innerHTML = "";
-
-  if (type === "image") {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = "Image";
-    container.appendChild(img);
-  } else {
-    const video = document.createElement("video");
-    video.src = src;
-    video.controls = true;
-    video.style.maxWidth = "100%";
-    video.style.maxHeight = "85vh";
-    video.muted = true;
-    container.appendChild(video);
-  }
+  container.innerHTML = type === "image" 
+    ? `<img src="${src}" style="max-width:100%">` 
+    : `<video src="${src}" controls autoplay style="max-width:100%"></video>`;
 
   viewer.classList.add("active");
 }
 
 function closeMediaViewer() {
-  const viewer = document.getElementById("mediaViewer");
-  const container = document.getElementById("mediaViewerContainer");
-  if (viewer) viewer.classList.remove("active");
-  if (container) container.innerHTML = "";
+  document.getElementById("mediaViewer")?.classList.remove("active");
 }
 
-function setupMediaViewerClicks() {
-  document.querySelectorAll(".message-media, .message-video").forEach((el) => {
-    if (!el.hasClickListener) {
-      el.hasClickListener = true;
-      el.addEventListener("click", (e) => e.stopPropagation());
-    }
+// ==============================
+// ADMIN & STATS
+// ==============================
+function adminLogin() {
+  const pass = document.getElementById("adminPassword")?.value;
+  if (pass === "admin123") {
+    isAdmin = true;
+    closeModal("adminModal");
+    renderMessages();
+    showNotification("Admin access granted!");
+  } else {
+    alert("Wrong password");
+  }
+}
+
+function loadAndShowUsers() {
+  const usersList = document.getElementById("usersList");
+  if (!usersList) return;
+  
+  const uniqueUsers = new Map();
+  allMessages.forEach(m => uniqueUsers.set(m.userId, { name: m.username, photo: m.userPhoto }));
+
+  usersList.innerHTML = "";
+  uniqueUsers.forEach((user, id) => {
+    const div = document.createElement("div");
+    div.className = "user-card"; // Apply your CSS here
+    div.innerHTML = `<img src="${user.photo}" width="30"> <span>${user.name}</span>`;
+    usersList.appendChild(div);
   });
+  openModal("usersModal");
 }
 
+// ==============================
+// UTILS
+// ==============================
 function formatTime(timestamp) {
   const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-  if (diffMins < 10080) return `${Math.floor(diffMins / 1440)}d ago`;
-  return date.toLocaleDateString();
+  const diff = Math.floor((new Date() - date) / 60000);
+  if (diff < 1) return "just now";
+  if (diff < 60) return `${diff}m ago`;
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function scrollChatToBottom() {
@@ -714,57 +550,19 @@ function scrollChatToBottom() {
 }
 
 function showNotification(title, options = {}) {
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, options);
-  }
+  if (Notification.permission === "granted") new Notification(title, options);
 }
 
-// ==============================
-// CHAT STATISTICS & EXPORT
-// ==============================
-function getChatStats() {
-  const users = new Set();
-  const totalMessages = allMessages.length;
-  let totalLikes = 0;
-
-  allMessages.forEach((msg) => {
-    users.add(msg.userId);
-    totalLikes += msg.likes || 0;
-  });
-
-  return {
-    totalMessages,
-    uniqueUsers: users.size,
-    totalLikes,
-    averageLikesPerMessage: totalMessages ? (totalLikes / totalMessages).toFixed(2) : 0,
-  };
-}
-
-// Expose to global for HTML buttons
+// Chat Export
 window.exportChat = () => {
-  const stats = getChatStats();
-  const data = {
-    messages: allMessages,
-    statistics: stats,
-    exportedAt: new Date().toISOString(),
-  };
-
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+  const data = JSON.stringify(allMessages, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `chat-export-${Date.now()}.json`;
+  a.href = URL.createObjectURL(blob);
+  a.download = "chat-export.json";
   a.click();
-  URL.revokeObjectURL(url);
-  showNotification("Chat exported!", { icon: "📥" });
 };
 
 window.clearChat = () => {
-  if (isAdmin && confirm("Clear all messages? This cannot be undone.")) {
-    allMessages = [];
-    remove(messagesRef).catch(console.error);
-    renderMessages();
-    showNotification("Chat cleared", { icon: "🗑️" });
-  }
+  if (isAdmin && confirm("Clear all?")) remove(messagesRef);
 };
