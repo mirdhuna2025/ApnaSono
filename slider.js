@@ -24,7 +24,7 @@ let index = 0;
 let autoSlideInterval;
 
 // Load slides from Firebase
-onValue(ref(db, 'slides'), (snapshot) => {
+onValue(ref(db, 'offer'), (snapshot) => {
   const data = snapshot.val();
   
   // Cleanup previous state
