@@ -104,7 +104,7 @@
       overflow: hidden;
     }
 
-    .chat-box {
+    #chatBox {
       flex: 1;
       overflow-y: auto;
       display: flex;
@@ -480,8 +480,9 @@
     }
 
     /* Hidden file inputs */
-       #cameraInput, #galleryInput, #photoInput {
-      display: none;}
+    #cameraInput, #galleryInput, #photoInput {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -491,22 +492,21 @@
     <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
   </header>
 
-  <div class="chat-container"></div>
-    <div id="chatBox"></div>
-   
+  <div class="chat-container">
+    <div id="chatBox">
       <div class="message" style="text-align:center; opacity:0.7">
         <div class="content">💬 Welcome to Mirdhuna Chat — Nov 21, 2025</div>
       </div>
     </div>
+  </div>
 
-    <div class="composer">
-      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
-      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
-      <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
-      <input id="galleryInput" type="file" accept="image/*,video/*">
-      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
-      <button id="send" title="Send message">➤</button>
-    </div>
+  <div class="composer">
+    <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
+    <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
+    <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
+    <input id="galleryInput" type="file" accept="image/*,video/*">
+    <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
+    <button id="send" title="Send message">➤</button>
   </div>
 
   <!-- Reply Popup -->
