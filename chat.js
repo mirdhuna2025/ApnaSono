@@ -1,7 +1,7 @@
-/// 🔧 Fix: Remove trailing spaces in import URLs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; 
-import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/storage';
+
 
 // Firebase Configuration
 const firebaseConfig = {
