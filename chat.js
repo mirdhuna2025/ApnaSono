@@ -421,7 +421,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="like-btn">👍 0</button>
           <button class="dislike-btn">👎 0</button>
           ${user?.isAdmin ? `<button class="delete-btn" onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ''}
-          <button class="gift-btn" onclick="giftToSend='${gifts[0]}';sendGift()">🎁 Gift</button>
+         
+          <button class="gift-btn" onclick="sendQuickGift('🎁')">🎁 Gift</button>
         </div>
       `;
       chatBox.appendChild(div);
