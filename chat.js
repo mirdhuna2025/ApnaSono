@@ -105,6 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 👤 Profile Setup
   if (profilePopup) {
+  document.getElementById("profileClose")?.onclick = () => {
+  if (profilePopup) profilePopup.style.display = "none";
+};
+    
     document.getElementById("profileClose")?.onclick = () => profilePopup.style.display = "none";
     profilePopup.onclick = (e) => {
       if (e.target === profilePopup) profilePopup.style.display = "none";
