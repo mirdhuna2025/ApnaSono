@@ -103,14 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
   }
 
-  // 👤 Profile Setup
-  if (profilePopup) {
-  document.getElementById("profileClose")?.onclick = () => {
-  if (profilePopup) profilePopup.style.display = "none";
-};
-    
-  }
-
+ 
   if (giftPopup) {
     document.getElementById("giftClose")?.onclick = () => giftPopup.style.display = "none";
   }
