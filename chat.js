@@ -109,10 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (profilePopup) profilePopup.style.display = "none";
 };
     
-    document.getElementById("profileClose")?.onclick = () => profilePopup.style.display = "none";
-    profilePopup.onclick = (e) => {
-      if (e.target === profilePopup) profilePopup.style.display = "none";
-    };
   }
 
   if (giftPopup) {
