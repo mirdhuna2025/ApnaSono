@@ -27,7 +27,7 @@ const db = getDatabase(app);
 const storage = getStorage(app);
 firebase.initializeApp(firebaseConfig);
 
-const bucket = storage.ref();
+
 
 
 // ==================== GLOBAL STATE ====================
