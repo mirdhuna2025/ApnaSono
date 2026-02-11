@@ -1,20 +1,14 @@
 // ==================== FIREBASE IMPORTS (v10 MODULE) ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  onValue,
-  update,
-  remove,
-  get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import {
-  getStorage,
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {getDatabase,ref,push,onValue,update,remove,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {getStorage,ref as sRef,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage();
+const bucket = storage.ref();
+
+
+
 
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
@@ -29,9 +23,7 @@ const firebaseConfig = {
 };
 
 // ==================== INIT FIREBASE ====================
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+
 
 // ==================== GLOBAL STATE ====================
 let currentUser = {
