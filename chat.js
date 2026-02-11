@@ -3,9 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {getDatabase,ref,push,onValue,update,remove,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {getStorage,ref as sRef,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-firebase.initializeApp(firebaseConfig);
-const storage = firebase.storage();
-const bucket = storage.ref();
+
 
 
 
@@ -23,6 +21,11 @@ const firebaseConfig = {
 };
 
 // ==================== INIT FIREBASE ====================
+
+
+firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage();
+const bucket = storage.ref();
 
 
 // ==================== GLOBAL STATE ====================
