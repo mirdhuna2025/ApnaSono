@@ -22,7 +22,9 @@ const firebaseConfig = {
 
 // ==================== INIT FIREBASE ====================
 
-
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
 firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 const bucket = storage.ref();
