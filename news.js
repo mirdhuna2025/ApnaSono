@@ -1,6 +1,6 @@
 // Automatically run search for "sono jhajha jamui"
 document.addEventListener('DOMContentLoaded', function () {
-  const query = "sono jhajha jamui public app";
+  const query = "sono jhajha jamui";
 
   const executeSearch = () => {
     try {
