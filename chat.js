@@ -329,5 +329,6 @@ document.getElementById("refreshBtn").onclick = async () => {
 };
 
 // ✅ Initial load
-if (user?.isAdmin) adminPanel.style.display = "block";s
+if (user?.isAdmin) adminPanel.style.display = "block";
+
 
