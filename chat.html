@@ -1,742 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Group Chat</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            
-            padding: 10px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            height: 100vh;
-            background: white;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        /* HEADER */
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .profile-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-        }
-
-        .profile-name {
-            font-size: 14px;
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .admin-badge {
-            background: #ff6b6b;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        button {
-            background:red;
-            border: none;
-            color: black;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* MESSAGES CONTAINER */
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            display: flex;
-            gap: 12px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-            border: 2px solid #667eea;
-        }
-
-        .message-content {
-            flex: 1;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .message-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .message-time {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .message-text {
-            color: #555;
-            line-height: 1.4;
-            word-break: break-word;
-            margin-bottom: 8px;
-        }
-
-        .message-media {
-            margin: 10px 0;
-            cursor: pointer;
-        }
-
-        .message-media img {
-            max-width: 300px;
-            border-radius: 8px;
-            transition: transform 0.2s;
-        }
-
-        .message-media img:hover {
-            transform: scale(1.02);
-        }
-
-        .message-media video {
-            max-width: 300px;
-            border-radius: 8px;
-        }
-
-        .video-play-overlay {
-            position: relative;
-            display: inline-block;
-        }
-
-        .video-play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.6);
-            border: none;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-
-        .video-play-button:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .message-gift {
-            font-size: 24px;
-            margin-top: 8px;
-        }
-
-        .message-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            font-size: 12px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            padding: 0;
-            text-decoration: underline;
-            font-size: 12px;
-            padding: 4px 8px;
-        }
-
-        .action-btn:hover {
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 4px;
-        }
-
-        .action-btn.delete {
-            color: #ff6b6b;
-        }
-
-        .replies {
-            margin-top: 10px;
-            border-left: 3px solid #667eea;
-            padding-left: 10px;
-            background: #FF0000;
-            padding: 8px;
-            border-radius: 4px;
-        }
-
-        .reply {
-            background: #FF0000;
-            color: #333;
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .reply-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .reply-content {
-            flex: 1;
-        }
-
-        .reply-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 12px;
-        }
-
-        .reply-text {
-            color: #555;
-            margin: 2px 0;
-            font-size: 13px;
-        }
-
-        .reply-gift {
-            font-size: 16px;
-        }
-
-        /* INPUT AREA */
-        .input-area {
-          
-            background: white;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-            border-radius: 0 0 12px 12px;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            display: flex;
-            gap: 8px;
-        }
-
-        input[type="text"],
-        input[type="file"] {
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 10px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .file-input-label {
-            padding: 8px 12px;
-            background: #FF0000;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .file-input-label:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .emoji-picker {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            max-width: 200px;
-        }
-
-        .emoji-btn {
-            padding: 6px;
-            font-size: 18px;
-            background: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .emoji-btn:hover {
-            background: #f0f0f0;
-            transform: scale(1.1);
-        }
-
-        /* MODALS */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .modal h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .modal input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-buttons button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        /* MEDIA MODAL */
-        .media-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .media-modal.active {
-            display: flex;
-        }
-
-        .media-modal-content {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-        }
-
-        .media-modal img,
-        .media-modal video {
-            max-width: 100%;
-            max-height: 90vh;
-            border-radius: 8px;
-        }
-
-        .media-modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .media-modal-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* EMPTY STATE */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            color: #999;
-            text-align: center;
-        }
-
-        .empty-state p {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 18px;
-            }
-
-            .profile-info {
-                display: none;
-            }
-
-            .message-content {
-                padding: 10px;
-                font-size: 14px;
-            }
-
-            .emoji-picker {
-                max-width: 150px;
-            }
-
-            .message-media img,
-            .message-media video {
-                max-width: 250px;
-            }
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .loading span {
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: pulse 1.4s infinite;
-        }
-
-        .loading span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .loading span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.3;
-                transform: scale(0.8);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mirdhuna Chat • Nov 21, 2025</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========== GLOBAL ========== */
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --accent: #ec4899;
+      --bg-gradient: linear-gradient(135deg, #f0f9ff, #e0e7ff);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.12);
+      --border-radius: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: var(--bg-gradient);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      color: #1e293b;
+    }
+
+    /* ========== HEADER ========== */
+    header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      color: white;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    #chatTitle {
+      font-weight: 700;
+      font-size: 18px;
+      text-align: center;
+      flex: 1;
+      letter-spacing: -0.5px;
+    }
+
+    .header-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 14px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    #profileBtn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    #profileBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+    }
+
+    /* ========== CHAT CONTAINER ========== */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    /* ========== MESSAGE ========== */
+    .message {
+      background: var(--card-bg);
+      padding: 18px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      position: relative;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .message img.profile {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      flex-shrink: 0;
+    }
+
+    .name-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #1e293b;
+    }
+
+    .admin-tag {
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .content {
+      font-size: 15px;
+      margin: 8px 0;
+      color: #334155;
+      word-break: break-word;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .media-content {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: var(--transition);
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+    }
+
+    .media-content:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .replies-section {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #cbd5e1;
+    }
+
+    .reply-inline {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      margin-top: 6px;
+      color: #475569;
+    }
+
+    .reply-inline strong {
+      color: var(--primary-dark);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      flex: 1;
+      min-width: 60px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .reply-btn { background: #dbeafe; color: #1d4ed8; }
+    .like-btn { background: #dcfce7; color: #16a34a; }
+    .dislike-btn { background: #fee2e2; color: #dc2626; }
+    .delete-btn { background: #fde8ff; color: #c026d3; }
+
+    .actions button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    /* ========== COMPOSER ========== */
+    .composer {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+      z-index: 500;
+    }
+
+    .media-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .media-btn:hover {
+      background: #e2e8f0;
+      transform: scale(1.1);
+    }
+
+    #msg {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 24px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      font-size: 15px;
+      background: #f8fafc;
+      transition: var(--transition);
+    }
+
+    #msg:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    #send {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    #send:hover {
+      background: var(--primary-dark);
+      transform: scale(1.08);
+    }
+
+    /* ========== POPUPS ========== */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 28px;
+      border-radius: 24px;
+      width: 92%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow-md);
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .closeBtn {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      cursor: pointer;
+      font-size: 24px;
+      font-weight: bold;
+      color: #94a3b8;
+      transition: var(--transition);
+    }
+
+    .closeBtn:hover {
+      color: #ef4444;
+      transform: rotate(90deg);
+    }
+
+    .popup-content h3 {
+      margin: 0 0 20px;
+      color: #1e293b;
+      font-weight: 700;
+    }
+
+    .popup-content input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 16px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .popup-content input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .popup-content button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .popup-content button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* ========== MEDIA MODAL ========== */
+    .media-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+    }
+
+    .media-modal .closeBtn {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 36px;
+      color: white;
+      cursor: pointer;
+      z-index: 2001;
+    }
+
+    .media-modal img,
+    .media-modal video {
+      max-width: 95%;
+      max-height: 85vh;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      object-fit: contain;
+    }
+
+    /* ========== ADMIN PANEL ========== */
+    #adminPanel {
+      position: fixed;
+      top: 70px;
+      right: 12px;
+      width: 360px;
+      max-height: 480px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      display: none;
+      z-index: 300;
+      box-shadow: var(--shadow-md);
+      border: 1px solid #e2e8f0;
+    }
+
+    #adminPanel h4 {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* ========== MOBILE OPTIMIZATION ========== */
+    @media (max-width: 768px) {
+      .composer {
+        padding: 12px;
+      }
+      #msg {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .message {
+        padding: 16px;
+      }
+      .header-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+      .meta {
+        font-size: 11px;
+      }
+    }
+
+    /* Hidden file inputs */
+    #cameraInput, #galleryInput, #photo {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>💬 Group Chat</h1>
-            <div class="header-controls">
-                <div class="profile-info" id="profileInfo">
-                    <img class="profile-avatar" id="headerAvatar" src="" alt="Profile">
-                    <div>
-                        <div class="profile-name" id="headerName">Loading...</div>
-                        <div id="adminBadgeContainer"></div>
-                    </div>
-                </div>
-                <button onclick="openProfileModal()">👤 Profile</button>
-                <button onclick="refreshMessages()">🔄 Refresh</button>
-            </div>
-        </div>
+  <header>
+    <button id="adminBtn" class="header-btn">🔐 Admin</button>
+    <div id="chatTitle">Mirdhuna Chat <button id="refreshBtn" class="header-btn">🔄 Refresh</button></div>
+    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
+  </header>
 
-        <!-- MESSAGES -->
-        <div class="messages-container" id="messagesContainer">
-            <div class="empty-state">
-                <p>Loading messages...</p>
-            </div>
-        </div>
-
-        <!-- INPUT -->
-        <div class="input-area">
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Type your message..."
-                    onkeypress="handleKeyPress(event)"
-                >
-                <label class="file-input-label">
-                    📎 Media
-                    <input 
-                        type="file" 
-                        id="mediaInput" 
-                        accept="image/*,video/*"
-                        onchange="handleMediaSelect(event)"
-                    >
-                </label>
-                <div class="emoji-picker">
-                    <button class="emoji-btn" onclick="sendGift('😂')">😂</button>
-                    <button class="emoji-btn" onclick="sendGift('❤️')">❤️</button>
-                    <button class="emoji-btn" onclick="sendGift('😍')">😍</button>
-                    <button class="emoji-btn" onclick="sendGift('🔥')">🔥</button>
-                    <button class="emoji-btn" onclick="sendGift('👍')">👍</button>
-                </div>
-                <button onclick="sendMessage()" class="btn-primary" style="width: auto; padding: 8px 16px;">Send</button>
-            </div>
-        </div>
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox">
+      <div class="message" style="text-align:center; opacity:0.7">
+        <div class="content">💬 Welcome to Mirdhuna Chat — Nov 21, 2025</div>
+      </div>
     </div>
 
-    <!-- PROFILE MODAL -->
-    <div class="modal-overlay" id="profileModal">
-        <div class="modal">
-            <h2>👤 Your Profile</h2>
-            <input 
-                type="text" 
-                id="nameInput" 
-                placeholder="Enter your name"
-                maxlength="30"
-            >
-            <label class="file-input-label">
-                📷 Upload Photo
-                <input 
-                    type="file" 
-                    id="photoInput" 
-                    accept="image/*"
-                    onchange="previewPhoto(event)"
-                >
-            </label>
-            <div id="photoPreview"></div>
-            <div class="modal-buttons">
-                <button class="btn-primary" onclick="saveProfile()">Save Profile</button>
-                <button class="btn-secondary" onclick="closeProfileModal()">Cancel</button>
-            </div>
-        </div>
+    <div class="composer">
+      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
+      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
+      <input id="cameraInput" type="file" accept="image/*,video/*" capture="environment">
+      <input id="galleryInput" type="file" accept="image/*,video/*">
+      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
+      <button id="send" title="Send message">➤</button>
     </div>
+  </div>
 
-    <!-- ADMIN LOGIN MODAL -->
-    <div class="modal-overlay" id="adminModal">
-        <div class="modal">
-            <h2>🔐 Admin Login</h2>
-            <input 
-                type="password" 
-                id="adminPassword" 
-                placeholder="Enter admin password"
-                onkeypress="if(event.key==='Enter') loginAdmin()"
-            >
-            <div class="modal-buttons">
-                <button class="btn-primary" onclick="loginAdmin()">Login</button>
-                <button class="btn-secondary" onclick="closeAdminModal()">Cancel</button>
-            </div>
-        </div>
+  <!-- Reply Popup -->
+  <div class="popup" id="replyPopup">
+    <div class="popup-content">
+      <span class="closeBtn" id="replyClose">×</span>
+      <h3>💬 Reply to Message</h3>
+      <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
+      <button id="sendReply">Send Reply</button>
     </div>
+  </div>
 
-    <!-- REPLY MODAL -->
-    <div class="modal-overlay" id="replyModal">
-        <div class="modal">
-            <h2>💬 Reply to Message</h2>
-            <div id="replyPreview" style="background: #FF0000; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px;"></div>
-            <input 
-                type="text" 
-                id="replyInput" 
-                placeholder="Type your reply..."
-            >
-            <div style="margin-top: 10px;">
-                <label style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    <span>Add gift:</span>
-                    <button class="emoji-btn" onclick="setReplyGift('😂')">😂</button>
-                    <button class="emoji-btn" onclick="setReplyGift('❤️')">❤️</button>
-                    <button class="emoji-btn" onclick="setReplyGift('😍')">😍</button>
-                    <button class="emoji-btn" onclick="setReplyGift('🔥')">🔥</button>
-                    <button class="emoji-btn" onclick="setReplyGift('👍')">👍</button>
-                </label>
-            </div>
-            <div class="modal-buttons" style="margin-top: 20px;">
-                <button class="btn-primary" onclick="submitReply()">Send Reply</button>
-                <button class="btn-secondary" onclick="closeReplyModal()">Cancel</button>
-            </div>
-        </div>
+  <!-- Profile Setup -->
+  <div class="popup" id="profilePopup">
+    <div class="popup-content">
+      <span class="closeBtn" id="profileClose">×</span>
+      <h3>👋 Set Your Profile</h3>
+      <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
+      <input id="photo" type="file" accept="image/*" />
+      <button id="saveProfile">✓ Save Profile</button>
     </div>
+  </div>
 
-    <!-- MEDIA MODAL -->
-    <div class="media-modal" id="mediaModal">
-        <div class="media-modal-content">
-            <button class="media-modal-close" onclick="closeMediaModal()">✕</button>
-            <div id="mediaContent"></div>
-        </div>
+  <!-- Admin Login -->
+  <div class="popup" id="adminPopup">
+    <div class="popup-content">
+      <span class="closeBtn" id="adminClose">×</span>
+      <h3>🔐 Admin Access</h3>
+      <input id="adminPass" type="password" placeholder="Enter admin password" />
+      <button id="adminLoginBtn">🔓 Login</button>
     </div>
+  </div>
 
-    <!-- FIREBASE SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <!-- Admin Panel (minimal placeholder) -->
+  <div id="adminPanel">
+    <h4>🛡️ Admin Dashboard</h4>
+    <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
+  </div>
 
-    <!-- CHAT APP SCRIPT -->
-    <script type="module" src="chat.js"></script>
-   
+  <!-- Media Viewer -->
+  <div class="media-modal" id="mediaModal">
+    <span class="closeBtn" id="mediaClose">×</span>
+    <div id="mediaContent"></div>
+  </div>
+
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
+
 
