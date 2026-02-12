@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase WebRTC Video Call</title>
+  <style>
+    body { font-family: Arial; text-align: center; background:#f5f5f5; }
+    video { width: 300px; margin:10px; background:black; border-radius:10px; }
+    button,input { padding:8px; margin:5px; }
+  </style>
+</head>
+<body>
+
+<h2>Video Calling System</h2>
+
+<video id="localVideo" autoplay muted playsinline></video>
+<video id="remoteVideo" autoplay playsinline></video>
+
+<br>
+
+<button id="startBtn">Start Camera</button>
+<button id="createBtn">Create Call</button>
+<input id="callInput" placeholder="Enter Call ID">
+<button id="answerBtn">Answer Call</button>
+<button id="hangupBtn">Hang Up</button>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getFirestore, collection, doc, setDoc, getDoc, updateDoc, 
+  onSnapshot, addDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 🔥 REPLACE WITH YOUR FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* WebRTC Setup */
+const servers = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }
+  ]
+};
+
+const pc = new RTCPeerConnection(servers);
+
+let localStream = null;
+let remoteStream = new MediaStream();
+
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
+
+remoteVideo.srcObject = remoteStream;
+
+pc.ontrack = event => {
+  event.streams[0].getTracks().forEach(track => {
+    remoteStream.addTrack(track);
+  });
+};
+
+/* Start Camera */
+document.getElementById("startBtn").onclick = async () => {
+  localStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+  });
+
+  localVideo.srcObject = localStream;
+
+  localStream.getTracks().forEach(track => {
+    pc.addTrack(track, localStream);
+  });
+};
+
+/* Create Call */
+document.getElementById("createBtn").onclick = async () => {
+
+  const callDoc = doc(collection(db, "calls"));
+  const offerCandidates = collection(callDoc, "offerCandidates");
+  const answerCandidates = collection(callDoc, "answerCandidates");
+
+  document.getElementById("callInput").value = callDoc.id;
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      addDoc(offerCandidates, event.candidate.toJSON());
+    }
+  };
+
+  const offerDescription = await pc.createOffer();
+  await pc.setLocalDescription(offerDescription);
+
+  await setDoc(callDoc, {
+    offer: {
+      type: offerDescription.type,
+      sdp: offerDescription.sdp,
+    },
+  });
+
+  onSnapshot(callDoc, snapshot => {
+    const data = snapshot.data();
+    if (!pc.currentRemoteDescription && data?.answer) {
+      const answerDescription = new RTCSessionDescription(data.answer);
+      pc.setRemoteDescription(answerDescription);
+    }
+  });
+
+  onSnapshot(answerCandidates, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added") {
+        const candidate = new RTCIceCandidate(change.doc.data());
+        pc.addIceCandidate(candidate);
+      }
+    });
+  });
+};
+
+/* Answer Call */
+document.getElementById("answerBtn").onclick = async () => {
+
+  const callId = document.getElementById("callInput").value;
+  const callDoc = doc(db, "calls", callId);
+  const offerCandidates = collection(callDoc, "offerCandidates");
+  const answerCandidates = collection(callDoc, "answerCandidates");
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      addDoc(answerCandidates, event.candidate.toJSON());
+    }
+  };
+
+  const callData = (await getDoc(callDoc)).data();
+
+  const offerDescription = callData.offer;
+  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+  const answerDescription = await pc.createAnswer();
+  await pc.setLocalDescription(answerDescription);
+
+  await updateDoc(callDoc, {
+    answer: {
+      type: answerDescription.type,
+      sdp: answerDescription.sdp,
+    },
+  });
+
+  onSnapshot(offerCandidates, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added") {
+        const data = change.doc.data();
+        pc.addIceCandidate(new RTCIceCandidate(data));
+      }
+    });
+  });
+};
+
+/* Hang Up */
+document.getElementById("hangupBtn").onclick = () => {
+  pc.close();
+  location.reload();
+};
+
+</script>
+
+</body>
+</html>
