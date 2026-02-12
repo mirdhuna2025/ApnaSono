@@ -13,7 +13,8 @@ const firebaseConfig = {
   authDomain: "mirdhuna-25542.firebaseapp.com",
   databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
   projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.appspot.com",
+  
+  storageBucket: "mirdhuna-25542.firebasestorage.app",  // ✅ CORRECT!
   messagingSenderId: "575924409876",
   appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
