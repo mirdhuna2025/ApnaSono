@@ -457,7 +457,30 @@
       font-weight: 700;
       font-size: 18px;
     }
+  <!-- ADD THIS INSIDE profilePopup -->
+<button id="photoBtn" class="media-btn" style="margin-top: 12px;">
+  🖼️ Choose Profile Photo
+</button>
 
+    <!-- Profile Setup -->
+<div class="popup" id="profilePopup">
+  <div class="popup-content">
+    <span class="closeBtn" id="profileClose">×</span>
+    <h3>👋 Set Your Profile</h3>
+    <input id="name" type="text" placeholder="Your Name (e.g., Sanu)" />
+    
+    <!-- ✅ FIXED: Visible button to trigger hidden input -->
+    <button id="photoBtn" class="media-btn" style="margin-top: 12px;">
+      🖼️ Choose Profile Photo
+    </button>
+    
+    <!-- Hidden input (now triggered by button) -->
+    <input id="photo" type="file" accept="image/*" />
+    
+    <button id="saveProfile">✓ Save Profile</button>
+  </div>
+</div>
+    
     /* ========== MOBILE OPTIMIZATION ========== */
     @media (max-width: 768px) {
       .composer {
@@ -480,9 +503,7 @@
     }
 
     /* Hidden file inputs */
-    #cameraInput, #galleryInput, {
-      display: none;
-    }
+    #cameraInput, #galleryInput, #photo {display: none;}
   </style>
 </head>
 <body>
