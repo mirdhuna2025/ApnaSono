@@ -51,8 +51,7 @@ const mediaContent = document.getElementById("mediaContent");
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
 
-cameraInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
-galleryInput.onchange = e => { if (e.target.files[0]) fileToSend = e.target.files[0]; };
+
 
 // 👤 Profile Setup
 document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
