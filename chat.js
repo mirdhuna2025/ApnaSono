@@ -47,7 +47,8 @@ const replyPopup = document.getElementById("replyPopup");
 const replyText = document.getElementById("replyText");
 const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
-
+const photoBtn = document.getElementById("photoBtn");
+const photoInput = document.getElementById("photo");
 // 📸 Media Selection
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
@@ -60,6 +61,12 @@ galleryInput.onchange = (e) => {
   fileToSend = e.target.files[0] || null;
 };
 
+const photoBtn = document.getElementById("photoBtn");
+const photoInput = document.getElementById("photo");
+
+if (photoBtn && photoInput) {
+  photoBtn.onclick = () => photoInput.click();
+}
 
 
 
