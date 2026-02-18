@@ -53,6 +53,12 @@ galleryBtn.onclick = () => galleryInput.click();
 
 
 
+<!-- hidden inputs (NOT buttons, NOT visible) -->
+<input type="file" id="cameraInput" accept="image/*,video/*" capture hidden>
+<input type="file" id="galleryInput" accept="image/*,video/*" hidden>
+
+
+
 // 👤 Profile Setup
 document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
 if (!user) profilePopup.style.display = "flex";
