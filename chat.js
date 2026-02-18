@@ -529,13 +529,20 @@ function renderMessages(data) {
         }
 
         let mediaHTML = "";
-        if (msg.mediaUrl) {
-            if (msg.mediaType?.startsWith("video")) {
-                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" style="max-width:200px; cursor:pointer;"></video>`;
-            } else {
-                mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
-            }
-        }
+       if (msg.mediaUrl) {
+    if (msg.mediaType?.startsWith("video")) {
+        // Video thumbnail container
+        mediaHTML = `
+        <div class="video-container" style="position:relative; display:inline-block; max-width:200px; cursor:pointer;">
+            <video class="media-content" src="${msg.mediaUrl}" style="width:100%; filter: brightness(50%);"></video>
+            <div class="play-btn" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" 
+                 style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+                        font-size:30px; color:white; pointer-events:auto;">▶️</div>
+        </div>`;
+    } else {
+        mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
+    }
+}
 
         div.innerHTML = `
            <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
