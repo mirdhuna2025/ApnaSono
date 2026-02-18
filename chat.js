@@ -33,7 +33,8 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const cameraBtn = document.getElementById("cameraBtn");
 const galleryBtn = document.getElementById("galleryBtn");
-
+const cameraInput = document.getElementById("cameraInput");
+const galleryInput = document.getElementById("galleryInput");
 const profilePopup = document.getElementById("profilePopup");
 const profileBtn = document.getElementById("profileBtn");
 const nameInput = document.getElementById("name");
