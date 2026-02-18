@@ -62,7 +62,7 @@ galleryInput.onchange = (e) => {
 };
 
 
-const photoInput = document.getElementById("photo");
+
 
 if (photoBtn && photoInput) {
   photoBtn.onclick = () => photoInput.click();
