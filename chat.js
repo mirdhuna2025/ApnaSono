@@ -1,4 +1,4 @@
-// chat.js — Merged Modern Firebase Chat (Mirdhuna Chat • Ultimate Version)
+// chat.js — Merged Modern Firebase Chat (Fixed & Enhanced)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
     getDatabase, ref, push, onValue, update, remove, get
@@ -35,7 +35,7 @@ let replyToMsg = null;
 let fileToSend = null;
 
 /* ===============================
-🖼️ DOM ELEMENTS (Fixed IDs)
+🖼️ DOM ELEMENTS (Fixed IDs - No Spaces)
 ================================ */
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
@@ -63,8 +63,7 @@ const closePreview = document.getElementById("closePreview");
 const uploadStatus = document.getElementById("uploadStatus");
 const uploadText = document.getElementById("uploadText");
 const refreshBtn = document.getElementById("refreshBtn");
-// Admin specific buttons (Ensure these exist in your HTML)
-const clearChatBtn = document.getElementById("clearChatBtn"); 
+const clearChatBtn = document.getElementById("clearChatBtn");
 
 /* ===============================
 📸 MEDIA SELECTION & PREVIEW
@@ -75,16 +74,16 @@ if(galleryBtn) galleryBtn.onclick = () => galleryInput.click();
 function handleFileSelect(file) {
     if (!file) return;
     fileToSend = file;
-    previewContent.innerHTML = "";
+    if(previewContent) previewContent.innerHTML = "";
     if (file.type.startsWith("image")) {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        previewContent.appendChild(img);
+        if(previewContent) previewContent.appendChild(img);
     } else if (file.type.startsWith("video")) {
         const video = document.createElement("video");
         video.src = URL.createObjectURL(file);
         video.controls = true;
-        previewContent.appendChild(video);
+        if(previewContent) previewContent.appendChild(video);
     }
     if(mediaPreview) mediaPreview.style.display = "block";
 }
@@ -147,7 +146,6 @@ if(saveProfileBtn) saveProfileBtn.onclick = async () => {
         }
     }
     
-    // Preserve admin status if already logged in as admin
     const wasAdmin = user?.isAdmin || false;
     user = { name, photoURL, isAdmin: wasAdmin };
     localStorage.setItem("chatUser", JSON.stringify(user));
@@ -180,7 +178,6 @@ if(adminLoginBtn) adminLoginBtn.onclick = () => {
         if(profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
         alert("✅ Admin login successful!");
         loadAnalytics();
-        // Refresh UI to show admin buttons
         const snapshot = await get(ref(db, "messages"));
         renderMessages(snapshot.val());
     } else {
@@ -273,7 +270,7 @@ if(sendBtn) sendBtn.onclick = async () => {
             mediaUrl,
             mediaType,
             mediaName,
-            storagePath, // Save path for deletion later
+            storagePath,
             timestamp: Date.now(),
             replies: {},
             likes: 0,
@@ -325,7 +322,6 @@ if(sendReplyBtn) sendReplyBtn.onclick = async () => {
     }
 };
 
-// Admin Delete Reply
 window.deleteReply = async (msgKey, replyKey) => {
     if (!user?.isAdmin) return alert("🔒 Admins only");
     if (!confirm("Delete this reply?")) return;
@@ -382,17 +378,15 @@ window.deleteMessage = async (key) => {
         if (!snap.exists()) return;
         const msg = snap.val();
         
-        // Delete from Storage if exists
         if (msg.storagePath) {
             try {
                 const fileRef = sRef(storage, msg.storagePath);
                 await deleteObject(fileRef);
             } catch (storageErr) {
-                console.warn("Storage file not found or already deleted", storageErr);
+                console.warn("Storage file not found", storageErr);
             }
         }
         
-        // Delete from DB
         await remove(ref(db, `messages/${key}`));
     } catch (err) {
         alert("❌ Delete failed.");
@@ -402,7 +396,7 @@ window.deleteMessage = async (key) => {
 
 window.clearChat = async () => {
     if (!user?.isAdmin) return alert("🔒 Admins only");
-    if (!confirm("⚠️ WARNING: Delete ALL messages? This cannot be undone.")) return;
+    if (!confirm("⚠️ WARNING: Delete ALL messages?")) return;
     try {
         await remove(ref(db, "messages"));
         alert("✅ Chat cleared.");
@@ -444,7 +438,6 @@ async function loadAnalytics() {
         const snap = await get(ref(db, "messages"));
         const total = snap.exists() ? Object.keys(snap.val()).length : 0;
         console.log("📊 Total Messages:", total);
-        // You can update a DOM element here if you have one like <span id="msgCount"></span>
     } catch (e) { console.error(e); }
 }
 
@@ -473,14 +466,12 @@ function renderMessages(data) {
     chatBox.innerHTML = "";
     const messages = data || {};
     
-    // Sort chronologically
     const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
     
     sorted.forEach(([key, msg]) => {
         const div = document.createElement("div");
         div.className = "message";
         
-        // Build replies HTML
         let repliesHTML = "";
         if (msg.replies && Object.keys(msg.replies).length > 0) {
             repliesHTML = `<div class="replies-section" style="margin-left:20px; border-left:2px solid #ccc; padding-left:10px;"><strong>Replies:</strong>`;
@@ -494,11 +485,10 @@ function renderMessages(data) {
             repliesHTML += `</div>`;
         }
 
-        // Build media HTML
         let mediaHTML = "";
         if (msg.mediaUrl) {
             if (msg.mediaType?.startsWith("video")) {
-                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" poster="${msg.mediaUrl.replace('.mp4', '.jpg')}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" style="max-width:200px; cursor:pointer;"></video>`;
+                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" style="max-width:200px; cursor:pointer;"></video>`;
             } else {
                 mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
             }
@@ -532,7 +522,6 @@ function renderMessages(data) {
         chatBox.appendChild(div);
     });
     
-    // Auto-scroll to bottom
     setTimeout(() => {
         chatBox.scrollTop = chatBox.scrollHeight;
     }, 100);
@@ -545,8 +534,6 @@ onValue(ref(db, "messages"), (snapshot) => {
     renderMessages(snapshot.val());
 }, (error) => {
     console.error("Firebase sync error:", error);
-    // Avoid alert spamming on every error
-    // alert("⚠️ Connection issue. Try refreshing.");
 });
 
 /* ===============================
