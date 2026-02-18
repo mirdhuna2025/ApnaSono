@@ -52,6 +52,13 @@ const mediaContent = document.getElementById("mediaContent");
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
 
+cameraInput.onchange = (e) => {
+  fileToSend = e.target.files[0] || null;
+};
+
+galleryInput.onchange = (e) => {
+  fileToSend = e.target.files[0] || null;
+};
 
 
 
