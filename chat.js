@@ -54,8 +54,6 @@ galleryBtn.onclick = () => galleryInput.click();
 
 
 
-<input type="file" id="cameraInput" accept="image/*,video/*" capture hidden>
-<input type="file" id="galleryInput" accept="image/*,video/*" hidden>
 
 
 
