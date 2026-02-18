@@ -1,22 +1,22 @@
-// chat.js — Final Clean Firebase Chat (No Admin)
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+// chat.js — Merged Modern Firebase Chat (With Logout System)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js  ";
 import {
-    getDatabase, ref, push, onValue, update, get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    getDatabase, ref, push, onValue, update, remove, get
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js  ";
 import {
     getStorage, ref as sRef,
     uploadBytesResumable,
-    getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    getDownloadURL,
+    deleteObject
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js  ";
 
 /* ===============================
-🔐 FIREBASE CONFIG (YOUR REAL CONFIG)
+🔐 FIREBASE CONFIG
 ================================ */
 const firebaseConfig = {
     apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
     authDomain: "mirdhuna-25542.firebaseapp.com",
-    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com  ",
     projectId: "mirdhuna-25542",
     storageBucket: "mirdhuna-25542.firebasestorage.app",
     messagingSenderId: "575924409876",
@@ -35,7 +35,7 @@ let replyToMsg = null;
 let fileToSend = null;
 
 /* ===============================
-🖼️ DOM ELEMENTS
+🖼️ DOM ELEMENTS (Fixed IDs)
 ================================ */
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
@@ -50,10 +50,8 @@ const nameInput = document.getElementById("name");
 const photoInput = document.getElementById("photo");
 const replyPopup = document.getElementById("replyPopup");
 const replyText = document.getElementById("replyText");
-const sendReplyBtn = document.getElementById("sendReply");
 const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
-const mediaClose = document.getElementById("mediaClose");
 const photoBtn = document.getElementById("photoBtn");
 const mediaPreview = document.getElementById("mediaPreview");
 const previewContent = document.getElementById("previewContent");
@@ -61,296 +59,432 @@ const closePreview = document.getElementById("closePreview");
 const uploadStatus = document.getElementById("uploadStatus");
 const uploadText = document.getElementById("uploadText");
 const refreshBtn = document.getElementById("refreshBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const profileClose = document.getElementById("profileClose");
+const clearChatBtn = document.getElementById("clearChatBtn");
+const logoutBtn = document.getElementById("logoutBtn"); // ✅ NEW
 
 /* ===============================
-🚪 LOGOUT
+🚪 LOGOUT FUNCTION
 ================================ */
 window.logout = () => {
     if (!confirm("🚪 Are you sure you want to logout?")) return;
+    
+    // Clear local storage
     localStorage.removeItem("chatUser");
+    
+    // Reset state
     user = null;
+    replyToMsg = null;
+    fileToSend = null;
+    
+    // Hide logout button
+    if (logoutBtn) logoutBtn.style.display = "none";
+    
+    // Show profile popup for new login
+    if (profilePopup) profilePopup.style.display = "flex";
+    
+    // Reset profile button to default
+    if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/thumbs/svg?seed=user  ";
+    
     alert("✅ Logged out successfully!");
+    
+    // Reload page to clean UI state completely
     location.reload();
 };
 
 if (logoutBtn) {
     logoutBtn.onclick = logout;
+    // Show logout button if user is logged in
     if (user) logoutBtn.style.display = "block";
 }
 
 /* ===============================
-📸 MEDIA SELECT
+📸 MEDIA SELECTION & PREVIEW
 ================================ */
 if (cameraBtn) cameraBtn.onclick = () => cameraInput.click();
 if (galleryBtn) galleryBtn.onclick = () => galleryInput.click();
-if (photoBtn) photoBtn.onclick = () => photoInput.click();
 
 function handleFileSelect(file) {
     if (!file) return;
     fileToSend = file;
-    previewContent.innerHTML = "";
-
+    if (previewContent) previewContent.innerHTML = "";
     if (file.type.startsWith("image")) {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        previewContent.appendChild(img);
+        if (previewContent) previewContent.appendChild(img);
     } else if (file.type.startsWith("video")) {
         const video = document.createElement("video");
         video.src = URL.createObjectURL(file);
         video.controls = true;
-        previewContent.appendChild(video);
+        if (previewContent) previewContent.appendChild(video);
     }
-
-    mediaPreview.style.display = "block";
+    if (mediaPreview) mediaPreview.style.display = "block";
 }
 
-if (cameraInput) cameraInput.onchange = e => handleFileSelect(e.target.files[0]);
-if (galleryInput) galleryInput.onchange = e => handleFileSelect(e.target.files[0]);
+if (cameraInput) cameraInput.onchange = (e) => handleFileSelect(e.target.files[0]);
+if (galleryInput) galleryInput.onchange = (e) => handleFileSelect(e.target.files[0]);
 
 if (closePreview) {
     closePreview.onclick = () => {
-        mediaPreview.style.display = "none";
-        previewContent.innerHTML = "";
+        if (mediaPreview) mediaPreview.style.display = "none";
+        if (previewContent) previewContent.innerHTML = "";
         fileToSend = null;
         if (cameraInput) cameraInput.value = "";
         if (galleryInput) galleryInput.value = "";
     };
 }
 
+if (photoBtn && photoInput) {
+    photoBtn.onclick = () => photoInput.click();
+}
+
 /* ===============================
-👤 PROFILE SYSTEM
+👤 PROFILE SETUP
 ================================ */
+const profileClose = document.getElementById("profileClose");
+if (profileClose) profileClose.onclick = () => {
+    if (profilePopup) profilePopup.style.display = "none";
+};
+
 if (!user && profilePopup) profilePopup.style.display = "flex";
 if (user?.photoURL && profileBtn) profileBtn.src = user.photoURL;
 
-if (profileBtn) profileBtn.onclick = () => profilePopup.style.display = "flex";
-if (profileClose) profileClose.onclick = () => profilePopup.style.display = "none";
+if (profileBtn) profileBtn.onclick = () => {
+    if (profilePopup) profilePopup.style.display = "flex";
+};
 
 const saveProfileBtn = document.getElementById("saveProfile");
 if (saveProfileBtn) saveProfileBtn.onclick = async () => {
     const name = nameInput.value.trim();
     if (!name) return alert("⚠️ Please enter your name");
-
+    
     let photoURL = user?.photoURL || "";
-
     if (photoInput.files[0]) {
-        const file = photoInput.files[0];
-        const path = `profiles/${Date.now()}_${file.name}`;
-        const sref = sRef(storage, path);
-        const uploadTask = uploadBytesResumable(sref, file);
-
-        await new Promise((resolve, reject) => {
-            uploadTask.on("state_changed", null, reject, async () => {
-                photoURL = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve();
+        try {
+            const file = photoInput.files[0];
+            const path = `profiles/${Date.now()}_${file.name}`;
+            const sref = sRef(storage, path);
+            const uploadTask = uploadBytesResumable(sref, file);
+            
+            await new Promise((resolve, reject) => {
+                uploadTask.on("state_changed", null, reject, async () => {
+                    photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve();
+                });
             });
-        });
+        } catch (err) {
+            alert("❌ Failed to upload photo. Try again.");
+            console.error(err);
+            return;
+        }
     }
-
+    
     user = { name, photoURL };
     localStorage.setItem("chatUser", JSON.stringify(user));
-
-    profilePopup.style.display = "none";
-    profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
-    logoutBtn.style.display = "block";
+    
+    if (profilePopup) profilePopup.style.display = "none";
+    if (profileBtn) profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${name}`;
+    
+    // Show logout button now that user is logged in
+    if (logoutBtn) logoutBtn.style.display = "block";
 };
 
 /* ===============================
 ✉️ SEND MESSAGE
 ================================ */
 if (sendBtn) sendBtn.onclick = async () => {
-    if (!user) return profilePopup.style.display = "flex";
+    if (!user) {
+        if (profilePopup) profilePopup.style.display = "flex";
+        return;
+    }
 
     const text = msgInput.value.trim();
     if (!text && !fileToSend) return;
 
-    let mediaUrl = "", mediaType = "";
+    try {
+        let mediaUrl = "", mediaType = "", mediaName = "", storagePath = "";
+        
+        if (fileToSend) {
+            const file = fileToSend;
+            storagePath = `uploads/${Date.now()}_${file.name}`;
+            const sref = sRef(storage, storagePath);
+            const uploadTask = uploadBytesResumable(sref, file);
+            
+            if (uploadStatus) {
+                uploadStatus.style.display = "flex";
+                uploadStatus.style.opacity = "1";
+                uploadStatus.style.zIndex = "9999";
+            }
 
-    if (fileToSend) {
-        const file = fileToSend;
-        const storagePath = `uploads/${Date.now()}_${file.name}`;
-        const sref = sRef(storage, storagePath);
-        const uploadTask = uploadBytesResumable(sref, file);
+            await new Promise((resolve, reject) => {
+                uploadTask.on(
+                    "state_changed",
+                    (snapshot) => {
+                        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                        if (uploadText) uploadText.innerText = `Uploading... ${progress}%`;
+                    },
+                    (error) => reject(error),
+                    async () => {
+                        mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve();
+                    }
+                );
+            });
 
-        uploadStatus.style.display = "flex";
+            if (uploadStatus) uploadStatus.style.display = "none";
+            if (mediaPreview) mediaPreview.style.display = "none";
+            if (previewContent) previewContent.innerHTML = "";
+            
+            mediaType = file.type;
+            mediaName = file.name;
+            fileToSend = null;
+            if (cameraInput) cameraInput.value = ""; 
+            if (galleryInput) galleryInput.value = "";
+        }
 
-        await new Promise((resolve, reject) => {
-            uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                    const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                    uploadText.innerText = `Uploading... ${progress}%`;
-                },
-                reject,
-                async () => {
-                    mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                    resolve();
-                }
-            );
-        });
+        const newMsg = {
+            user: user.name,
+            photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${user.name}`,
+            text: text || "",
+            mediaUrl,
+            mediaType,
+            mediaName,
+            storagePath,
+            timestamp: Date.now(),
+            replies: {},
+            likes: 0,
+            dislikes: 0
+        };
 
-        uploadStatus.style.display = "none";
-        mediaPreview.style.display = "none";
-        previewContent.innerHTML = "";
-        fileToSend = null;
-        mediaType = file.type;
+        await push(ref(db, "messages"), newMsg);
+        if (msgInput) msgInput.value = "";
+    } catch (err) {
+        alert("❌ Failed to send message. Check connection.");
+        console.error(err);
+        if (uploadStatus) uploadStatus.style.display = "none";
     }
-
-    await push(ref(db, "messages"), {
-        user: user.name,
-        photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
-        text: text || "",
-        mediaUrl,
-        mediaType,
-        timestamp: Date.now(),
-        replies: {},
-        likes: 0,
-        dislikes: 0
-    });
-
-    msgInput.value = "";
 };
 
 /* ===============================
 💬 REPLIES
 ================================ */
-window.replyMessage = (key) => {
-    replyToMsg = key;
-    replyPopup.style.display = "flex";
-    replyText.value = "";
-    replyText.focus();
+const replyClose = document.getElementById("replyClose");
+if (replyClose) replyClose.onclick = () => {
+    if (replyPopup) replyPopup.style.display = "none";
+    replyToMsg = null;
 };
 
+window.replyMessage = (key) => {
+    replyToMsg = key;
+    if (replyPopup) replyPopup.style.display = "flex";
+    if (replyText) {
+        replyText.value = "";
+        replyText.focus();
+    }
+};
+
+const sendReplyBtn = document.getElementById("sendReply");
 if (sendReplyBtn) sendReplyBtn.onclick = async () => {
     if (!replyText.value.trim() || !replyToMsg) return;
-
-    await push(ref(db, `messages/${replyToMsg}/replies`), {
-        user: user.name,
-        text: replyText.value.trim(),
-        timestamp: Date.now()
-    });
-
-    replyPopup.style.display = "none";
-    replyToMsg = null;
+    try {
+        const replyRef = ref(db, `messages/${replyToMsg}/replies`);
+        await push(replyRef, {
+            user: user.name,
+            text: replyText.value.trim(),
+            timestamp: Date.now()
+        });
+        if (replyPopup) replyPopup.style.display = "none";
+        replyToMsg = null;
+    } catch (err) {
+        alert("❌ Failed to send reply.");
+        console.error(err);
+    }
 };
 
 /* ===============================
 👍👎 REACTIONS
 ================================ */
 window.likeMessage = async (key) => {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    await update(msgRef, { likes: (snap.val().likes || 0) + 1 });
+    try {
+        const msgRef = ref(db, `messages/${key}`);
+        const snap = await get(msgRef);
+        if (!snap.exists()) return;
+        const val = snap.val();
+        await update(msgRef, { likes: (val.likes || 0) + 1 });
+    } catch (err) { console.error(err); }
 };
 
 window.dislikeMessage = async (key) => {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    await update(msgRef, { dislikes: (snap.val().dislikes || 0) + 1 });
+    try {
+        const msgRef = ref(db, `messages/${key}`);
+        const snap = await get(msgRef);
+        if (!snap.exists()) return;
+        const val = snap.val();
+        await update(msgRef, { dislikes: (val.dislikes || 0) + 1 });
+    } catch (err) { console.error(err); }
+};
+
+/* ===============================
+🗑️ DELETE MESSAGE (Self-only)
+================================ */
+window.deleteMessage = async (key) => {
+    if (!confirm("⚠️ Are you sure you want to delete your message? This cannot be undone.")) return;
+    
+    try {
+        const snap = await get(ref(db, `messages/${key}`));
+        if (!snap.exists()) return;
+        const msg = snap.val();
+        
+        // Only allow deleting own messages
+        if (msg.user !== user?.name) {
+            return alert("🔒 You can only delete your own messages.");
+        }
+        
+        if (msg.storagePath) {
+            try {
+                const fileRef = sRef(storage, msg.storagePath);
+                await deleteObject(fileRef);
+            } catch (storageErr) {
+                console.warn("Storage file not found", storageErr);
+            }
+        }
+        
+        await remove(ref(db, `messages/${key}`));
+    } catch (err) {
+        alert("❌ Delete failed.");
+        console.error(err);
+    }
 };
 
 /* ===============================
 🖼️ MEDIA MODAL
 ================================ */
+const mediaClose = document.getElementById("mediaClose");
+if (mediaClose) mediaClose.onclick = () => {
+    if (mediaModal) mediaModal.style.display = "none";
+    if (mediaContent) mediaContent.innerHTML = "";
+};
+
 window.showMedia = (url, type) => {
+    if (!mediaContent || !mediaModal) return;
     mediaContent.innerHTML = "";
-
-    if (type?.startsWith("video")) {
-        mediaContent.innerHTML = `<video src="${url}" controls autoplay style="max-width:100%;max-height:80vh;"></video>`;
+    if (type?.startsWith("image")) {
+        mediaContent.innerHTML = `<img src="${url}" alt="Shared media" style="max-width:100%; max-height:80vh;" />`;
+    } else if (type?.startsWith("video")) {
+        mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline style="max-width:100%; max-height:80vh;"></video>`;
     } else {
-        mediaContent.innerHTML = `<img src="${url}" style="max-width:100%;max-height:80vh;" />`;
+        mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
     }
-
     mediaModal.style.display = "flex";
 };
 
-if (mediaClose) mediaClose.onclick = () => {
-    mediaModal.style.display = "none";
-    mediaContent.innerHTML = "";
-};
-
 /* ===============================
-🕒 FORMAT TIME
+🕒 UTILS
 ================================ */
 function formatTimestamp(ts) {
-    if (!ts) return "";
+    if (!ts) return "Just now";
     const d = new Date(ts);
-    return d.toLocaleString();
+    return d.toLocaleString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    }).replace(", ", ", ");
 }
 
 /* ===============================
 🎨 RENDER MESSAGES
 ================================ */
 function renderMessages(data) {
+    if (!chatBox) return;
     chatBox.innerHTML = "";
     const messages = data || {};
+    
+    const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
+    
+    sorted.forEach(([key, msg]) => {
+        const div = document.createElement("div");
+        div.className = "message";
+        
+        let repliesHTML = "";
+        if (msg.replies && Object.keys(msg.replies).length > 0) {
+            repliesHTML = `<div class="replies-section" style="margin-left:20px; border-left:2px solid #ccc; padding-left:10px;"><strong>Replies:</strong>`;
+            Object.entries(msg.replies).forEach(([rKey, r]) => {
+                repliesHTML += `
+                    <div class="reply-inline" style="font-size:0.9em; margin-top:5px;">
+                        <strong>${r.user}</strong>: ${r.text}
+                    </div>`;
+            });
+            repliesHTML += `</div>`;
+        }
 
-    Object.entries(messages)
-        .sort((a, b) => a[1].timestamp - b[1].timestamp)
-        .forEach(([key, msg]) => {
-
-            let repliesHTML = "";
-            if (msg.replies) {
-                repliesHTML = `<div style="margin-left:20px;border-left:2px solid #ccc;padding-left:10px;">`;
-                Object.values(msg.replies).forEach(r => {
-                    repliesHTML += `
-                        <div style="font-size:0.9em;margin-top:5px;">
-                            <strong>${r.user}</strong>: ${r.text}
-                        </div>
-                    `;
-                });
-                repliesHTML += `</div>`;
+        let mediaHTML = "";
+        if (msg.mediaUrl) {
+            if (msg.mediaType?.startsWith("video")) {
+                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" style="max-width:200px; cursor:pointer;"></video>`;
+            } else {
+                mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
             }
+        }
 
-            let mediaHTML = "";
-            if (msg.mediaUrl) {
-                if (msg.mediaType?.startsWith("video")) {
-                    mediaHTML = `<video src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}','${msg.mediaType}')" style="max-width:200px;cursor:pointer;"></video>`;
-                } else {
-                    mediaHTML = `<img src="${msg.mediaUrl}" onclick="showMedia('${msg.mediaUrl}','${msg.mediaType}')" style="max-width:200px;cursor:pointer;" />`;
-                }
-            }
-
-            const div = document.createElement("div");
-            div.className = "message";
-            div.innerHTML = `
-                <div style="display:flex;gap:10px;align-items:center;">
-                    <img src="${msg.photo}" width="40" height="40" style="border-radius:50%;">
-                    <div>
-                        <strong>${msg.user}</strong>
-                        <div style="font-size:0.8em;color:#666;">${formatTimestamp(msg.timestamp)}</div>
-                    </div>
-                </div>
-                <div style="margin:5px 0;">${msg.text}</div>
-                ${mediaHTML}
-                ${repliesHTML}
-                <div style="margin-top:5px;display:flex;gap:10px;">
-                    <button onclick="replyMessage('${key}')">💬 Reply</button>
-                    <button onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
-                    <button onclick="dislikeMessage('${key}')">👎 ${msg.dislikes || 0}</button>
-                </div>
-            `;
-            chatBox.appendChild(div);
-        });
-
-    chatBox.scrollTop = chatBox.scrollHeight;
+        div.innerHTML = `
+           <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+             <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=  ' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
+             <div>
+               <div class="name-line">
+                 <strong>${msg.user || 'Anonymous'}</strong>
+               </div>
+               <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
+             </div>
+           </div>
+          ${msg.text ? `<div class="content" style="margin:5px 0;">${msg.text}</div>` : ''}
+          ${mediaHTML}
+          ${repliesHTML}
+           <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
+             <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
+             <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
+             <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
+            ${msg.user === user?.name ? `
+                <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
+            ` : ''}
+           </div>
+        `;
+        chatBox.appendChild(div);
+    });
+    
+    setTimeout(() => {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }, 100);
 }
 
 /* ===============================
 🔄 REALTIME LISTENER
 ================================ */
-onValue(ref(db, "messages"), snapshot => {
+onValue(ref(db, "messages"), (snapshot) => {
     renderMessages(snapshot.val());
+}, (error) => {
+    console.error("Firebase sync error:", error);
 });
 
 /* ===============================
 🔄 MANUAL REFRESH
 ================================ */
 if (refreshBtn) refreshBtn.onclick = async () => {
-    const snapshot = await get(ref(db, "messages"));
-    renderMessages(snapshot.val());
-    alert("✅ Chat refreshed!");
+    try {
+        const snapshot = await get(ref(db, "messages"));
+        renderMessages(snapshot.val());
+        alert("✅ Chat refreshed!");
+    } catch (err) {
+        alert("❌ Refresh failed. Check internet.");
+        console.error(err);
+    }
 };
 
+/* ===============================
+✅ INITIAL LOAD
+================================ */
+if (user && logoutBtn) {
+    logoutBtn.style.display = "block";
+}
