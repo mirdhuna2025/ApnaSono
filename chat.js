@@ -169,8 +169,33 @@ document.getElementById("send").onclick = async () => {
       const file = fileToSend;
       const path = `uploads/${Date.now()}_${file.name}`;
       const sref = sRef(storage, path);
-      await uploadBytes(sref, file);
-      mediaUrl = await getDownloadURL(sref);
+   const uploadTask = uploadBytesResumable(sref, file);
+
+uploadStatus.style.display = "block";
+
+await new Promise((resolve, reject) => {
+  uploadTask.on(
+    "state_changed",
+    (snapshot) => {
+      const progress = Math.round(
+        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+      );
+      uploadText.innerText = `Uploading... ${progress}%`;
+    },
+    (error) => {
+      reject(error);
+    },
+    async () => {
+      mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
+      resolve();
+    }
+  );
+});
+
+uploadStatus.style.display = "none";
+mediaPreview.style.display = "none";
+previewContent.innerHTML = "";
+
       mediaType = file.type;
       mediaName = file.name;
       fileToSend = null;
