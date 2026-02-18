@@ -183,7 +183,10 @@ document.getElementById("send").onclick = async () => {
       const sref = sRef(storage, path);
    const uploadTask = uploadBytesResumable(sref, file);
 
-uploadStatus.style.display = "block";
+uploadStatus.style.display = "flex";
+uploadStatus.style.opacity = "1";
+uploadStatus.style.zIndex = "9999";
+
 
 await new Promise((resolve, reject) => {
   uploadTask.on(
