@@ -120,8 +120,20 @@ document.getElementById("saveProfile").onclick = async () => {
       const file = photoInput.files[0];
       const path = `profiles/${Date.now()}_${file.name}`;
       const sref = sRef(storage, path);
-      await uploadBytes(sref, file);
-      photoURL = await getDownloadURL(sref);
+     const uploadTask = uploadBytesResumable(sref, file);
+
+await new Promise((resolve, reject) => {
+  uploadTask.on(
+    "state_changed",
+    null,
+    reject,
+    async () => {
+      photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+      resolve();
+    }
+  );
+});
+
     } catch (err) {
       alert("❌ Failed to upload photo. Try again.");
       console.error(err);
