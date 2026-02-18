@@ -27,17 +27,33 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      background: var(--bg-gradient);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      color: #1e293b;
-    }
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 
+             'Segoe UI Emoji', 'Noto Color Emoji', 
+             'Apple Color Emoji', 'Segoe UI', 
+             sans-serif;  /* ✅ Emoji-friendly fallback chain */
+  margin: 0;
+  background: var(--bg-gradient);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  color: #1e293b;
+}
+/* Force emoji rendering */
+.content, #msg, .reply-inline {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
 
-.media-preview {
+/* Ensure emojis scale properly */
+.content img.emoji, #msg img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
+    
+    .media-preview {
   position: fixed;
   bottom: 90px;
   left: 50%;
