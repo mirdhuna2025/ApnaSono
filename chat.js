@@ -1,4 +1,4 @@
-// chat.js — Merged Modern Firebase Chat (Fixed & Enhanced)
+// chat.js — Merged Modern Firebase Chat (With Logout System)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
     getDatabase, ref, push, onValue, update, remove, get
@@ -35,7 +35,7 @@ let replyToMsg = null;
 let fileToSend = null;
 
 /* ===============================
-🖼️ DOM ELEMENTS (Fixed IDs - No Spaces)
+🖼️ DOM ELEMENTS (Fixed IDs)
 ================================ */
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
@@ -64,40 +64,79 @@ const uploadStatus = document.getElementById("uploadStatus");
 const uploadText = document.getElementById("uploadText");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearChatBtn = document.getElementById("clearChatBtn");
+const logoutBtn = document.getElementById("logoutBtn"); // ✅ NEW
+
+/* ===============================
+🚪 LOGOUT FUNCTION
+================================ */
+window.logout = () => {
+    if (!confirm("🚪 Are you sure you want to logout?")) return;
+    
+    // Clear local storage
+    localStorage.removeItem("chatUser");
+    
+    // Reset state
+    user = null;
+    replyToMsg = null;
+    fileToSend = null;
+    
+    // Hide admin panel
+    if (adminPanel) adminPanel.style.display = "none";
+    
+    // Hide logout button
+    if (logoutBtn) logoutBtn.style.display = "none";
+    
+    // Show profile popup for new login
+    if (profilePopup) profilePopup.style.display = "flex";
+    
+    // Reset profile button to default
+    if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/thumbs/svg?seed=user";
+    
+    alert("✅ Logged out successfully!");
+    
+    // Reload page to clean UI state completely
+    location.reload();
+};
+
+if (logoutBtn) {
+    logoutBtn.onclick = logout;
+    // Show logout button if user is logged in
+    if (user) logoutBtn.style.display = "block";
+}
 
 /* ===============================
 📸 MEDIA SELECTION & PREVIEW
 ================================ */
-if(cameraBtn) cameraBtn.onclick = () => cameraInput.click();
-if(galleryBtn) galleryBtn.onclick = () => galleryInput.click();
+if (cameraBtn) cameraBtn.onclick = () => cameraInput.click();
+if (galleryBtn) galleryBtn.onclick = () => galleryInput.click();
 
 function handleFileSelect(file) {
     if (!file) return;
     fileToSend = file;
-    if(previewContent) previewContent.innerHTML = "";
+    if (previewContent) previewContent.innerHTML = "";
     if (file.type.startsWith("image")) {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        if(previewContent) previewContent.appendChild(img);
+        if (previewContent) previewContent.appendChild(img);
     } else if (file.type.startsWith("video")) {
         const video = document.createElement("video");
         video.src = URL.createObjectURL(file);
         video.controls = true;
-        if(previewContent) previewContent.appendChild(video);
+        if (previewContent) previewContent.appendChild(video);
     }
-    if(mediaPreview) mediaPreview.style.display = "block";
+    if (mediaPreview) mediaPreview.style.display = "block";
 }
 
-if(cameraInput) cameraInput.onchange = (e) => handleFileSelect(e.target.files[0]);
-if(galleryInput) galleryInput.onchange = (e) => handleFileSelect(e.target.files[0]);
+if (cameraInput) cameraInput.onchange = (e) => handleFileSelect(e.target.files[0]);
+if (galleryInput) galleryInput.onchange = (e) => handleFileSelect(e.target.files[0]);
 
-if(closePreview) {
+if (closePreview) {
     closePreview.onclick = () => {
-        if(mediaPreview) mediaPreview.style.display = "none";
-        if(previewContent) previewContent.innerHTML = "";
+        if (mediaPreview) mediaPreview.style.display = "none";
+        if (previewContent) previewContent.innerHTML = "";
         fileToSend = null;
-        if(cameraInput) cameraInput.value = "";
-        if(galleryInput) galleryInput.value = "";
+        if (cameraInput) cameraInput.value = "";
+        if (galleryInput) galleryInput.value = "";
     };
 }
 
@@ -109,19 +148,19 @@ if (photoBtn && photoInput) {
 👤 PROFILE SETUP
 ================================ */
 const profileClose = document.getElementById("profileClose");
-if(profileClose) profileClose.onclick = () => {
-    if(profilePopup) profilePopup.style.display = "none";
+if (profileClose) profileClose.onclick = () => {
+    if (profilePopup) profilePopup.style.display = "none";
 };
 
 if (!user && profilePopup) profilePopup.style.display = "flex";
 if (user?.photoURL && profileBtn) profileBtn.src = user.photoURL;
 
-if(profileBtn) profileBtn.onclick = () => {
-    if(profilePopup) profilePopup.style.display = "flex";
+if (profileBtn) profileBtn.onclick = () => {
+    if (profilePopup) profilePopup.style.display = "flex";
 };
 
 const saveProfileBtn = document.getElementById("saveProfile");
-if(saveProfileBtn) saveProfileBtn.onclick = async () => {
+if (saveProfileBtn) saveProfileBtn.onclick = async () => {
     const name = nameInput.value.trim();
     if (!name) return alert("⚠️ Please enter your name");
     
@@ -150,42 +189,44 @@ if(saveProfileBtn) saveProfileBtn.onclick = async () => {
     user = { name, photoURL, isAdmin: wasAdmin };
     localStorage.setItem("chatUser", JSON.stringify(user));
     
-    if(profilePopup) profilePopup.style.display = "none";
-    if(profileBtn) profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
+    if (profilePopup) profilePopup.style.display = "none";
+    if (profileBtn) profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
     
-    if(wasAdmin && adminPanel) adminPanel.style.display = "block";
+    // Show logout button now that user is logged in
+    if (logoutBtn) logoutBtn.style.display = "block";
+    
+    if (wasAdmin && adminPanel) adminPanel.style.display = "block";
 };
 
 /* ===============================
 🔐 ADMIN LOGIN
 ================================ */
 const adminClose = document.getElementById("adminClose");
-if(adminClose) adminClose.onclick = () => {
-    if(adminPopup) adminPopup.style.display = "none";
+if (adminClose) adminClose.onclick = () => {
+    if (adminPopup) adminPopup.style.display = "none";
 };
 
-if(adminBtn) adminBtn.onclick = () => {
-    if(adminPopup) adminPopup.style.display = "flex";
+if (adminBtn) adminBtn.onclick = () => {
+    if (adminPopup) adminPopup.style.display = "flex";
 };
 
 const adminLoginBtn = document.getElementById("adminLoginBtn");
-if(adminLoginBtn) adminLoginBtn.onclick = async () => {
+if (adminLoginBtn) adminLoginBtn.onclick = () => {
     if (adminPassInput.value === "sanu0000") {
         user = { name: "Admin", photoURL: "", isAdmin: true };
         localStorage.setItem("chatUser", JSON.stringify(user));
-        if(adminPopup) adminPopup.style.display = "none";
-        if(adminPanel) adminPanel.style.display = "block";
-        if(profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
+        if (adminPopup) adminPopup.style.display = "none";
+        if (adminPanel) adminPanel.style.display = "block";
+        if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
+        if (logoutBtn) logoutBtn.style.display = "block";
         alert("✅ Admin login successful!");
         loadAnalytics();
-        const snapshot = await get(ref(db, "messages")); // ✅ now allowed
+        const snapshot = await get(ref(db, "messages"));
         renderMessages(snapshot.val());
     } else {
         alert("❌ Wrong password. Try again.");
     }
 };
-
-
 
 /* ===============================
 🚫 BAN SYSTEM
@@ -209,9 +250,9 @@ window.banUser = async (username) => {
 /* ===============================
 ✉️ SEND MESSAGE
 ================================ */
-if(sendBtn) sendBtn.onclick = async () => {
+if (sendBtn) sendBtn.onclick = async () => {
     if (!user) {
-        if(profilePopup) profilePopup.style.display = "flex";
+        if (profilePopup) profilePopup.style.display = "flex";
         return;
     }
     
@@ -232,7 +273,7 @@ if(sendBtn) sendBtn.onclick = async () => {
             const sref = sRef(storage, storagePath);
             const uploadTask = uploadBytesResumable(sref, file);
             
-            if(uploadStatus) {
+            if (uploadStatus) {
                 uploadStatus.style.display = "flex";
                 uploadStatus.style.opacity = "1";
                 uploadStatus.style.zIndex = "9999";
@@ -243,7 +284,7 @@ if(sendBtn) sendBtn.onclick = async () => {
                     "state_changed",
                     (snapshot) => {
                         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                        if(uploadText) uploadText.innerText = `Uploading... ${progress}%`;
+                        if (uploadText) uploadText.innerText = `Uploading... ${progress}%`;
                     },
                     (error) => reject(error),
                     async () => {
@@ -253,15 +294,15 @@ if(sendBtn) sendBtn.onclick = async () => {
                 );
             });
 
-            if(uploadStatus) uploadStatus.style.display = "none";
-            if(mediaPreview) mediaPreview.style.display = "none";
-            if(previewContent) previewContent.innerHTML = "";
+            if (uploadStatus) uploadStatus.style.display = "none";
+            if (mediaPreview) mediaPreview.style.display = "none";
+            if (previewContent) previewContent.innerHTML = "";
             
             mediaType = file.type;
             mediaName = file.name;
             fileToSend = null;
-            if(cameraInput) cameraInput.value = ""; 
-            if(galleryInput) galleryInput.value = "";
+            if (cameraInput) cameraInput.value = ""; 
+            if (galleryInput) galleryInput.value = "";
         }
 
         const newMsg = {
@@ -280,11 +321,11 @@ if(sendBtn) sendBtn.onclick = async () => {
         };
 
         await push(ref(db, "messages"), newMsg);
-        if(msgInput) msgInput.value = "";
+        if (msgInput) msgInput.value = "";
     } catch (err) {
         alert("❌ Failed to send message. Check connection.");
         console.error(err);
-        if(uploadStatus) uploadStatus.style.display = "none";
+        if (uploadStatus) uploadStatus.style.display = "none";
     }
 };
 
@@ -292,22 +333,22 @@ if(sendBtn) sendBtn.onclick = async () => {
 💬 REPLIES
 ================================ */
 const replyClose = document.getElementById("replyClose");
-if(replyClose) replyClose.onclick = () => {
-    if(replyPopup) replyPopup.style.display = "none";
+if (replyClose) replyClose.onclick = () => {
+    if (replyPopup) replyPopup.style.display = "none";
     replyToMsg = null;
 };
 
 window.replyMessage = (key) => {
     replyToMsg = key;
-    if(replyPopup) replyPopup.style.display = "flex";
-    if(replyText) {
+    if (replyPopup) replyPopup.style.display = "flex";
+    if (replyText) {
         replyText.value = "";
         replyText.focus();
     }
 };
 
 const sendReplyBtn = document.getElementById("sendReply");
-if(sendReplyBtn) sendReplyBtn.onclick = async () => {
+if (sendReplyBtn) sendReplyBtn.onclick = async () => {
     if (!replyText.value.trim() || !replyToMsg) return;
     try {
         const replyRef = ref(db, `messages/${replyToMsg}/replies`);
@@ -316,7 +357,7 @@ if(sendReplyBtn) sendReplyBtn.onclick = async () => {
             text: replyText.value.trim(),
             timestamp: Date.now()
         });
-        if(replyPopup) replyPopup.style.display = "none";
+        if (replyPopup) replyPopup.style.display = "none";
         replyToMsg = null;
     } catch (err) {
         alert("❌ Failed to send reply.");
@@ -407,19 +448,19 @@ window.clearChat = async () => {
     }
 };
 
-if(clearChatBtn) clearChatBtn.onclick = clearChat;
+if (clearChatBtn) clearChatBtn.onclick = clearChat;
 
 /* ===============================
 🖼️ MEDIA MODAL
 ================================ */
 const mediaClose = document.getElementById("mediaClose");
-if(mediaClose) mediaClose.onclick = () => {
-    if(mediaModal) mediaModal.style.display = "none";
-    if(mediaContent) mediaContent.innerHTML = "";
+if (mediaClose) mediaClose.onclick = () => {
+    if (mediaModal) mediaModal.style.display = "none";
+    if (mediaContent) mediaContent.innerHTML = "";
 };
 
 window.showMedia = (url, type) => {
-    if(!mediaContent || !mediaModal) return;
+    if (!mediaContent || !mediaModal) return;
     mediaContent.innerHTML = "";
     if (type?.startsWith("image")) {
         mediaContent.innerHTML = `<img src="${url}" alt="Shared media" style="max-width:100%; max-height:80vh;" />`;
@@ -541,7 +582,7 @@ onValue(ref(db, "messages"), (snapshot) => {
 /* ===============================
 🔄 MANUAL REFRESH
 ================================ */
-if(refreshBtn) refreshBtn.onclick = async () => {
+if (refreshBtn) refreshBtn.onclick = async () => {
     try {
         const snapshot = await get(ref(db, "messages"));
         renderMessages(snapshot.val());
@@ -556,6 +597,9 @@ if(refreshBtn) refreshBtn.onclick = async () => {
 ✅ INITIAL LOAD
 ================================ */
 if (user?.isAdmin) {
-    if(adminPanel) adminPanel.style.display = "block";
+    if (adminPanel) adminPanel.style.display = "block";
     loadAnalytics();
+}
+if (user && logoutBtn) {
+    logoutBtn.style.display = "block";
 }
