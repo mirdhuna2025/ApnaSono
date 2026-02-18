@@ -96,7 +96,7 @@ document.getElementById("adminLoginBtn").onclick = () => {
     adminPanel.style.display = "block";
     profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
     alert("✅ Admin login successful!");
-    renderMessages(); // refresh to show delete buttons
+     // refresh to show delete buttons
   } else {
     alert("❌ Wrong password. Try again.");
   }
