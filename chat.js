@@ -48,6 +48,12 @@ const replyText = document.getElementById("replyText");
 const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
 const photoBtn = document.getElementById("photoBtn");
+const mediaPreview = document.getElementById("mediaPreview");
+const previewContent = document.getElementById("previewContent");
+const closePreview = document.getElementById("closePreview");
+const uploadStatus = document.getElementById("uploadStatus");
+const uploadText = document.getElementById("uploadText");
+
 
 // 📸 Media Selection
 cameraBtn.onclick = () => cameraInput.click();
