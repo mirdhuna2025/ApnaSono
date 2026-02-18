@@ -211,7 +211,7 @@ if (adminBtn) adminBtn.onclick = () => {
 };
 
 const adminLoginBtn = document.getElementById("adminLoginBtn");
-if (adminLoginBtn) adminLoginBtn.onclick = () => {
+if (adminLoginBtn) adminLoginBtn.onclick =  async () => {
     if (adminPassInput.value === "sanu0000") {
         user = { name: "Admin", photoURL: "", isAdmin: true };
         localStorage.setItem("chatUser", JSON.stringify(user));
