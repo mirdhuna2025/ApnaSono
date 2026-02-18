@@ -1,34 +1,43 @@
-// chat.js — Modern Firebase Chat (Mirdhuna Chat • Nov 21, 2025)
+// chat.js — Modern Firebase Chat (Mirdhuna Chat • Full Admin Final 2026)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase, ref, push, onValue, update, remove, get
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
-  getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
+  getStorage, ref as sRef,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// 🔐 Firebase Config (Same as yours)
+/* ===============================
+   🔐 FIREBASE CONFIG (USE YOURS)
+================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain: "mirdhuna-25542.firebaseapp.com",
-  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-  projectId: "mirdhuna-25542",
-  
-  storageBucket: "mirdhuna-25542.firebasestorage.app",  // ✅ CORRECT!
-  messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// 🧠 State
+/* ===============================
+   🧠 STATE
+================================ */
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 let replyToMsg = null;
 let fileToSend = null;
 
-// 🖼️ DOM Elements
+/* ===============================
+   🖼️ DOM ELEMENTS
+================================ */
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msg");
 const cameraBtn = document.getElementById("cameraBtn");
@@ -53,15 +62,16 @@ const previewContent = document.getElementById("previewContent");
 const closePreview = document.getElementById("closePreview");
 const uploadStatus = document.getElementById("uploadStatus");
 const uploadText = document.getElementById("uploadText");
+const refreshBtn = document.getElementById("refreshBtn");
 
-
-// 📸 Media Selection
+/* ===============================
+   📸 MEDIA SELECTION
+================================ */
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
 
 function handleFileSelect(file) {
   if (!file) return;
-
   fileToSend = file;
   previewContent.innerHTML = "";
 
@@ -69,8 +79,7 @@ function handleFileSelect(file) {
     const img = document.createElement("img");
     img.src = URL.createObjectURL(file);
     previewContent.appendChild(img);
-  } 
-  else if (file.type.startsWith("video")) {
+  } else if (file.type.startsWith("video")) {
     const video = document.createElement("video");
     video.src = URL.createObjectURL(file);
     video.controls = true;
@@ -80,13 +89,8 @@ function handleFileSelect(file) {
   mediaPreview.style.display = "block";
 }
 
-cameraInput.onchange = (e) => {
-  handleFileSelect(e.target.files[0]);
-};
-
-galleryInput.onchange = (e) => {
-  handleFileSelect(e.target.files[0]);
-};
+cameraInput.onchange = (e) => handleFileSelect(e.target.files[0]);
+galleryInput.onchange = (e) => handleFileSelect(e.target.files[0]);
 
 closePreview.onclick = () => {
   mediaPreview.style.display = "none";
@@ -94,18 +98,16 @@ closePreview.onclick = () => {
   fileToSend = null;
 };
 
-
-
-
 if (photoBtn && photoInput) {
   photoBtn.onclick = () => photoInput.click();
 }
 
+/* ===============================
+   👤 PROFILE SETUP
+================================ */
+document.getElementById("profileClose").onclick = () =>
+  profilePopup.style.display = "none";
 
-
-
-// 👤 Profile Setup
-document.getElementById("profileClose").onclick = () => profilePopup.style.display = "none";
 if (!user) profilePopup.style.display = "flex";
 if (user?.photoURL) profileBtn.src = user.photoURL;
 
@@ -113,42 +115,42 @@ profileBtn.onclick = () => profilePopup.style.display = "flex";
 
 document.getElementById("saveProfile").onclick = async () => {
   const name = nameInput.value.trim();
-  if (!name) return alert("⚠️ Please enter your name");
+  if (!name) return alert("⚠️ Enter your name");
+
   let photoURL = user?.photoURL || "";
+
   if (photoInput.files[0]) {
-    try {
-      const file = photoInput.files[0];
-      const path = `profiles/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
-     const uploadTask = uploadBytesResumable(sref, file);
+    const file = photoInput.files[0];
+    const path = `profiles/${Date.now()}_${file.name}`;
+    const sref = sRef(storage, path);
+    const uploadTask = uploadBytesResumable(sref, file);
 
-await new Promise((resolve, reject) => {
-  uploadTask.on(
-    "state_changed",
-    null,
-    reject,
-    async () => {
-      photoURL = await getDownloadURL(uploadTask.snapshot.ref);
-      resolve();
-    }
-  );
-});
-
-    } catch (err) {
-      alert("❌ Failed to upload photo. Try again.");
-      console.error(err);
-      return;
-    }
+    await new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        null,
+        reject,
+        async () => {
+          photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve();
+        }
+      );
+    });
   }
+
   user = { name, photoURL, isAdmin: false };
   localStorage.setItem("chatUser", JSON.stringify(user));
+  profileBtn.src =
+    photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
   profilePopup.style.display = "none";
-  profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
- 
 };
 
-// 🔐 Admin Login
-document.getElementById("adminClose").onclick = () => adminPopup.style.display = "none";
+/* ===============================
+   🔐 ADMIN LOGIN (PASSWORD: sanu0000)
+================================ */
+document.getElementById("adminClose").onclick = () =>
+  adminPopup.style.display = "none";
+
 adminBtn.onclick = () => adminPopup.style.display = "flex";
 
 document.getElementById("adminLoginBtn").onclick = () => {
@@ -157,89 +159,141 @@ document.getElementById("adminLoginBtn").onclick = () => {
     localStorage.setItem("chatUser", JSON.stringify(user));
     adminPopup.style.display = "none";
     adminPanel.style.display = "block";
-    profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
     alert("✅ Admin login successful!");
-     // refresh to show delete buttons
+    loadAnalytics();
   } else {
-    alert("❌ Wrong password. Try again.");
+    alert("❌ Wrong password.");
   }
 };
 
-// ✉️ Send Message
+/* ===============================
+   🚫 BAN CHECK
+================================ */
+async function isBanned(username) {
+  const snap = await get(ref(db, `bannedUsers/${username}`));
+  return snap.exists();
+}
+
+/* ===============================
+   ✉️ SEND MESSAGE
+================================ */
 document.getElementById("send").onclick = async () => {
-  if (!user) {
-    profilePopup.style.display = "flex";
+  if (!user) return;
+
+  if (await isBanned(user.name)) {
+    alert("🚫 You are banned.");
     return;
   }
 
   const text = msgInput.value.trim();
   if (!text && !fileToSend) return;
 
-  try {
-    let mediaUrl = "", mediaType = "", mediaName = "";
-    if (fileToSend) {
-      const file = fileToSend;
-      const path = `uploads/${Date.now()}_${file.name}`;
-      const sref = sRef(storage, path);
-   const uploadTask = uploadBytesResumable(sref, file);
+  let mediaUrl = "";
+  let mediaType = "";
 
-uploadStatus.style.display = "flex";
-uploadStatus.style.opacity = "1";
-uploadStatus.style.zIndex = "9999";
+  if (fileToSend) {
+    const path = `uploads/${Date.now()}_${fileToSend.name}`;
+    const sref = sRef(storage, path);
+    const uploadTask = uploadBytesResumable(sref, fileToSend);
 
+    uploadStatus.style.display = "flex";
 
-await new Promise((resolve, reject) => {
-  uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-      const progress = Math.round(
-        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+    await new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          uploadText.innerText = `Uploading... ${progress}%`;
+        },
+        reject,
+        async () => {
+          mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          mediaType = fileToSend.type;
+          resolve();
+        }
       );
-      uploadText.innerText = `Uploading... ${progress}%`;
-    },
-    (error) => {
-      reject(error);
-    },
-    async () => {
-      mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
-      resolve();
-    }
-  );
-});
+    });
 
-uploadStatus.style.display = "none";
-mediaPreview.style.display = "none";
-previewContent.innerHTML = "";
-
-      mediaType = file.type;
-      mediaName = file.name;
-      fileToSend = null;
-      cameraInput.value = ""; galleryInput.value = "";
-    }
-
-    const newMsg = {
-      user: user.name,
-      photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
-      isAdmin: user.isAdmin || false,
-      text: text || "",
-      mediaUrl,
-      mediaType,
-      mediaName,
-      timestamp: Date.now(),
-      replies: {},
-      likes: 0,
-      dislikes: 0
-    };
-
-    await push(ref(db, "messages"), newMsg);
-    msgInput.value = "";
-  } catch (err) {
-    alert("❌ Failed to send message. Check connection.");
-    console.error(err);
+    uploadStatus.style.display = "none";
+    mediaPreview.style.display = "none";
+    fileToSend = null;
   }
+
+  const newMsg = {
+    user: user.name,
+    photo: user.photoURL,
+    isAdmin: user.isAdmin || false,
+    text: text || "",
+    mediaUrl,
+    mediaType,
+    timestamp: Date.now(),
+    replies: {},
+    likes: 0,
+    dislikes: 0
+  };
+
+  await push(ref(db, "messages"), newMsg);
+  msgInput.value = "";
 };
 
-// 💬 Reply Handling
+/* ===============================
+   👍👎 REACTIONS
+================================ */
+window.likeMessage = async (key) => {
+  const snap = await get(ref(db, `messages/${key}`));
+  if (!snap.exists()) return;
+  const val = snap.val();
+  await update(ref(db, `messages/${key}`), {
+    likes: (val.likes || 0) + 1
+  });
+};
+
+window.dislikeMessage = async (key) => {
+  const snap = await get(ref(db, `messages/${key}`));
+  if (!snap.exists()) return;
+  const val = snap.val();
+  await update(ref(db, `messages/${key}`), {
+    dislikes: (val.dislikes || 0) + 1
+  });
+};
+
+/* ===============================
+   ✏️ EDIT MESSAGE (ADMIN)
+================================ */
+window.editMessage = async (key, oldText) => {
+  if (!user?.isAdmin) return;
+  const newText = prompt("Edit message:", oldText);
+  if (newText === null) return;
+  await update(ref(db, `messages/${key}`), { text: newText });
+};
+
+/* ===============================
+   🗑️ DELETE MESSAGE + MEDIA
+================================ */
+window.deleteMessage = async (key) => {
+  if (!user?.isAdmin) return;
+  if (!confirm("Delete this message?")) return;
+
+  const snap = await get(ref(db, `messages/${key}`));
+  if (!snap.exists()) return;
+
+  const msg = snap.val();
+
+  if (msg.mediaUrl) {
+    try {
+      const fileRef = sRef(storage, msg.mediaUrl);
+      await deleteObject(fileRef);
+    } catch {}
+  }
+
+  await remove(ref(db, `messages/${key}`));
+};
+
+/* ===============================
+   💬 REPLIES
+================================ */
 document.getElementById("replyClose").onclick = () => {
   replyPopup.style.display = "none";
   replyToMsg = null;
@@ -248,178 +302,120 @@ document.getElementById("replyClose").onclick = () => {
 window.replyMessage = (key) => {
   replyToMsg = key;
   replyPopup.style.display = "flex";
-  replyText.value = "";
-  replyText.focus();
 };
 
 document.getElementById("sendReply").onclick = async () => {
-  if (!replyText.value.trim() || !replyToMsg) return;
-  try {
-    const replyRef = ref(db, `messages/${replyToMsg}/replies`);
-    await push(replyRef, {
-      user: user.name,
-      text: replyText.value.trim(),
-      timestamp: Date.now()
-    });
-    replyPopup.style.display = "none";
-    replyToMsg = null;
-  } catch (err) {
-    alert("❌ Failed to send reply.");
-    console.error(err);
-  }
+  if (!replyText.value.trim()) return;
+
+  await push(ref(db, `messages/${replyToMsg}/replies`), {
+    user: user.name,
+    text: replyText.value.trim(),
+    timestamp: Date.now()
+  });
+
+  replyPopup.style.display = "none";
+  replyText.value = "";
 };
 
-// 👍👎 Reactions
-window.likeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { likes: (val.likes || 0) + 1 });
-  } catch (err) { console.error(err); }
+/* ===============================
+   🚫 BAN USER
+================================ */
+window.banUser = async (username) => {
+  if (!user?.isAdmin) return;
+  await update(ref(db, `bannedUsers/${username}`), true);
+  alert(username + " banned!");
 };
 
-window.dislikeMessage = async (key) => {
-  try {
-    const msgRef = ref(db, `messages/${key}`);
-    const snap = await get(msgRef);
-    if (!snap.exists()) return;
-    const val = snap.val();
-    await update(msgRef, { dislikes: (val.dislikes || 0) + 1 });
-  } catch (err) { console.error(err); }
+/* ===============================
+   🧹 CLEAR CHAT
+================================ */
+window.clearChat = async () => {
+  if (!user?.isAdmin) return;
+  if (!confirm("Delete ALL messages?")) return;
+  await remove(ref(db, "messages"));
 };
 
-// 🗑️ Delete (Admin only)
-window.deleteMessage = async (key) => {
-  if (!user?.isAdmin) return alert("🔒 Only admins can delete messages.");
-  if (!confirm("⚠️ Are you sure you want to delete this message? This cannot be undone.")) return;
-  try {
-    await remove(ref(db, `messages/${key}`));
-  } catch (err) {
-    alert("❌ Delete failed.");
-    console.error(err);
-  }
-};
-
-// 🖼️ Media Modal
-document.getElementById("mediaClose").onclick = () => {
-  mediaModal.style.display = "none";
-  mediaContent.innerHTML = "";
-};
-
-window.showMedia = (url, type) => {
-  mediaContent.innerHTML = "";
-  if (type?.startsWith("image")) {
-    mediaContent.innerHTML = `<img src="${url}" alt="Shared media" />`;
-  } else if (type?.startsWith("video")) {
-    mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
-  } else {
-    mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
-  }
-  mediaModal.style.display = "flex";
-};
-
-// 🕒 Format timestamp as "11/21/2025, 10:56:08 PM"
-function formatTimestamp(ts) {
-  if (!ts) return "Just now";
-  const d = new Date(ts);
-  return d.toLocaleString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  }).replace(",", ",");
+/* ===============================
+   📊 ANALYTICS
+================================ */
+async function loadAnalytics() {
+  if (!user?.isAdmin) return;
+  const snap = await get(ref(db, "messages"));
+  const total = snap.exists() ? Object.keys(snap.val()).length : 0;
+  console.log("📊 Total Messages:", total);
 }
 
-// 🎨 Render Messages
+/* ===============================
+   🎨 RENDER
+================================ */
 function renderMessages(data) {
-  if (!chatBox) return;
   chatBox.innerHTML = "";
   const messages = data || {};
 
-  // Sort chronologically
-  const sorted = Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp);
+  const sorted = Object.entries(messages)
+    .sort((a, b) => a[1].timestamp - b[1].timestamp);
 
   sorted.forEach(([key, msg]) => {
     const div = document.createElement("div");
     div.className = "message";
 
-    // Build replies HTML
     let repliesHTML = "";
-    if (msg.replies && Object.keys(msg.replies).length > 0) {
-      repliesHTML = `<div class="replies-section"><strong>Replies:</strong>`;
-      Object.values(msg.replies).forEach(r => {
-        repliesHTML += `<div class="reply-inline"><strong>${r.user}</strong>: ${r.text}</div>`;
+    if (msg.replies) {
+      Object.entries(msg.replies).forEach(([rKey, r]) => {
+        repliesHTML += `
+          <div class="reply-inline">
+            <strong>${r.user}</strong>: ${r.text}
+            ${user?.isAdmin ? `<button onclick="deleteReply('${key}','${rKey}')">🗑️</button>` : ""}
+          </div>`;
       });
-      repliesHTML += `</div>`;
-    }
-
-    // Build media HTML
-    let mediaHTML = "";
-    if (msg.mediaUrl) {
-      if (msg.mediaType?.startsWith("video")) {
-        mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" poster="${msg.mediaUrl.replace('.mp4', '.jpg')}" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')"></video>`;
-      } else {
-        mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')"/>`;
-      }
     }
 
     div.innerHTML = `
       <div class="header">
-        <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}">
-        <div>
-          <div class="name-line">
-            <strong>${msg.user || 'Anonymous'}</strong>
-            ${msg.isAdmin ? '<span class="admin-tag">Admin</span>' : ''}
-          </div>
-          <div class="meta">${formatTimestamp(msg.timestamp)}</div>
-        </div>
+        <img class="profile" src="${msg.photo}" />
+        <strong>${msg.user}</strong>
+        ${msg.isAdmin ? '<span class="admin-tag">Admin</span>' : ""}
       </div>
-      ${msg.text ? `<div class="content">${msg.text}</div>` : ''}
-      ${mediaHTML}
+      <div>${msg.text || ""}</div>
+      ${msg.mediaUrl ? `<img src="${msg.mediaUrl}" class="media-content"/>` : ""}
+      <div>${new Date(msg.timestamp).toLocaleString()}</div>
+      <button onclick="replyMessage('${key}')">💬</button>
+      <button onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
+      <button onclick="dislikeMessage('${key}')">👎 ${msg.dislikes || 0}</button>
+      ${user?.isAdmin ? `
+        <button onclick="editMessage('${key}', \`${msg.text || ""}\`)">✏️</button>
+        <button onclick="deleteMessage('${key}')">🗑️</button>
+        <button onclick="banUser('${msg.user}')">🚫</button>
+      ` : ""}
       ${repliesHTML}
-      <div class="actions">
-        <button class="reply-btn" onclick="replyMessage('${key}')">💬 Reply</button>
-        <button class="like-btn" onclick="likeMessage('${key}')">👍 ${msg.likes || 0}</button>
-        <button class="dislike-btn" onclick="dislikeMessage('${key}')">👎 ${msg.dislikes || 0}</button>
-        ${user?.isAdmin ? `<button class="delete-btn" onclick="deleteMessage('${key}')">🗑️ Delete</button>` : ''}
-      </div>
     `;
+
     chatBox.appendChild(div);
   });
 
-  // Auto-scroll to bottom
-  setTimeout(() => {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }, 100);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 🔄 Real-time listener
+/* ===============================
+   🔄 REALTIME LISTENER
+================================ */
 onValue(ref(db, "messages"), (snapshot) => {
   renderMessages(snapshot.val());
-}, (error) => {
-  console.error("Firebase sync error:", error);
-  alert("⚠️ Connection issue. Try refreshing.");
 });
 
-// ♻️ Manual Refresh
-document.getElementById("refreshBtn").onclick = async () => {
-  try {
-    const snapshot = await get(ref(db, "messages"));
-    renderMessages(snapshot.val());
-    alert("✅ Chat refreshed!");
-  } catch (err) {
-    alert("❌ Refresh failed. Check internet.");
-    console.error(err);
-  }
+/* ===============================
+   🔄 MANUAL REFRESH
+================================ */
+refreshBtn.onclick = async () => {
+  const snapshot = await get(ref(db, "messages"));
+  renderMessages(snapshot.val());
+  alert("✅ Chat refreshed!");
 };
 
-// ✅ Initial load
-if (user?.isAdmin) adminPanel.style.display = "block";
-
-
-
+/* ===============================
+   INIT
+================================ */
+if (user?.isAdmin) {
+  adminPanel.style.display = "block";
+  loadAnalytics();
+}
