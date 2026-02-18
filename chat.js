@@ -61,7 +61,7 @@ galleryInput.onchange = (e) => {
   fileToSend = e.target.files[0] || null;
 };
 
-const photoBtn = document.getElementById("photoBtn");
+
 const photoInput = document.getElementById("photo");
 
 if (photoBtn && photoInput) {
