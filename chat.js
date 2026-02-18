@@ -169,7 +169,7 @@ if(adminBtn) adminBtn.onclick = () => {
 };
 
 const adminLoginBtn = document.getElementById("adminLoginBtn");
-if(adminLoginBtn) adminLoginBtn.onclick = () => {
+if(adminLoginBtn) adminLoginBtn.onclick = async () => {
     if (adminPassInput.value === "sanu0000") {
         user = { name: "Admin", photoURL: "", isAdmin: true };
         localStorage.setItem("chatUser", JSON.stringify(user));
@@ -178,12 +178,14 @@ if(adminLoginBtn) adminLoginBtn.onclick = () => {
         if(profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
         alert("✅ Admin login successful!");
         loadAnalytics();
-        const snapshot = await get(ref(db, "messages"));
+        const snapshot = await get(ref(db, "messages")); // ✅ now allowed
         renderMessages(snapshot.val());
     } else {
         alert("❌ Wrong password. Try again.");
     }
 };
+
+
 
 /* ===============================
 🚫 BAN SYSTEM
