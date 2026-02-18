@@ -85,7 +85,7 @@ document.getElementById("saveProfile").onclick = async () => {
   localStorage.setItem("chatUser", JSON.stringify(user));
   profilePopup.style.display = "none";
   profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
-  renderMessages(); // refresh UI
+ 
 };
 
 // 🔐 Admin Login
