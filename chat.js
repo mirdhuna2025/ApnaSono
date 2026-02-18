@@ -1,14 +1,14 @@
 // chat.js — Merged Modern Firebase Chat (With Logout System)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js  ";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
     getDatabase, ref, push, onValue, update, remove, get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js  ";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
     getStorage, ref as sRef,
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js  ";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /* ===============================
 🔐 FIREBASE CONFIG
@@ -16,7 +16,7 @@ import {
 const firebaseConfig = {
     apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
     authDomain: "mirdhuna-25542.firebaseapp.com",
-    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com  ",
+    databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
     projectId: "mirdhuna-25542",
     storageBucket: "mirdhuna-25542.firebasestorage.app",
     messagingSenderId: "575924409876",
@@ -48,6 +48,10 @@ const profilePopup = document.getElementById("profilePopup");
 const profileBtn = document.getElementById("profileBtn");
 const nameInput = document.getElementById("name");
 const photoInput = document.getElementById("photo");
+const adminPopup = document.getElementById("adminPopup");
+const adminBtn = document.getElementById("adminBtn");
+const adminPassInput = document.getElementById("adminPass");
+const adminPanel = document.getElementById("adminPanel");
 const replyPopup = document.getElementById("replyPopup");
 const replyText = document.getElementById("replyText");
 const mediaModal = document.getElementById("mediaModal");
@@ -76,6 +80,9 @@ window.logout = () => {
     replyToMsg = null;
     fileToSend = null;
     
+    // Hide admin panel
+    if (adminPanel) adminPanel.style.display = "none";
+    
     // Hide logout button
     if (logoutBtn) logoutBtn.style.display = "none";
     
@@ -83,7 +90,7 @@ window.logout = () => {
     if (profilePopup) profilePopup.style.display = "flex";
     
     // Reset profile button to default
-    if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/thumbs/svg?seed=user  ";
+    if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/thumbs/svg?seed=user";
     
     alert("✅ Logged out successfully!");
     
@@ -178,14 +185,66 @@ if (saveProfileBtn) saveProfileBtn.onclick = async () => {
         }
     }
     
-    user = { name, photoURL };
+    const wasAdmin = user?.isAdmin || false;
+    user = { name, photoURL, isAdmin: wasAdmin };
     localStorage.setItem("chatUser", JSON.stringify(user));
     
     if (profilePopup) profilePopup.style.display = "none";
-    if (profileBtn) profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${name}`;
+    if (profileBtn) profileBtn.src = photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${name}`;
     
     // Show logout button now that user is logged in
     if (logoutBtn) logoutBtn.style.display = "block";
+    
+    if (wasAdmin && adminPanel) adminPanel.style.display = "block";
+};
+
+/* ===============================
+🔐 ADMIN LOGIN
+================================ */
+const adminClose = document.getElementById("adminClose");
+if (adminClose) adminClose.onclick = () => {
+    if (adminPopup) adminPopup.style.display = "none";
+};
+
+if (adminBtn) adminBtn.onclick = () => {
+    if (adminPopup) adminPopup.style.display = "flex";
+};
+
+const adminLoginBtn = document.getElementById("adminLoginBtn");
+if (adminLoginBtn) adminLoginBtn.onclick =  async () => {
+    if (adminPassInput.value === "sanu0000") {
+        user = { name: "Admin", photoURL: "", isAdmin: true };
+        localStorage.setItem("chatUser", JSON.stringify(user));
+        if (adminPopup) adminPopup.style.display = "none";
+        if (adminPanel) adminPanel.style.display = "block";
+        if (profileBtn) profileBtn.src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=admin";
+        if (logoutBtn) logoutBtn.style.display = "block";
+        alert("✅ Admin login successful!");
+        loadAnalytics();
+        const snapshot = await get(ref(db, "messages"));
+        renderMessages(snapshot.val());
+    } else {
+        alert("❌ Wrong password. Try again.");
+    }
+};
+
+/* ===============================
+🚫 BAN SYSTEM
+================================ */
+async function isBanned(username) {
+    try {
+        const snap = await get(ref(db, `bannedUsers/${username}`));
+        return snap.exists();
+    } catch (e) {
+        return false;
+    }
+}
+
+window.banUser = async (username) => {
+    if (!user?.isAdmin) return alert("🔒 Admins only");
+    if (!confirm(`Ban user ${username}?`)) return;
+    await update(ref(db, `bannedUsers/${username}`), true);
+    alert(`${username} has been banned!`);
 };
 
 /* ===============================
@@ -194,6 +253,11 @@ if (saveProfileBtn) saveProfileBtn.onclick = async () => {
 if (sendBtn) sendBtn.onclick = async () => {
     if (!user) {
         if (profilePopup) profilePopup.style.display = "flex";
+        return;
+    }
+    
+    if (await isBanned(user.name)) {
+        alert("🚫 You are banned from chatting.");
         return;
     }
 
@@ -243,7 +307,8 @@ if (sendBtn) sendBtn.onclick = async () => {
 
         const newMsg = {
             user: user.name,
-            photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=  ${user.name}`,
+            photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
+            isAdmin: user.isAdmin || false,
             text: text || "",
             mediaUrl,
             mediaType,
@@ -300,6 +365,16 @@ if (sendReplyBtn) sendReplyBtn.onclick = async () => {
     }
 };
 
+window.deleteReply = async (msgKey, replyKey) => {
+    if (!user?.isAdmin) return alert("🔒 Admins only");
+    if (!confirm("Delete this reply?")) return;
+    try {
+        await remove(ref(db, `messages/${msgKey}/replies/${replyKey}`));
+    } catch (err) {
+        alert("❌ Failed to delete reply");
+    }
+};
+
 /* ===============================
 👍👎 REACTIONS
 ================================ */
@@ -324,20 +399,27 @@ window.dislikeMessage = async (key) => {
 };
 
 /* ===============================
-🗑️ DELETE MESSAGE (Self-only)
+🗑️ DELETE & EDIT (ADMIN)
 ================================ */
+window.editMessage = async (key, oldText) => {
+    if (!user?.isAdmin) return alert("🔒 Admins only");
+    const newText = prompt("Edit message:", oldText);
+    if (newText === null || newText.trim() === "") return;
+    try {
+        await update(ref(db, `messages/${key}`), { text: newText.trim() });
+    } catch (err) {
+        alert("❌ Edit failed");
+    }
+};
+
 window.deleteMessage = async (key) => {
-    if (!confirm("⚠️ Are you sure you want to delete your message? This cannot be undone.")) return;
+    if (!user?.isAdmin) return alert("🔒 Only admins can delete messages.");
+    if (!confirm("⚠️ Are you sure? This cannot be undone.")) return;
     
     try {
         const snap = await get(ref(db, `messages/${key}`));
         if (!snap.exists()) return;
         const msg = snap.val();
-        
-        // Only allow deleting own messages
-        if (msg.user !== user?.name) {
-            return alert("🔒 You can only delete your own messages.");
-        }
         
         if (msg.storagePath) {
             try {
@@ -354,6 +436,19 @@ window.deleteMessage = async (key) => {
         console.error(err);
     }
 };
+
+window.clearChat = async () => {
+    if (!user?.isAdmin) return alert("🔒 Admins only");
+    if (!confirm("⚠️ WARNING: Delete ALL messages?")) return;
+    try {
+        await remove(ref(db, "messages"));
+        alert("✅ Chat cleared.");
+    } catch (err) {
+        alert("❌ Failed to clear chat.");
+    }
+};
+
+if (clearChatBtn) clearChatBtn.onclick = clearChat;
 
 /* ===============================
 🖼️ MEDIA MODAL
@@ -376,6 +471,18 @@ window.showMedia = (url, type) => {
     }
     mediaModal.style.display = "flex";
 };
+
+/* ===============================
+📊 ANALYTICS
+================================ */
+async function loadAnalytics() {
+    if (!user?.isAdmin) return;
+    try {
+        const snap = await get(ref(db, "messages"));
+        const total = snap.exists() ? Object.keys(snap.val()).length : 0;
+        console.log("📊 Total Messages:", total);
+    } catch (e) { console.error(e); }
+}
 
 /* ===============================
 🕒 UTILS
@@ -415,6 +522,7 @@ function renderMessages(data) {
                 repliesHTML += `
                     <div class="reply-inline" style="font-size:0.9em; margin-top:5px;">
                         <strong>${r.user}</strong>: ${r.text}
+                        ${user?.isAdmin ? `<button onclick="deleteReply('${key}','${rKey}')" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>` : ""}
                     </div>`;
             });
             repliesHTML += `</div>`;
@@ -431,10 +539,11 @@ function renderMessages(data) {
 
         div.innerHTML = `
            <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-             <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=  ' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
+             <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
              <div>
                <div class="name-line">
                  <strong>${msg.user || 'Anonymous'}</strong>
+                 ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
                </div>
                <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
              </div>
@@ -446,8 +555,10 @@ function renderMessages(data) {
              <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
              <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
              <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
-            ${msg.user === user?.name ? `
+            ${user?.isAdmin ? `
+                <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
                 <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
+                <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
             ` : ''}
            </div>
         `;
@@ -485,6 +596,11 @@ if (refreshBtn) refreshBtn.onclick = async () => {
 /* ===============================
 ✅ INITIAL LOAD
 ================================ */
+if (user?.isAdmin) {
+    if (adminPanel) adminPanel.style.display = "block";
+    loadAnalytics();
+}
 if (user && logoutBtn) {
     logoutBtn.style.display = "block";
 }
+
