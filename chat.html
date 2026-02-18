@@ -37,6 +37,49 @@
       color: #1e293b;
     }
 
+.media-preview {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  padding: 10px;
+  border-radius: 12px;
+  z-index: 999;
+  text-align: center;
+}
+
+.media-preview img,
+.media-preview video {
+  max-width: 250px;
+  max-height: 300px;
+  border-radius: 10px;
+}
+
+.close-preview {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  color: white;
+}
+
+.upload-status {
+  position: fixed;
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+
+
+
+    
     /* ========== HEADER ========== */
     header {
       position: sticky;
@@ -529,6 +572,19 @@
     </div>
   </div>
 
+<!-- Media Preview Box -->
+<div id="mediaPreview" class="media-preview" style="display:none;">
+  <span id="closePreview" class="close-preview">✖</span>
+  <div id="previewContent"></div>
+</div>
+
+<!-- Upload Progress -->
+<div id="uploadStatus" class="upload-status" style="display:none;">
+  <span id="uploadText">Uploading...</span>
+</div>
+
+
+  
   <!-- Reply Popup -->
   <div class="popup" id="replyPopup">
     <div class="popup-content">
