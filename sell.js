@@ -21,7 +21,7 @@ const ADMIN_MOBILE = "6454678866";
 let CURRENT_USER = ADMIN_MOBILE; // Default to admin
 
 // ==============================
-// UI toggle helpers (for new modal-style form)
+// UI toggle helpers
 // ==============================
 function toggleModal(show = true) {
   const modal = document.getElementById('modalBackdrop');
@@ -31,14 +31,14 @@ function toggleModal(show = true) {
 }
 
 // ==============================
-// Open Add Form (via FAB)
+// Open Add Form
 // ==============================
 window.openAddForm = () => {
-  toggleModal(true); // No login check anymore
+  toggleModal(true); // No login check
 };
 
 // ==============================
-// Image Preview (for new UI)
+// Image Preview
 // ==============================
 document.addEventListener('DOMContentLoaded', () => {
   const imageUpload = document.getElementById('imageUpload');
@@ -60,8 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==============================
-// Save Listing (Upload)
+// Save Listing (Upload) - OPTIONAL
 // ==============================
+// You can remove this entirely if Post Listing button is gone
 window.handleAddListing = async () => {
   const title = document.getElementById("title")?.value.trim();
   const price = Number(document.getElementById("price")?.value);
@@ -177,7 +178,6 @@ Thanks!
 
           <div class="btn-group">
             <a href="${waURL}" class="btn-whatsapp" target="_blank">WhatsApp</a>
-            ${item.status !== "purchased" ? `<button class="btn-purchase" style="flex:1;background:#ef4444" onclick="deleteItem('${item.id}')">Delete</button>` : ""}
             ${item.status === "active" ? `<button class="btn-purchase" onclick="markAsPurchased('${item.id}')">Purchased</button>` : ""}
           </div>
         </div>
@@ -217,22 +217,6 @@ window.markAsPurchased = async function (listingId) {
 };
 
 // ==============================
-// Delete Item
-// ==============================
-window.deleteItem = async function (listingId) {
-  if (!confirm("🗑️ Permanently delete this listing?")) return;
-
-  try {
-    const fileRef = bucket.child(`listings/${listingId}.json`);
-    await fileRef.delete();
-    alert("🗑️ Deleted successfully");
-    loadListings();
-  } catch (err) {
-    alert("❌ Delete failed: " + err.message);
-  }
-};
-
-// ==============================
 // Open Full Image
 // ==============================
 window.openImage = (url) => {
@@ -258,3 +242,4 @@ window.openImage = (url) => {
 document.addEventListener("DOMContentLoaded", () => {
   loadListings();
 });
+
