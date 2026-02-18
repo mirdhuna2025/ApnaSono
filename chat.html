@@ -557,26 +557,6 @@
 
 </head>
 <body>
-  <!-- Add this inside your composer div -->
-<button id="emojiBtn" class="icon-btn">😀</button>
-<button id="stickerBtn" class="icon-btn">🎭</button>
-
-<!-- Add Emoji Picker Library -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-
-<!-- Sticker/GIF Modal -->
-<div id="stickerModal" class="modal" style="display:none;">
-    <div class="modal-content" style="background:#222; padding:20px; border-radius:10px; max-width:400px;">
-        <span onclick="document.getElementById('stickerModal').style.display='none'" style="float:right; cursor:pointer;">❌</span>
-        <h3>Choose Sticker/GIF</h3>
-        <div id="stickerGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;"></div>
-    </div>
-</div>
-
-<!-- Emoji Picker Container -->
-<emoji-picker id="emojiPicker" style="position:absolute; bottom:80px; left:20px; display:none;"></emoji-picker>
-  
-  
   <header>
     <button id="logoutBtn" style="display:none;">Logout</button>
     <button id="adminBtn" class="header-btn">🔐 </button>
