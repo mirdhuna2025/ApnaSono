@@ -59,12 +59,39 @@ const uploadText = document.getElementById("uploadText");
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
 
+function handleFileSelect(file) {
+  if (!file) return;
+
+  fileToSend = file;
+  previewContent.innerHTML = "";
+
+  if (file.type.startsWith("image")) {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    previewContent.appendChild(img);
+  } 
+  else if (file.type.startsWith("video")) {
+    const video = document.createElement("video");
+    video.src = URL.createObjectURL(file);
+    video.controls = true;
+    previewContent.appendChild(video);
+  }
+
+  mediaPreview.style.display = "block";
+}
+
 cameraInput.onchange = (e) => {
-  fileToSend = e.target.files[0] || null;
+  handleFileSelect(e.target.files[0]);
 };
 
 galleryInput.onchange = (e) => {
-  fileToSend = e.target.files[0] || null;
+  handleFileSelect(e.target.files[0]);
+};
+
+closePreview.onclick = () => {
+  mediaPreview.style.display = "none";
+  previewContent.innerHTML = "";
+  fileToSend = null;
 };
 
 
