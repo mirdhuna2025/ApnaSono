@@ -48,7 +48,7 @@ const replyText = document.getElementById("replyText");
 const mediaModal = document.getElementById("mediaModal");
 const mediaContent = document.getElementById("mediaContent");
 const photoBtn = document.getElementById("photoBtn");
-const photoInput = document.getElementById("photo");
+
 // 📸 Media Selection
 cameraBtn.onclick = () => cameraInput.click();
 galleryBtn.onclick = () => galleryInput.click();
