@@ -328,7 +328,101 @@ if (sendBtn) sendBtn.onclick = async () => {
         if (uploadStatus) uploadStatus.style.display = "none";
     }
 };
+/* ===============================
+😀 EMOJI & STICKER LOGIC
+================================ */
+const emojiBtn = document.getElementById("emojiBtn");
+const emojiPicker = document.getElementById("emojiPicker");
+const stickerBtn = document.getElementById("stickerBtn");
+const stickerModal = document.getElementById("stickerModal");
+const stickerGrid = document.getElementById("stickerGrid");
 
+// 1. Emoji Picker Toggle
+if (emojiBtn && emojiPicker) {
+    emojiBtn.onclick = () => {
+        emojiPicker.style.display = emojiPicker.style.display === "none" ? "block" : "none";
+    };
+
+    emojiPicker.addEventListener("emoji-click", event => {
+        msgInput.value += event.detail.unicode;
+        emojiPicker.style.display = "none";
+        msgInput.focus();
+    });
+}
+
+// 2. Sticker/GIF Data (You can add more URLs here)
+const stickers = [
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7aD2saalBwwftBIY/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlHFRbmaZtBRhXG/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q3Zw/26FPy3QZQqGtDcrja/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgG50Fb7Mi0prBC/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6Zt6ML6BklcajjsA/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW55eW55eW55eW55eW55eW55eW55eW55eW55eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26u4cqiYI30juCOGY/giphy.gif"
+];
+
+// 3. Render Sticker Grid
+if (stickerGrid) {
+    stickers.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "100%";
+        img.style.borderRadius = "5px";
+        img.style.cursor = "pointer";
+        img.onclick = () => sendSticker(url);
+        stickerGrid.appendChild(img);
+    });
+}
+
+// 4. Sticker Modal Toggle
+if (stickerBtn && stickerModal) {
+    stickerBtn.onclick = () => {
+        stickerModal.style.display = "flex";
+        stickerModal.style.position = "fixed";
+        stickerModal.style.top = "0";
+        stickerModal.style.left = "0";
+        stickerModal.style.width = "100%";
+        stickerModal.style.height = "100%";
+        stickerModal.style.background = "rgba(0,0,0,0.8)";
+        stickerModal.style.zIndex = "9999";
+        stickerModal.style.justifyContent = "center";
+        stickerModal.style.alignItems = "center";
+    };
+}
+
+// 5. Send Sticker Function
+async function sendSticker(url) {
+    if (!user) {
+        if(profilePopup) profilePopup.style.display = "flex";
+        return;
+    }
+    if (await isBanned(user.name)) {
+        alert("🚫 You are banned from chatting.");
+        return;
+    }
+
+    try {
+        const newMsg = {
+            user: user.name,
+            photo: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.name}`,
+            isAdmin: user.isAdmin || false,
+            text: "", // Stickers have no text
+            mediaUrl: url,
+            mediaType: "image/gif", // Treat as GIF
+            mediaName: "sticker.gif",
+            storagePath: "", // No storage upload needed for public URLs
+            timestamp: Date.now(),
+            replies: {},
+            likes: 0,
+            dislikes: 0
+        };
+
+        await push(ref(db, "messages"), newMsg);
+        if(stickerModal) stickerModal.style.display = "none";
+    } catch (err) {
+        alert("❌ Failed to send sticker.");
+        console.error(err);
+    }
+}
 /* ===============================
 💬 REPLIES
 ================================ */
