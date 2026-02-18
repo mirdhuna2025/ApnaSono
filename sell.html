@@ -1,411 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LocalMart — Storage Only</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f9fafb;
-      color: #1f2937;
-      padding: 16px;
-      line-height: 1.6;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 24px;
-      padding: 12px 0;
-    }
-
-    h1 {
-      font-weight: 700;
-      font-size: 2rem;
-      background: linear-gradient(90deg, #ff6f00, #ff9800);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 4px;
-    }
-
-    header p {
-      color: #6b7280;
-      font-size: 0.95rem;
-    }
-
-    /* === Floating Action Button === */
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      background: #25D366;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-      cursor: pointer;
-      z-index: 10;
-      transition: transform 0.2s;
-    }
-    .fab:hover { transform: scale(1.08); }
-    .fab svg { width: 28px; height: 28px; }
-
-    /* === Modal Backdrop & Form === */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-      z-index: 20;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-backdrop.active { display: flex; }
-
-    .add-form {
-      background: white;
-      border-radius: 16px;
-      width: 95%;
-      max-width: 480px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-    .form-header h3 {
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: #1f2937;
-    }
-    .close-btn {
-      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af;
-    }
-
-    .form-group {
-      margin-bottom: 5px;
-      position: relative;
-    }
-    .form-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: #4b5563;
-    }
-    .form-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus {
-      outline: none;
-      border-color: #25D366;
-      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
-    }
-    .form-input[type="file"] {
-      padding: 4px;
-    }
-
-    .image-preview-container {
-      width: 100%;
-      height: 160px;
-      background: #f3f4f6;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 8px;
-      display: none;
-      position: relative;
-    }
-    .image-preview {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .form-footer {
-      display: flex;
-      gap: 10px;
-    }
-    .btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn-primary {
-      background: #25D366;
-      color: white;
-    }
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #374151;
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* === Listings Grid === */
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 24px 0 16px;
-      color: #1f2937;
-    }
-
-    .listings {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    .item-card {
-      background: white;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .item-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    }
-
-    .item-img {
-      height: 160px;
-      background: #f9fafb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .item-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .item-info {
-      padding: 16px;
-    }
-    .item-title {
-      font-weight: 600;
-      font-size: 1.05rem;
-      margin-bottom: 6px;
-      color: #111827;
-    }
-    .item-price {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #ff6f00;
-      margin: 6px 0;
-    }
-    .item-meta {
-      font-size: 0.85rem;
-      color: #6b7280;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .meta-badge {
-      background: #f3f4f6;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 8px;
-    }
-    .btn-whatsapp {
-      flex: 3;
-      background: #25D366;
-      color: white;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-purchase {
-      flex: 2;
-      background: #ff9800;
-      color: white;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: #6b7280;
-    }
-    .empty-state svg {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 16px;
-      color: #d1d5db;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      .listings { grid-template-columns: 1fr; }
-      .btn-group { flex-direction: column; }
-      .btn-whatsapp, .btn-purchase { flex: 1; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listings</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; }
+  .btn { padding: 8px 16px; border: none; cursor: pointer; border-radius: 4px; }
+  .btn-success { background: #25D366; color: white; }
+  .btn-secondary { background: #ccc; }
+  .item-card { display:flex; margin: 10px; border:1px solid #ddd; border-radius:8px; overflow:hidden; }
+  .item-img img { width:120px; height:120px; object-fit:cover; cursor:pointer; }
+  .item-info { padding:10px; flex:1; }
+  .item-title { font-weight:bold; margin-bottom:5px; }
+  .item-price { color:#ef4444; margin-bottom:5px; }
+  .meta-badge { background:#eee; padding:2px 6px; border-radius:4px; margin-right:5px; font-size:12px; }
+  .btn-group { margin-top:10px; display:flex; gap:5px; }
+  /* Modal styles */
+  #modalBackdrop { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:999; }
+  #modalBackdrop.active { display:flex; }
+  #modalContent { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
+</style>
 </head>
 <body>
 
-<header>
-  <h1>🛒 LocalMart</h1>
-</header>
+<!-- FAB to open Add Listing -->
+<button onclick="openAddForm()" class="btn btn-success" style="position:fixed; bottom:20px; right:20px;">+ Add Listing</button>
 
-<!-- FAB to open form -->
-<button class="fab" id="fab">
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-  </svg>
-</button>
+<!-- Listings Container -->
+<div id="listingsContainer" style="padding:10px;"></div>
 
-<!-- Modal Backdrop -->
-<div class="modal-backdrop" id="modalBackdrop">
-  <div class="add-form">
-    <div class="form-header">
-      <h3>➕ Add New Listing</h3>
-      <button class="close-btn" id="closeModal">&times;</button>
-    </div>
-    <form id="addListingForm">
-      <div class="form-group">
-        <label class="form-label">Title *</label>
-        <input type="text" id="title" class="form-input" required placeholder="">
+<!-- Add Listing Modal -->
+<div id="modalBackdrop">
+  <div id="modalContent">
+    <h3>Add Listing</h3>
+    <form id="addListingForm" onsubmit="event.preventDefault(); sendToAdmin();">
+      <input type="text" id="title" placeholder="Item title *" required style="width:100%; margin-bottom:10px;">
+      <input type="number" id="price" placeholder="Price *" required style="width:100%; margin-bottom:10px;">
+      <input type="text" id="location" placeholder="Location *" required style="width:100%; margin-bottom:10px;">
+      <input type="text" id="mobile" placeholder="Your mobile (optional)" style="width:100%; margin-bottom:10px;">
+      <input type="file" id="imageUpload" accept="image/*" style="margin-bottom:10px;">
+      <div id="previewContainer" style="display:none; margin-bottom:10px;">
+        <img id="imagePreview" src="" alt="Preview" style="max-width:100px;">
       </div>
-      <div class="form-group">
-        <label class="form-label">Price (₹) *</label>
-        <input type="number" id="price" class="form-input" required min="1" placeholder="">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Location *</label>
-        <input type="text" id="location" class="form-input" value="" required placeholder="">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Seller Mobile </label>
-        <input type="tel" id="mobile" class="form-input" placeholder="" maxlength="10">
-        <small style="color:#777; font-size:0.8rem"></small>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Upload Photo *</label>
-        <input type="file" id="imageUpload" class="form-input" accept="image/jpeg,image/png" required>
-        <div class="image-preview-container" id="previewContainer">
-          <img id="imagePreview" class="image-preview" alt="Preview">
-        </div>
-      </div>
-      <div class="form-footer">
-        <button type="submit" class="btn btn-primary">Post Listing</button>
-        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-      </div>
+      <button type="submit" class="btn btn-success">Send to Admin (WhatsApp)</button>
+      <button type="button" class="btn btn-secondary" onclick="closeAddForm()">Cancel</button>
     </form>
   </div>
 </div>
 
-<h3 class="section-title">🛍️ Available Items</h3>
-<div class="listings" id="listingsContainer">
-  <div class="empty-state">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </svg>
-    <p>No listings yet. Tap + to add one!</p>
-  </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-
-<!-- App Logic (sell.js will handle the rest) -->
 <script>
-  // UI helpers
+// ==============================
+// Admin WhatsApp Number
+// ==============================
+const ADMIN_MOBILE = "6303438082";
+
+// ==============================
+// Modal Controls
+// ==============================
+window.openAddForm = () => {
   const modal = document.getElementById('modalBackdrop');
-  const fab = document.getElementById('fab');
-  const closeBtn = document.getElementById('closeModal');
-  const cancelBtn = document.getElementById('cancelBtn');
+  if (!modal) return;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeAddForm = () => {
+  const modal = document.getElementById('modalBackdrop');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  document.getElementById("addListingForm")?.reset();
+  const container = document.getElementById('previewContainer');
+  if (container) container.style.display = 'none';
+};
+
+// ==============================
+// Image Preview
+// ==============================
+document.addEventListener('DOMContentLoaded', () => {
   const imageUpload = document.getElementById('imageUpload');
-  const previewContainer = document.getElementById('previewContainer');
-  const imagePreview = document.getElementById('imagePreview');
+  if (!imageUpload) return;
 
-  function toggleModal(show = true) {
-    modal.classList.toggle('active', show);
-    if (show) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-  }
+  imageUpload.addEventListener('change', () => {
+    const file = imageUpload.files?.[0];
+    const preview = document.getElementById('imagePreview');
+    const container = document.getElementById('previewContainer');
 
-  fab.onclick = () => toggleModal(true);
-  closeBtn.onclick = () => toggleModal(false);
-  cancelBtn.onclick = () => toggleModal(false);
-
-  // Image preview
-  imageUpload.onchange = () => {
-    const file = imageUpload.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      imagePreview.src = url;
-      previewContainer.style.display = 'block';
+      preview.src = url;
+      container.style.display = 'block';
     } else {
-      previewContainer.style.display = 'none';
+      container.style.display = 'none';
     }
-  };
+  });
+});
 
-  // Form submission (sell.js must still handle Firebase upload)
-  document.getElementById('addListingForm').onsubmit = (e) => {
-    e.preventDefault();
-    // Let sell.js take over from here
-    if (typeof handleAddListing === 'function') {
-      handleAddListing();
-    } else {
-      alert('⚠️ sell.js not loaded or missing handleAddListing()');
+// ==============================
+// Send Form to Admin via WhatsApp
+// ==============================
+window.sendToAdmin = () => {
+  const title = document.getElementById("title")?.value.trim();
+  const price = document.getElementById("price")?.value.trim();
+  const location = document.getElementById("location")?.value.trim();
+  const sellerMobile = document.getElementById("mobile")?.value.trim();
+  const file = document.getElementById("imageUpload")?.files[0];
+
+  if (!title || !price || !location) {
+    return alert("⚠️ Please fill all required fields!");
+  }
+
+  let waMessage = `
+Hello Admin,
+
+A user wants to post a listing:
+
+📍 Location: ${location}
+📱 Mobile: ${sellerMobile || 'Not provided'}
+🛒 Item: ${title}
+💰 Price: ₹${Number(price).toLocaleString()}
+`;
+
+  if (file) waMessage += "\n📷 Image attached (send manually)";
+
+  const waURL = `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(waMessage)}`;
+  window.open(waURL, "_blank");
+
+  closeAddForm();
+};
+
+// ==============================
+// Firebase Config (for read-only listings display)
+// ==============================
+const firebaseConfig = {
+  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain: "mirdhuna-25542.firebaseapp.com",
+  projectId: "mirdhuna-25542",
+  storageBucket: "mirdhuna-25542.firebasestorage.app",
+  messagingSenderId: "575924409876",
+  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+};
+firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage();
+const bucket = storage.ref();
+
+// ==============================
+// Load Listings for Users (read-only)
+// ==============================
+async function loadListings() {
+  const container = document.getElementById("listingsContainer");
+  if (!container) return;
+
+  container.innerHTML = `<div class="empty-state"><p>Loading listings…</p></div>`;
+
+  try {
+    const listRef = bucket.child("listings/");
+    const res = await listRef.listAll();
+    const jsonFiles = res.items.filter(item => item.name.endsWith(".json"));
+
+    const items = [];
+    for (const fileRef of jsonFiles) {
+      const url = await fileRef.getDownloadURL();
+      const resp = await fetch(url);
+      if (resp.ok) items.push(await resp.json());
     }
-  };
+
+    items.sort((a, b) => b.createdAt - a.createdAt);
+
+    if (items.length === 0) {
+      container.innerHTML = `<div class="empty-state"><p>No listings yet.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = "";
+    items.forEach(item => {
+      const waMessage = `
+Hi, I'm interested in:
+
+📍 Location: ${item.location}
+📱 Mobile: ${item.mobile}
+🛒 Item: ${item.title}
+💰 Price: ₹${item.price.toLocaleString()}
+📷 Image: ${item.imageUrl}
+🆔 Order ID: ${item.orderId}
+💳 Payment: ${item.paymentMode}
+
+Thanks!
+`.trim();
+
+      const waURL = `https://wa.me/91${item.mobile}?text=${encodeURIComponent(waMessage)}`;
+
+      const card = document.createElement("div");
+      card.className = "item-card";
+
+      card.innerHTML = `
+        <div class="item-img">
+          <img loading="lazy" src="${item.imageUrl}" alt="${item.title}" onclick="openImage('${item.imageUrl}')">
+        </div>
+        <div class="item-info">
+          <div class="item-title">${item.title}</div>
+          <div class="item-price">₹${item.price.toLocaleString()}</div>
+          <div class="item-meta">
+            <span class="meta-badge">📍 ${item.location}</span>
+            ${item.status === "purchased" ? `<span class="meta-badge" style="background:#fee2e2;color:#ef4444">Purchased</span>` : ""}
+          </div>
+          <div class="btn-group">
+            <a href="${waURL}" class="btn btn-success" target="_blank">WhatsApp</a>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div class="empty-state"><p>❌ Error loading listings.<br>${err.message}</p></div>`;
+  }
+}
+
+// ==============================
+// Open Full Image
+// ==============================
+window.openImage = (url) => {
+  const newWin = window.open("", "_blank", "width=800,height=600,scrollbars=yes");
+  if (newWin) {
+    newWin.document.write(`
+      <html>
+        <head><title>Image</title></head>
+        <body style="margin:0;background:#000">
+          <img src="${url}" style="max-width:100%;max-height:100vh;display:block;margin:auto">
+        </body>
+      </html>
+    `);
+    newWin.document.close();
+  } else {
+    alert("Popup blocked. Please allow popups to view image.");
+  }
+};
+
+// ==============================
+// Auto Load Listings on Start
+// ==============================
+document.addEventListener("DOMContentLoaded", () => {
+  loadListings();
+});
 </script>
-
-<script src="sell.js"></script>
 </body>
 </html>
