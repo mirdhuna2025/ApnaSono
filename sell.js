@@ -1,5 +1,5 @@
 // ==============================
-// Firebase Config & Init
+// Firebase Config & Init (for admin only, optional for users)
 // ==============================
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
@@ -17,8 +17,8 @@ const bucket = storage.ref();
 // ==============================
 // DEFAULT USER
 // ==============================
-const ADMIN_MOBILE = "6303438082";
-let CURRENT_USER = ADMIN_MOBILE; // Default to admin
+const ADMIN_MOBILE = "6454678866"; // WhatsApp contact
+let CURRENT_USER = ADMIN_MOBILE; // Only admin uploads, but form can go to admin via WhatsApp
 
 // ==============================
 // UI toggle helpers
@@ -34,7 +34,7 @@ function toggleModal(show = true) {
 // Open Add Form
 // ==============================
 window.openAddForm = () => {
-  toggleModal(true); // No login check
+  toggleModal(true);
 };
 
 // ==============================
@@ -60,69 +60,49 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==============================
-// Save Listing (Upload) - OPTIONAL
+// Send Listing to Admin via WhatsApp
 // ==============================
-// You can remove this entirely if Post Listing button is gone
-window.handleAddListing = async () => {
+window.sendToAdmin = () => {
   const title = document.getElementById("title")?.value.trim();
-  const price = Number(document.getElementById("price")?.value);
+  const price = document.getElementById("price")?.value.trim();
   const location = document.getElementById("location")?.value.trim();
   const sellerMobile = document.getElementById("mobile")?.value.trim();
   const file = document.getElementById("imageUpload")?.files[0];
 
-  if (!title || !price || !location || !file) {
+  if (!title || !price || !location) {
     return alert("⚠️ All fields marked * are required!");
   }
 
-  try {
-    const orderId = Math.floor(10000 + Math.random() * 90000);
-    const timestamp = Date.now();
-    const imgPath = `images/${timestamp}_${file.name}`;
-    const jsonPath = `listings/${timestamp}.json`;
+  let waMessage = `
+Hello Admin,
 
-    await bucket.child(imgPath).put(file);
-    const imageUrl = await bucket.child(imgPath).getDownloadURL();
+A user wants to post a listing:
 
-    const finalMobile = sellerMobile || ADMIN_MOBILE;
+📍 Location: ${location}
+📱 Mobile: ${sellerMobile || 'Not provided'}
+🛒 Item: ${title}
+💰 Price: ₹${Number(price).toLocaleString()}
+`;
 
-    const metadata = {
-      id: timestamp,
-      orderId,
-      title,
-      price,
-      location,
-      mobile: finalMobile,
-      imageUrl,
-      ownerMobile: CURRENT_USER,
-      status: "active",
-      paymentMode: "Cash on Delivery",
-      createdAt: timestamp
-    };
+  if (file) waMessage += "\n📷 Image attached (send manually)";
 
-    const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
-    await bucket.child(jsonPath).put(blob);
+  const waURL = `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(waMessage)}`;
+  window.open(waURL, "_blank");
 
-    alert("✅ Listing added successfully!");
-    document.getElementById("addListingForm")?.reset();
-    document.getElementById("previewContainer").style.display = "none";
-    toggleModal(false);
-    loadListings();
-  } catch (err) {
-    console.error(err);
-    alert("❌ Failed: " + (err.message || err));
-  }
+  // Optionally reset form
+  document.getElementById("addListingForm")?.reset();
+  document.getElementById("previewContainer").style.display = "none";
+  toggleModal(false);
 };
 
 // ==============================
-// Load Listings (Updated for New UI)
+// Load Listings for Users
 // ==============================
 async function loadListings() {
   const container = document.getElementById("listingsContainer");
   if (!container) return;
 
-  container.innerHTML = `<div class="empty-state">
-    <p>Loading listings…</p>
-  </div>`;
+  container.innerHTML = `<div class="empty-state"><p>Loading listings…</p></div>`;
 
   try {
     const listRef = bucket.child("listings/");
@@ -139,7 +119,7 @@ async function loadListings() {
     items.sort((a, b) => b.createdAt - a.createdAt);
 
     if (items.length === 0) {
-      container.innerHTML = `<div class="empty-state"><p>No listings yet. Tap + to add one!</p></div>`;
+      container.innerHTML = `<div class="empty-state"><p>No listings yet.</p></div>`;
       return;
     }
 
@@ -178,7 +158,6 @@ Thanks!
 
           <div class="btn-group">
             <a href="${waURL}" class="btn-whatsapp" target="_blank">WhatsApp</a>
-            ${item.status === "active" ? `<button class="btn-purchase" onclick="markAsPurchased('${item.id}')">Purchased</button>` : ""}
           </div>
         </div>
       `;
@@ -190,31 +169,6 @@ Thanks!
     container.innerHTML = `<div class="empty-state"><p>❌ Error loading listings.<br>${err.message}</p></div>`;
   }
 }
-
-// ==============================
-// Mark as Purchased
-// ==============================
-window.markAsPurchased = async function (listingId) {
-  if (!confirm("✅ Mark this item as purchased?")) return;
-
-  try {
-    const fileRef = bucket.child(`listings/${listingId}.json`);
-    const url = await fileRef.getDownloadURL();
-    const resp = await fetch(url);
-    const data = await resp.json();
-
-    data.status = "purchased";
-    data.purchasedAt = Date.now();
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    await fileRef.put(blob);
-
-    alert("✔️ Marked as Purchased");
-    loadListings();
-  } catch (err) {
-    alert("❌ Failed: " + err.message);
-  }
-};
 
 // ==============================
 // Open Full Image
@@ -242,4 +196,5 @@ window.openImage = (url) => {
 document.addEventListener("DOMContentLoaded", () => {
   loadListings();
 });
+
 
