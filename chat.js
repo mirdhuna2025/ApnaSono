@@ -4,7 +4,7 @@ import {
   getDatabase, ref, push, onValue, update, remove, get
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
-  getStorage, ref as sRef, uploadBytes, getDownloadURL
+  getStorage, ref as sRef, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // 🔐 Firebase Config (Same as yours)
