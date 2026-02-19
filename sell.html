@@ -4,47 +4,215 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Listings</title>
+
 <style>
-  body { font-family: Arial, sans-serif; margin:0; padding:0; }
-  .btn { padding: 8px 16px; border: none; cursor: pointer; border-radius: 4px; }
-  .btn-success { background: #25D366; color: white; }
-  .btn-secondary { background: #ccc; }
-  .item-card { display:flex; margin: 10px; border:1px solid #ddd; border-radius:8px; overflow:hidden; }
-  .item-img img { width:120px; height:120px; object-fit:cover; cursor:pointer; }
-  .item-info { padding:10px; flex:1; }
-  .item-title { font-weight:bold; margin-bottom:5px; }
-  .item-price { color:#ef4444; margin-bottom:5px; }
-  .meta-badge { background:#eee; padding:2px 6px; border-radius:4px; margin-right:5px; font-size:12px; }
-  .btn-group { margin-top:10px; display:flex; gap:5px; }
-  /* Modal styles */
-  #modalBackdrop { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:999; }
-  #modalBackdrop.active { display:flex; }
-  #modalContent { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
+:root{
+  --primary:#25D366;
+  --danger:#ef4444;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:14px;
+  --shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+*{box-sizing:border-box}
+
+body{
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background:var(--bg);
+  margin:0;
+  color:var(--text);
+}
+
+/* ================= FAB ================= */
+.fab{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  font-size:28px;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(37,211,102,.4);
+  z-index:1000;
+}
+.fab:hover{transform:scale(1.05)}
+
+/* ================= LIST ================= */
+#listingsContainer{
+  padding:16px;
+  max-width:760px;
+  margin:auto;
+}
+
+/* ================= CARD ================= */
+.item-card{
+  display:flex;
+  gap:14px;
+  background:var(--card);
+  border-radius:var(--radius);
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.item-img img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+.item-info{
+  padding:12px;
+  flex:1;
+}
+
+.item-title{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.item-price{
+  color:var(--danger);
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.item-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.meta-badge{
+  background:#f1f5f9;
+  color:#374151;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+.btn-group{
+  margin-top:10px;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  text-decoration:none;
+}
+
+.btn-success{
+  background:var(--primary);
+  color:#fff;
+}
+
+.btn-secondary{
+  background:#e5e7eb;
+}
+
+/* ================= MODAL ================= */
+#modalBackdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+#modalBackdrop.active{display:flex}
+
+#modalContent{
+  background:var(--card);
+  width:92%;
+  max-width:420px;
+  padding:18px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  animation:pop .2s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.95);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+#modalContent h3{
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+#modalContent input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  margin-bottom:10px;
+}
+
+#modalContent input:focus{
+  outline:none;
+  border-color:var(--primary);
+}
+
+#previewContainer img{
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  max-width:100px;
+}
+
+/* ================= EMPTY ================= */
+.empty-state{
+  text-align:center;
+  color:var(--muted);
+  padding:40px 0;
+}
 </style>
 </head>
+
 <body>
 
-<!-- FAB to open Add Listing -->
-<button onclick="openAddForm()" class="btn btn-success" style="position:fixed; bottom:20px; right:20px;">+ Add Listing</button>
+<!-- FAB -->
+<button onclick="openAddForm()" class="fab">+</button>
 
-<!-- Listings Container -->
-<div id="listingsContainer" style="padding:10px;"></div>
+<!-- Listings -->
+<div id="listingsContainer"></div>
 
 <!-- Add Listing Modal -->
 <div id="modalBackdrop">
   <div id="modalContent">
-    <h3>Add Listing</h3>
+    <h3>➕ Add Listing</h3>
     <form id="addListingForm" onsubmit="event.preventDefault(); sendToAdmin();">
-      <input type="text" id="title" placeholder="Item title *" required style="width:100%; margin-bottom:10px;">
-      <input type="number" id="price" placeholder="Price *" required style="width:100%; margin-bottom:10px;">
-      <input type="text" id="location" placeholder="Location *" required style="width:100%; margin-bottom:10px;">
-      <input type="text" id="mobile" placeholder="Your mobile (optional)" style="width:100%; margin-bottom:10px;">
-      <input type="file" id="imageUpload" accept="image/*" style="margin-bottom:10px;">
-      <div id="previewContainer" style="display:none; margin-bottom:10px;">
-        <img id="imagePreview" src="" alt="Preview" style="max-width:100px;">
+      <input type="text" id="title" placeholder="Item title *" required>
+      <input type="number" id="price" placeholder="Price *" required>
+      <input type="text" id="location" placeholder="Location *" required>
+      <input type="text" id="mobile" placeholder="Your mobile (optional)">
+      <input type="file" id="imageUpload" accept="image/*">
+
+      <div id="previewContainer" style="display:none;margin-bottom:10px;">
+        <img id="imagePreview">
       </div>
-      <button type="submit" class="btn btn-success">Send to Admin (WhatsApp)</button>
-      <button type="button" class="btn btn-secondary" onclick="closeAddForm()">Cancel</button>
+
+      <button type="submit" class="btn btn-success" style="width:100%;margin-bottom:8px;">
+        📤 Send to Admin (WhatsApp)
+      </button>
+      <button type="button" class="btn btn-secondary" style="width:100%;" onclick="closeAddForm()">Cancel</button>
     </form>
   </div>
 </div>
@@ -53,201 +221,111 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-// ==============================
-// Admin WhatsApp Number
-// ==============================
+// ================= ADMIN NUMBER =================
 const ADMIN_MOBILE = "6303438082";
 
-// ==============================
-// Modal Controls
-// ==============================
-window.openAddForm = () => {
-  const modal = document.getElementById('modalBackdrop');
-  if (!modal) return;
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeAddForm = () => {
-  const modal = document.getElementById('modalBackdrop');
-  if (!modal) return;
-  modal.classList.remove('active');
-  document.body.style.overflow = '';
-  document.getElementById("addListingForm")?.reset();
-  const container = document.getElementById('previewContainer');
-  if (container) container.style.display = 'none';
-};
-
-// ==============================
-// Image Preview
-// ==============================
-document.addEventListener('DOMContentLoaded', () => {
-  const imageUpload = document.getElementById('imageUpload');
-  if (!imageUpload) return;
-
-  imageUpload.addEventListener('change', () => {
-    const file = imageUpload.files?.[0];
-    const preview = document.getElementById('imagePreview');
-    const container = document.getElementById('previewContainer');
-
-    if (file) {
-      const url = URL.createObjectURL(file);
-      preview.src = url;
-      container.style.display = 'block';
-    } else {
-      container.style.display = 'none';
-    }
-  });
-});
-
-// ==============================
-// Send Form to Admin via WhatsApp
-// ==============================
-window.sendToAdmin = () => {
-  const title = document.getElementById("title")?.value.trim();
-  const price = document.getElementById("price")?.value.trim();
-  const location = document.getElementById("location")?.value.trim();
-  const sellerMobile = document.getElementById("mobile")?.value.trim();
-  const file = document.getElementById("imageUpload")?.files[0];
-
-  if (!title || !price || !location) {
-    return alert("⚠️ Please fill all required fields!");
-  }
-
-  let waMessage = `
-Hello Admin,
-
-A user wants to post a listing:
-
-📍 Location: ${location}
-📱 Mobile: ${sellerMobile || 'Not provided'}
-🛒 Item: ${title}
-💰 Price: ₹${Number(price).toLocaleString()}
-`;
-
-  if (file) waMessage += "\n📷 Image attached (send manually)";
-
-  const waURL = `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(waMessage)}`;
-  window.open(waURL, "_blank");
-
-  closeAddForm();
-};
-
-// ==============================
-// Firebase Config (for read-only listings display)
-// ==============================
-const firebaseConfig = {
-  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain: "mirdhuna-25542.firebaseapp.com",
-  projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.firebasestorage.app",
-  messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
-};
-firebase.initializeApp(firebaseConfig);
-const storage = firebase.storage();
-const bucket = storage.ref();
-
-// ==============================
-// Load Listings for Users (read-only)
-// ==============================
-async function loadListings() {
-  const container = document.getElementById("listingsContainer");
-  if (!container) return;
-
-  container.innerHTML = `<div class="empty-state"><p>Loading listings…</p></div>`;
-
-  try {
-    const listRef = bucket.child("listings/");
-    const res = await listRef.listAll();
-    const jsonFiles = res.items.filter(item => item.name.endsWith(".json"));
-
-    const items = [];
-    for (const fileRef of jsonFiles) {
-      const url = await fileRef.getDownloadURL();
-      const resp = await fetch(url);
-      if (resp.ok) items.push(await resp.json());
-    }
-
-    items.sort((a, b) => b.createdAt - a.createdAt);
-
-    if (items.length === 0) {
-      container.innerHTML = `<div class="empty-state"><p>No listings yet.</p></div>`;
-      return;
-    }
-
-    container.innerHTML = "";
-    items.forEach(item => {
-      const waMessage = `
-Hi, I'm interested in:
-
-📍 Location: ${item.location}
-📱 Mobile: ${item.mobile}
-🛒 Item: ${item.title}
-💰 Price: ₹${item.price.toLocaleString()}
-📷 Image: ${item.imageUrl}
-🆔 Order ID: ${item.orderId}
-💳 Payment: ${item.paymentMode}
-
-Thanks!
-`.trim();
-
-      const waURL = `https://wa.me/91${item.mobile}?text=${encodeURIComponent(waMessage)}`;
-
-      const card = document.createElement("div");
-      card.className = "item-card";
-
-      card.innerHTML = `
-        <div class="item-img">
-          <img loading="lazy" src="${item.imageUrl}" alt="${item.title}" onclick="openImage('${item.imageUrl}')">
-        </div>
-        <div class="item-info">
-          <div class="item-title">${item.title}</div>
-          <div class="item-price">₹${item.price.toLocaleString()}</div>
-          <div class="item-meta">
-            <span class="meta-badge">📍 ${item.location}</span>
-            ${item.status === "purchased" ? `<span class="meta-badge" style="background:#fee2e2;color:#ef4444">Purchased</span>` : ""}
-          </div>
-          <div class="btn-group">
-            <a href="${waURL}" class="btn btn-success" target="_blank">WhatsApp</a>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = `<div class="empty-state"><p>❌ Error loading listings.<br>${err.message}</p></div>`;
-  }
+// ================= MODAL =================
+function openAddForm(){
+  document.getElementById("modalBackdrop").classList.add("active");
+  document.body.style.overflow="hidden";
+}
+function closeAddForm(){
+  document.getElementById("modalBackdrop").classList.remove("active");
+  document.body.style.overflow="";
+  document.getElementById("addListingForm").reset();
+  document.getElementById("previewContainer").style.display="none";
 }
 
-// ==============================
-// Open Full Image
-// ==============================
-window.openImage = (url) => {
-  const newWin = window.open("", "_blank", "width=800,height=600,scrollbars=yes");
-  if (newWin) {
-    newWin.document.write(`
-      <html>
-        <head><title>Image</title></head>
-        <body style="margin:0;background:#000">
-          <img src="${url}" style="max-width:100%;max-height:100vh;display:block;margin:auto">
-        </body>
-      </html>
-    `);
-    newWin.document.close();
-  } else {
-    alert("Popup blocked. Please allow popups to view image.");
-  }
-};
-
-// ==============================
-// Auto Load Listings on Start
-// ==============================
-document.addEventListener("DOMContentLoaded", () => {
-  loadListings();
+// ================= IMAGE PREVIEW =================
+document.getElementById("imageUpload").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  document.getElementById("imagePreview").src=URL.createObjectURL(file);
+  document.getElementById("previewContainer").style.display="block";
 });
+
+// ================= SEND TO ADMIN =================
+function sendToAdmin(){
+  const title=titleInput.value.trim();
+  const price=priceInput.value.trim();
+  const location=locationInput.value.trim();
+  const mobile=mobileInput.value.trim();
+
+  if(!title||!price||!location){
+    alert("Please fill required fields");
+    return;
+  }
+
+  const msg=`Hello Admin,
+
+New Listing Request:
+
+🛒 ${title}
+💰 ₹${Number(price).toLocaleString()}
+📍 ${location}
+📱 ${mobile||"Not provided"}`;
+
+  window.open(`https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(msg)}`,"_blank");
+  closeAddForm();
+}
+
+// ================= FIREBASE =================
+firebase.initializeApp({
+  apiKey:"AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain:"mirdhuna-25542.firebaseapp.com",
+  projectId:"mirdhuna-25542",
+  storageBucket:"mirdhuna-25542.firebasestorage.app",
+  messagingSenderId:"575924409876",
+  appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
+});
+
+const storage=firebase.storage().ref();
+
+// ================= LOAD LISTINGS =================
+async function loadListings(){
+  const c=document.getElementById("listingsContainer");
+  c.innerHTML='<div class="empty-state">Loading…</div>';
+
+  const res=await storage.child("listings").listAll();
+  const items=[];
+  for(const f of res.items){
+    const url=await f.getDownloadURL();
+    const data=await (await fetch(url)).json();
+    items.push(data);
+  }
+
+  items.sort((a,b)=>b.createdAt-a.createdAt);
+  if(!items.length){c.innerHTML='<div class="empty-state">No listings yet</div>';return;}
+
+  c.innerHTML="";
+  items.forEach(i=>{
+    const wa=`https://wa.me/91${i.mobile}?text=${encodeURIComponent("Interested in "+i.title)}`;
+    c.innerHTML+=`
+      <div class="item-card">
+        <div class="item-img">
+          <img src="${i.imageUrl}" onclick="openImage('${i.imageUrl}')">
+        </div>
+        <div class="item-info">
+          <div class="item-title">${i.title}</div>
+          <div class="item-price">₹${i.price.toLocaleString()}</div>
+          <div class="item-meta">
+            <span class="meta-badge">📍 ${i.location}</span>
+          </div>
+          <div class="btn-group">
+            <a href="${wa}" target="_blank" class="btn btn-success">💬 WhatsApp</a>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function openImage(url){
+  const w=window.open();
+  w.document.write(`<img src="${url}" style="width:100%">`);
+}
+
+loadListings();
 </script>
+
 </body>
 </html>
