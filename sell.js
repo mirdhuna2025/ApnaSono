@@ -1,9 +1,4 @@
-<!-- ==============================
-     OPTIMIZED FIREBASE LISTINGS
-     Loads in <1 second with caching & parallel fetch
-     ============================== -->
 
-<!-- Add this to your <head> for performance -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://mirdhuna-25542.firebasestorage.app">
 
