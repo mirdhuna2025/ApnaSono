@@ -13,23 +13,64 @@ header{padding:12px;background:#111;color:#fff;text-align:center}
 .add-btn{background:#4caf50;color:#fff;border:none;padding:10px 16px;border-radius:6px}
 #listingsContainer{padding:10px}
 
-.item-card{background:#fff;border-radius:10px;margin-bottom:10px;display:flex;gap:10px;padding:10px}
-.item-img img{width:110px;height:110px;object-fit:cover;border-radius:8px}
+.item-card{
+  background:#fff;
+  border-radius:10px;
+  margin-bottom:10px;
+  display:flex;
+  gap:10px;
+  padding:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+.item-img img{
+  width:110px;
+  height:110px;
+  object-fit:cover;
+  border-radius:8px;
+}
 .item-info{flex:1}
 .item-title{font-weight:700}
 .item-price{color:#16a34a;font-weight:700}
-.btn-whatsapp{display:inline-block;margin-top:6px;background:#25d366;color:#fff;text-decoration:none;padding:6px 10px;border-radius:6px}
+.btn-whatsapp{
+  display:inline-block;
+  margin-top:6px;
+  background:#25d366;
+  color:#fff;
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:6px;
+}
 
 .empty-state{text-align:center;padding:40px;color:#777}
 
 /* MODAL */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center
+}
 .modal-backdrop.active{display:flex}
-.modal{background:#fff;width:90%;max-width:420px;border-radius:12px;padding:16px}
+.modal{
+  background:#fff;
+  width:90%;
+  max-width:420px;
+  border-radius:12px;
+  padding:16px
+}
 .modal h3{margin-top:0}
-.modal input,.modal button{width:100%;padding:10px;margin-top:8px}
+.modal input,.modal button{
+  width:100%;
+  padding:10px;
+  margin-top:8px
+}
 #previewContainer{display:none;text-align:center;margin-top:6px}
-#previewContainer img{max-width:100%;border-radius:8px}
+#previewContainer img{
+  max-width:100%;
+  border-radius:8px
+}
 </style>
 </head>
 
@@ -73,27 +114,26 @@ header{padding:12px;background:#111;color:#fff;text-align:center}
    FIREBASE INIT
 ================================ */
 const firebaseConfig={
-  apiKey:"AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain:"mirdhuna-25542.firebaseapp.com",
-  projectId:"mirdhuna-25542",
-  storageBucket:"mirdhuna-25542.appspot.com",
-  messagingSenderId:"575924409876",
-  appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_AUTH_DOMAIN",
+  projectId:"YOUR_PROJECT_ID",
+  storageBucket:"YOUR_STORAGE_BUCKET",
+  messagingSenderId:"YOUR_MSG_ID",
+  appId:"YOUR_APP_ID"
 };
+
 firebase.initializeApp(firebaseConfig);
 const storage=firebase.storage();
 const bucket=storage.ref();
 
-/* ===============================
-   ADMIN
-================================ */
 const ADMIN_MOBILE="6303438082";
 
 /* ===============================
-   MODAL CONTROLS
+   MODAL
 ================================ */
 function toggleModal(show){
-  document.getElementById("modalBackdrop").classList.toggle("active",show);
+  document.getElementById("modalBackdrop")
+    .classList.toggle("active",show);
   document.body.style.overflow=show?"hidden":"";
 }
 function openAddForm(){toggleModal(true)}
@@ -101,10 +141,12 @@ function openAddForm(){toggleModal(true)}
 /* ===============================
    IMAGE PREVIEW
 ================================ */
-document.getElementById("imageUpload").addEventListener("change",function(){
+document.getElementById("imageUpload")
+.addEventListener("change",function(){
   const file=this.files[0];
   const preview=document.getElementById("imagePreview");
   const box=document.getElementById("previewContainer");
+
   if(file){
     preview.src=URL.createObjectURL(file);
     box.style.display="block";
@@ -114,9 +156,10 @@ document.getElementById("imageUpload").addEventListener("change",function(){
 });
 
 /* ===============================
-   SEND TO ADMIN (NO ERRORS)
+   SEND TO ADMIN
 ================================ */
-document.getElementById("addListingForm").addEventListener("submit",function(e){
+document.getElementById("addListingForm")
+.addEventListener("submit",function(e){
   e.preventDefault();
 
   const title=document.getElementById("title").value.trim();
@@ -143,34 +186,50 @@ New listing request:
 
   if(file) msg+="\n📷 Image selected (send manually)";
 
-  const waURL="https://wa.me/91"+ADMIN_MOBILE+"?text="+encodeURIComponent(msg);
+  const waURL="https://wa.me/91"+ADMIN_MOBILE+
+              "?text="+encodeURIComponent(msg);
+
   window.open(waURL,"_blank");
 
   this.reset();
-  document.getElementById("previewContainer").style.display="none";
+  document.getElementById("previewContainer")
+    .style.display="none";
   toggleModal(false);
 });
 
 /* ===============================
-   LOAD LISTINGS
+   FAST LOAD LISTINGS
 ================================ */
 async function loadListings(){
   const container=document.getElementById("listingsContainer");
-  container.innerHTML='<div class="empty-state">Loading listings…</div>';
+  container.innerHTML=
+    '<div class="empty-state">Loading listings…</div>';
 
   try{
     const res=await bucket.child("listings").listAll();
+
     if(res.items.length===0){
-      container.innerHTML='<div class="empty-state">No listings yet</div>';
+      container.innerHTML=
+        '<div class="empty-state">No listings yet</div>';
       return;
     }
 
     container.innerHTML="";
-    for(const ref of res.items){
-      const url=await ref.getDownloadURL();
-      const data=await fetch(url).then(r=>r.json());
 
-      const wa="https://wa.me/91"+data.mobile+"?text="+encodeURIComponent(
+    // 🔥 LOAD ALL IN PARALLEL
+    const listings=await Promise.all(
+      res.items.map(async(ref)=>{
+        const url=await ref.getDownloadURL();
+        return fetch(url).then(r=>r.json());
+      })
+    );
+
+    // 🔥 RENDER FAST
+    const fragment=document.createDocumentFragment();
+
+    listings.forEach(data=>{
+      const wa="https://wa.me/91"+data.mobile+
+      "?text="+encodeURIComponent(
         `Hi, I am interested in:\n${data.title}\n₹${data.price}\n${data.location}`
       );
 
@@ -178,20 +237,27 @@ async function loadListings(){
       card.className="item-card";
       card.innerHTML=`
         <div class="item-img">
-          <img src="${data.imageUrl}">
+          <img src="${data.imageUrl}" loading="lazy">
         </div>
         <div class="item-info">
           <div class="item-title">${data.title}</div>
           <div class="item-price">₹${data.price}</div>
           <div>${data.location}</div>
-          <a class="btn-whatsapp" href="${wa}" target="_blank">WhatsApp</a>
+          <a class="btn-whatsapp"
+             href="${wa}" target="_blank">
+             WhatsApp
+          </a>
         </div>
       `;
-      container.appendChild(card);
-    }
+      fragment.appendChild(card);
+    });
+
+    container.appendChild(fragment);
+
   }catch(err){
     console.error(err);
-    container.innerHTML='<div class="empty-state">❌ Error loading listings</div>';
+    container.innerHTML=
+      '<div class="empty-state">❌ Error loading listings</div>';
   }
 }
 
