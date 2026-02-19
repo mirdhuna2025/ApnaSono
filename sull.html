@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listings</title>
+
+<style>
+:root{
+  --primary:#25D366;
+  --danger:#ef4444;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:14px;
+  --shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+*{box-sizing:border-box}
+
+body{
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background:var(--bg);
+  margin:0;
+  color:var(--text);
+}
+
+/* ================= FAB ================= */
+.fab{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  font-size:28px;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(37,211,102,.4);
+  z-index:1000;
+}
+.fab:hover{transform:scale(1.05)}
+
+/* ================= LIST ================= */
+#listingsContainer{
+  padding:16px;
+  max-width:760px;
+  margin:auto;
+}
+
+/* ================= CARD ================= */
+.item-card{
+  display:flex;
+  gap:14px;
+  background:var(--card);
+  border-radius:var(--radius);
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.item-img img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+.item-info{
+  padding:12px;
+  flex:1;
+}
+
+.item-title{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.item-price{
+  color:var(--danger);
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.item-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.meta-badge{
+  background:#f1f5f9;
+  color:#374151;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+.btn-group{
+  margin-top:10px;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  text-decoration:none;
+}
+
+.btn-success{
+  background:var(--primary);
+  color:#fff;
+}
+
+.btn-secondary{
+  background:#e5e7eb;
+}
+
+/* ================= MODAL ================= */
+#modalBackdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+#modalBackdrop.active{display:flex}
+
+#modalContent{
+  background:var(--card);
+  width:92%;
+  max-width:420px;
+  padding:18px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  animation:pop .2s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.95);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+#modalContent h3{
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+#modalContent input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  margin-bottom:10px;
+}
+
+#modalContent input:focus{
+  outline:none;
+  border-color:var(--primary);
+}
+
+#previewContainer img{
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  max-width:100px;
+}
+
+/* ================= EMPTY ================= */
+.empty-state{
+  text-align:center;
+  color:var(--muted);
+  padding:40px 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- FAB -->
+<button onclick="openAddForm()" class="fab">+</button>
+
+<!-- Listings -->
+<div id="listingsContainer"></div>
+
+<!-- Add Listing Modal -->
+<div id="modalBackdrop">
+  <div id="modalContent">
+    <h3>➕ Add Listing</h3>
+    <form id="addListingForm" onsubmit="event.preventDefault(); sendToAdmin();">
+      <input type="text" id="title" placeholder="Item title *" required>
+      <input type="number" id="price" placeholder="Price *" required>
+      <input type="text" id="location" placeholder="Location *" required>
+      <input type="text" id="mobile" placeholder="Your mobile (optional)">
+      <input type="file" id="imageUpload" accept="image/*">
+
+      <div id="previewContainer" style="display:none;margin-bottom:10px;">
+        <img id="imagePreview">
+      </div>
+
+      <button type="submit" class="btn btn-success" style="width:100%;margin-bottom:8px;">
+        📤 Send to Admin (WhatsApp)
+      </button>
+      <button type="button" class="btn btn-secondary" style="width:100%;" onclick="closeAddForm()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<script>
+// ================= ADMIN NUMBER =================
+const ADMIN_MOBILE = "6303438082";
+
+// ================= MODAL =================
+function openAddForm(){
+  document.getElementById("modalBackdrop").classList.add("active");
+  document.body.style.overflow="hidden";
+}
+function closeAddForm(){
+  document.getElementById("modalBackdrop").classList.remove("active");
+  document.body.style.overflow="";
+  document.getElementById("addListingForm").reset();
+  document.getElementById("previewContainer").style.display="none";
+}
+
+// ================= IMAGE PREVIEW =================
+document.getElementById("imageUpload").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  document.getElementById("imagePreview").src=URL.createObjectURL(file);
+  document.getElementById("previewContainer").style.display="block";
+});
+
+// ================= SEND TO ADMIN =================
+function sendToAdmin(){
+  const title=titleInput.value.trim();
+  const price=priceInput.value.trim();
+  const location=locationInput.value.trim();
+  const mobile=mobileInput.value.trim();
+
+  if(!title||!price||!location){
+    alert("Please fill required fields");
+    return;
+  }
+
+  const msg=`Hello Admin,
+
+New Listing Request:
+
+🛒 ${title}
+💰 ₹${Number(price).toLocaleString()}
+📍 ${location}
+📱 ${mobile||"Not provided"}`;
+
+  window.open(`https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(msg)}`,"_blank");
+  closeAddForm();
+}
+
+// ================= FIREBASE =================
+firebase.initializeApp({
+  apiKey:"AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain:"mirdhuna-25542.firebaseapp.com",
+  projectId:"mirdhuna-25542",
+  storageBucket:"mirdhuna-25542.firebasestorage.app",
+  messagingSenderId:"575924409876",
+  appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
+});
+
+const storage=firebase.storage().ref();
+
+// ================= LOAD LISTINGS =================
+async function loadListings(){
+  const c=document.getElementById("listingsContainer");
+  c.innerHTML='<div class="empty-state">Loading…</div>';
+
+  const res=await storage.child("listings").listAll();
+  const items=[];
+  for(const f of res.items){
+    const url=await f.getDownloadURL();
+    const data=await (await fetch(url)).json();
+    items.push(data);
+  }
+
+  items.sort((a,b)=>b.createdAt-a.createdAt);
+  if(!items.length){c.innerHTML='<div class="empty-state">No listings yet</div>';return;}
+
+  c.innerHTML="";
+  items.forEach(i=>{
+    const wa=`https://wa.me/91${i.mobile}?text=${encodeURIComponent("Interested in "+i.title)}`;
+    c.innerHTML+=`
+      <div class="item-card">
+        <div class="item-img">
+          <img src="${i.imageUrl}" onclick="openImage('${i.imageUrl}')">
+        </div>
+        <div class="item-info">
+          <div class="item-title">${i.title}</div>
+          <div class="item-price">₹${i.price.toLocaleString()}</div>
+          <div class="item-meta">
+            <span class="meta-badge">📍 ${i.location}</span>
+          </div>
+          <div class="btn-group">
+            <a href="${wa}" target="_blank" class="btn btn-success">💬 WhatsApp</a>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function openImage(url){
+  const w=window.open();
+  w.document.write(`<img src="${url}" style="width:100%">`);
+}
+
+loadListings();
+</script>
+
+</body>
+</html>
