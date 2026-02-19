@@ -1,8 +1,4 @@
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://mirdhuna-25542.firebasestorage.app">
-
-<!-- Firebase SDK (use compat for simplicity) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
