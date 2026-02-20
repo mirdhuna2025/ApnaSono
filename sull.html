@@ -297,22 +297,10 @@ function App(){
   return(
     <>
       <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
-      
-#listingsContainer {
-  max-width: 760px;
-  margin: auto;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 16px;  
-}
 
-
-@media (max-width: 600px) {
-  #listingsContainer {
-    grid-template-columns: 1fr;
-  }
-}
+      <div id="listingsContainer">
+        {listings.map((i,idx)=>(
+          <div className="item-card" key={idx}>
             <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
             <div className="item-info">
               <div className="item-title">{i.title}</div>
