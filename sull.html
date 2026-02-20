@@ -297,18 +297,17 @@ function App(){
   return(
     <>
       <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
-
-     /* Make two items per row */
+      
 #listingsContainer {
   max-width: 760px;
   margin: auto;
   padding: 16px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  gap: 16px; /* space between items */
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 16px;  
 }
 
-/* Responsive: 1 per row on small screens */
+
 @media (max-width: 600px) {
   #listingsContainer {
     grid-template-columns: 1fr;
