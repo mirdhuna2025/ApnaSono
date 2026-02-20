@@ -23,35 +23,44 @@
 body{margin:0;font-family:system-ui;background:var(--bg)}
 #listingsContainer{max-width:760px;margin:auto;padding:16px}
 
-.rainbow-header{
-  position: sticky;
-  top: 0;
-  text-align:center;
-  font-size:32px;
-  font-weight:800;
-  padding:18px 0;
-  background: linear-gradient(
-    90deg,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet
-  );
-  background-size: 400% 400%;
-  animation: rainbow 6s ease infinite;
+ header {
+      backdrop-filter: blur(12px);
+      background: #d4edda ;   
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      padding: 1px 0;
+    }
 
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+    .header-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 18px;
+    }
 
-@keyframes rainbow {
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
-}
+    .SONO OLX {
+      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 4s ease infinite;
+      font-size: 2.3rem;
+      letter-spacing: -1px;
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
   
   /* Card */
 
@@ -179,9 +188,11 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 </style>
 </head>
 
-<body>
-<div id="root"></div>
-  <div class="rainbow-header">  SONO OLX </div>
+ <div class="header-container">
+    <div class="logo">
+      
+      <h1 class="SONO OLX">SONO OLX</h1>
+    </div>
 
 <!-- Firebase v10.12.2 -->
 <script type="module">
