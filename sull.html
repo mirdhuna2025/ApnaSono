@@ -70,18 +70,41 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 .btn-success{background:#25D366;color:#fff}
 
 /* FAB */
-.fab{
-  position:fixed;
-  bottom:22px;right:22px;
-  width:58px;height:58px;
-  border-radius:50%;
-  background:#25D366;
-  color:#fff;
-  font-size:28px;
-  border:none;
-  z-index: 9999; 
+.fab {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #ff6a00, #ff3d00);
+  color: white;
+  border: none;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: 0.3s;
+  z-index: 9999;
 }
 
+  .fab::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(12px);
+  opacity: 0.5;
+  z-index: -1;
+}
 /* Modal */
 #modalBackdrop{
   position:fixed;inset:0;
@@ -212,7 +235,7 @@ async function sendToAdmin(e){
 
   return(
     <>
-      <button className="fab" onClick={()=>setModal(true)}>+</button>
+      <button className="fab" onClick={()=>setModal(true)}>+ sell</button>
 
       <div id="listingsContainer">
         {listings.map((i,idx)=>(
