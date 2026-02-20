@@ -177,30 +177,34 @@ function App(){
   },[]);
 
   /* SEND TO ADMIN */
-  async function sendToAdmin(e){
+async function sendToAdmin(e){
   e.preventDefault();
 
-  // ⚠️ NO FIREBASE UPLOAD HERE
-  // Images will be sent as local info only (admin asks user again OR admin uploads)
+  const { storage, ref, uploadBytes, getDownloadURL } = window.firebase;
 
-  const msg = `📩 New Listing Request (NOT PUBLISHED)
+  const id = Date.now().toString();
+  const basePath = "pendingListings/" + id;
 
-🛒 ${form.title}
-💰 ₹${Number(form.price).toLocaleString()}
-📍 ${form.location}
-📱 ${form.mobile || "Not provided"}
+  const imageUrls = [];
+  for(const f of files){
+    const imgRef = ref(storage, `${basePath}/images/${f.name}`);
+    await uploadBytes(imgRef, f);
+    imageUrls.push(await getDownloadURL(imgRef));
+  }
 
-⚠️ Images attached by user.
-(Admin will upload from admin panel)`;
+  const data = {
+    ...form,
+    images: imageUrls,
+    status: "pending",
+    createdAt: Date.now()
+  };
 
-  window.open(
-    `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(msg)}`,
-    "_blank"
-  );
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  await uploadBytes(ref(storage, `${basePath}/data.json`), blob);
 
+  alert("✅ Listing sent for admin approval");
   setModal(false);
 }
- 
 
   return(
     <>
