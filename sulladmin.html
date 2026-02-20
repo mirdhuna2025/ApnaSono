@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain: "mirdhuna-25542.firebaseapp.com",
+  projectId: "mirdhuna-25542",
+  storageBucket: "mirdhuna-25542.firebasestorage.app"
+});
+
+window.fb = { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject };
+window.storage = getStorage(app);
+</script>
+
+<script type="text/babel">
+const {useEffect,useState} = React;
+
+function Admin(){
+  const [items,setItems]=useState([]);
+
+  useEffect(()=>{
+    load();
+  },[]);
+
+  async function load(){
+    const {ref,listAll,getDownloadURL} = window.fb;
+    const res = await listAll(ref(window.storage,"pendingListings"));
+    const data = await Promise.all(
+      res.prefixes.map(async p=>{
+        const url = await getDownloadURL(ref(window.storage, p.fullPath+"/data.json"));
+        return { id:p.name, ...(await (await fetch(url)).json()) };
+      })
+    );
+    setItems(data);
+  }
+
+  async function approve(item){
+    const {ref,uploadBytes} = window.fb;
+
+    const blob = new Blob([JSON.stringify(item)],{type:"application/json"});
+    await uploadBytes(ref(window.storage, `listings/${item.id}/data.json`), blob);
+
+    alert("✅ Approved & published");
+  }
+
+  return (
+    <div style={{padding:20}}>
+      <h2>Pending Listings</h2>
+      {items.map(i=>(
+        <div key={i.id} style={{border:"1px solid #ccc",padding:10,marginBottom:10}}>
+          <b>{i.title}</b> – ₹{i.price}
+          <div>
+            {i.images.map(img=>(
+              <img key={img} src={img} width="80" />
+            ))}
+          </div>
+          <button onClick={()=>approve(i)}>Approve</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Admin/>);
+</script>
+</body>
+</html>
