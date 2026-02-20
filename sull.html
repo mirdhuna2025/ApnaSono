@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+
+
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -11,45 +13,46 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <style>
-  header {
-      backdrop-filter: blur(12px);
-      background: #d4edda ;   
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      padding: 1px 0;
-    }
+header {
+  backdrop-filter: blur(12px);
+  background: #d4edda;   
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 1px 0;
+}
 
-    .header-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 18px;
-    }
+.header-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 18px;
+}
 
-    .SONO OLX {
-      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-      background-size: 400% 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: rainbow 4s ease infinite;
-      font-size: 2.3rem;
-      letter-spacing: -1px;
-      margin: 0;
-      font-family: 'Playfair Display', serif;
-    }
+/* FIXED CLASS NAME */
+.sono-olx {
+  background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 4s ease infinite;
+  font-size: 2.3rem;
+  letter-spacing: -1px;
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+}
 
-    @keyframes rainbow {
-      0% { background-position: 0% 50% }
-      50% { background-position: 100% 50% }
-      100% { background-position: 0% 50% }
-    } 
-  
+@keyframes rainbow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
 :root{
   --primary:#25D366;
   --danger:#ef4444;
@@ -58,15 +61,12 @@
   --radius:14px;
   --shadow:0 10px 25px rgba(0,0,0,.08);
 }
+
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui;background:var(--bg)}
 #listingsContainer{max-width:760px;margin:auto;padding:16px}
 
- 
-  
-  /* Card */
-
-  
+/* Card */
 .item-card{
   background:var(--card);
   border-radius:var(--radius);
@@ -74,6 +74,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   box-shadow:var(--shadow);
   overflow:hidden;
 }
+
 .item-info{padding:12px}
 .item-title{font-weight:600}
 .item-price{color:var(--danger);font-weight:700}
@@ -83,10 +84,10 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 .slider img{
   width:100%;
   height:220px;
-  object-fit:fill;
+  object-fit:cover;
 }
 .dots{
-  position:sticky;
+  position:absolute;
   bottom:8px;
   width:100%;
   display:flex;
@@ -101,14 +102,13 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 
 /* Buttons */
 .btn{
-   position:sticky;
-  left: 250px !important;
-
   padding:10px 14px;
   border-radius:10px;
   border:none;
   cursor:pointer;
   font-weight:600;
+  display:inline-block;
+  margin-top:8px;
 }
 .btn-success{background:#25D366;color:#fff}
 
@@ -117,27 +117,21 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   position: fixed;
   bottom: 22px;
   right: 22px;
-
   width: 75px;
   height: 75px;
   border-radius: 50%;
-
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-
   background: linear-gradient(135deg, #ff6a00, #ff3d00);
   color: white;
   border: none;
-
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: 0.3s;
   z-index: 9999;
 }
 
-  .fab::after {
+.fab::after {
   content: '';
   position: absolute;
   width: 100%;
@@ -148,8 +142,28 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   opacity: 0.5;
   z-index: -1;
 }
-  #modalContent{
-  position:relative;   /* required for absolute positioning */
+
+/* Modal */
+#modalBackdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#modalContent{
+  background:#fff;
+  width:92%;
+  max-width:420px;
+  padding:18px;
+  border-radius:14px;
+  position:relative;
+}
+#modalContent input{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
 }
 
 .close-btn{
@@ -163,39 +177,23 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   font-weight:bold;
   color:#555;
 }
-
 .close-btn:hover{
   color:#ef4444;
-}
-/* Modal */
-#modalBackdrop{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-#modalContent{
-  background:#fff;
-  width:92%;
-  max-width:420px;
-  padding:18px;
-  border-radius:14px;
-}
-#modalContent input{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
 }
 </style>
 </head>
 
-    <div class="header-container">
-    <h1 class="SONO OLX">SONO OLX</h1>
+<body>
+
+<header>
+  <div class="header-container">
+    <h1 class="sono-olx">SONO OLX</h1>
   </div>
 </header>
 
-<!-- Firebase v10.12.2 -->
+<div id="root"></div>
+
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -203,13 +201,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 window.firebase = (() => {
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
     authDomain: "mirdhuna-25542.firebaseapp.com",
     projectId: "mirdhuna-25542",
     storageBucket: "mirdhuna-25542.firebasestorage.app",
     appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
   };
+
+  
   const app = initializeApp(firebaseConfig);
   return {
     storage: getStorage(app),
@@ -220,16 +220,19 @@ window.firebase = (() => {
 
 <script type="text/babel">
 const {useState,useEffect} = React;
-const ADMIN_MOBILE="6303438082";
 
-/* Image Slider */
-function Slider({images}){
+/* Slider */
+function Slider({images=[]}){
   const [i,setI]=useState(0);
+
   useEffect(()=>{
     if(images.length<2) return;
     const t=setInterval(()=>setI(x=>(x+1)%images.length),3000);
     return ()=>clearInterval(t);
   },[images]);
+
+  if(!images.length) return null;
+
   return(
     <div className="slider">
       <img src={images[i]} />
@@ -248,58 +251,69 @@ function App(){
   const [form,setForm]=useState({});
   const [files,setFiles]=useState([]);
 
-  /* LOAD LISTINGS (original logic preserved) */
+  /* SAFE LOAD */
   useEffect(()=>{
     const load=async()=>{
-      const {storage,ref,listAll,getDownloadURL}=window.firebase;
-      const folder=ref(storage,"listings");
-      const res=await listAll(folder);
+      try{
+        const {storage,ref,listAll,getDownloadURL}=window.firebase;
+        const folder=ref(storage,"listings");
+        const res=await listAll(folder);
 
-      const items=await Promise.all(
-        res.prefixes.map(async p=>{
-          const meta=await getDownloadURL(ref(storage,p.fullPath+"/data.json"));
-          return await (await fetch(meta)).json();
-        })
-      );
-      items.sort((a,b)=>b.createdAt-a.createdAt);
-      setListings(items);
+        const items=await Promise.all(
+          res.prefixes.map(async p=>{
+            try{
+              const meta=await getDownloadURL(ref(storage,p.fullPath+"/data.json"));
+              return await (await fetch(meta)).json();
+            }catch{
+              return null;
+            }
+          })
+        );
+
+        const clean=items.filter(Boolean);
+        clean.sort((a,b)=>b.createdAt-a.createdAt);
+        setListings(clean);
+      }catch(err){
+        console.log("No listings found");
+      }
     };
     load();
   },[]);
 
-  /* SEND TO ADMIN */
-async function sendToAdmin(e){
-  e.preventDefault();
+  async function sendToAdmin(e){
+    e.preventDefault();
 
-  const { storage, ref, uploadBytes, getDownloadURL } = window.firebase;
+    const { storage, ref, uploadBytes, getDownloadURL } = window.firebase;
 
-  const id = Date.now().toString();
-  const basePath = "pendingListings/" + id;
+    const id = Date.now().toString();
+    const basePath = "pendingListings/" + id;
 
-  const imageUrls = [];
-  for(const f of files){
-    const imgRef = ref(storage, `${basePath}/images/${f.name}`);
-    await uploadBytes(imgRef, f);
-    imageUrls.push(await getDownloadURL(imgRef));
+    const imageUrls = [];
+    for(const f of files){
+      const imgRef = ref(storage, `${basePath}/images/${f.name}`);
+      await uploadBytes(imgRef, f);
+      imageUrls.push(await getDownloadURL(imgRef));
+    }
+
+    const data = {
+      ...form,
+      images: imageUrls,
+      status: "pending",
+      createdAt: Date.now()
+    };
+
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    await uploadBytes(ref(storage, `${basePath}/data.json`), blob);
+
+    alert("✅ Listing sent for admin approval");
+    setModal(false);
+    setForm({});
+    setFiles([]);
   }
-
-  const data = {
-    ...form,
-    images: imageUrls,
-    status: "pending",
-    createdAt: Date.now()
-  };
-
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  await uploadBytes(ref(storage, `${basePath}/data.json`), blob);
-
-  alert("✅ Listing sent for admin approval");
-  setModal(false);
-}
 
   return(
     <>
-      <button className="fab" onClick={()=>setModal(true)}>+ sell</button>
+      <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
 
       <div id="listingsContainer">
         {listings.map((i,idx)=>(
@@ -308,35 +322,28 @@ async function sendToAdmin(e){
             <div className="item-info">
               <div className="item-title">{i.title}</div>
               <div className="item-price">₹{i.price}</div>
-              <a className="btn btn-success"
-                 target="_blank"
-                 href={`https://wa.me/91${i.mobile}`}>
-                 💬 WhatsApp
+              <a 
+                className="btn btn-success"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://wa.me/91${i.mobile}`}>
+                💬 WhatsApp
               </a>
             </div>
           </div>
         ))}
       </div>
 
-
-
-      
-    {modal && (
-  <div id="modalBackdrop" onClick={()=>setModal(false)}>
-    <div id="modalContent" onClick={(e)=>e.stopPropagation()}>
-      
-      <button 
-        className="close-btn" 
-        onClick={()=>setModal(false)}
-      >
-        ✖
-      </button>
+      {modal && (
+        <div id="modalBackdrop" onClick={()=>setModal(false)}>
+          <div id="modalContent" onClick={(e)=>e.stopPropagation()}>
+            <button className="close-btn" onClick={()=>setModal(false)}>✖</button>
             <h3>Add Listing</h3>
             <form onSubmit={sendToAdmin}>
               <input placeholder="Title" required onChange={e=>setForm({...form,title:e.target.value})}/>
               <input type="number" placeholder="Price" required onChange={e=>setForm({...form,price:e.target.value})}/>
               <input placeholder="Location" required onChange={e=>setForm({...form,location:e.target.value})}/>
-              <input placeholder="Mobile" onChange={e=>setForm({...form,mobile:e.target.value})}/>
+              <input placeholder="Mobile" required onChange={e=>setForm({...form,mobile:e.target.value})}/>
               <input type="file" multiple accept="image/*" required onChange={e=>setFiles([...e.target.files])}/>
               <button className="btn btn-success">Send to Admin</button>
             </form>
@@ -349,5 +356,6 @@ async function sendToAdmin(e){
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
+
 </body>
 </html>
