@@ -298,9 +298,22 @@ function App(){
     <>
       <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
 
-      <div id="listingsContainer">
-        {listings.map((i,idx)=>(
-          <div className="item-card" key={idx}>
+     /* Make two items per row */
+#listingsContainer {
+  max-width: 760px;
+  margin: auto;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  gap: 16px; /* space between items */
+}
+
+/* Responsive: 1 per row on small screens */
+@media (max-width: 600px) {
+  #listingsContainer {
+    grid-template-columns: 1fr;
+  }
+}
             <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
             <div className="item-info">
               <div className="item-title">{i.title}</div>
