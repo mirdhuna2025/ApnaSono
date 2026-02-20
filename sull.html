@@ -178,43 +178,29 @@ function App(){
 
   /* SEND TO ADMIN */
   async function sendToAdmin(e){
-    e.preventDefault();
-    const {storage,ref,uploadBytes,getDownloadURL}=window.firebase;
+  e.preventDefault();
 
-    const folder="listings/"+Date.now();
-    const imageUrls=[];
+  // ⚠️ NO FIREBASE UPLOAD HERE
+  // Images will be sent as local info only (admin asks user again OR admin uploads)
 
-    for(const f of files){
-      const r=ref(storage,folder+"/"+f.name);
-      await uploadBytes(r,f);
-      imageUrls.push(await getDownloadURL(r));
-    }
+  const msg = `📩 New Listing Request (NOT PUBLISHED)
 
-    const data={
-      ...form,
-      images:imageUrls,
-      createdAt:Date.now()
-    };
-
-    const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-    await uploadBytes(ref(storage,folder+"/data.json"),blob);
-
-    const msg=`New Listing Request
-
-${form.title}
-₹${form.price}
+🛒 ${form.title}
+💰 ₹${Number(form.price).toLocaleString()}
 📍 ${form.location}
-📱 ${form.mobile||"N/A"}
+📱 ${form.mobile || "Not provided"}
 
-Images:
-${imageUrls.join("\n")}`;
+⚠️ Images attached by user.
+(Admin will upload from admin panel)`;
 
-    window.open(
-      `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(msg)}`,
-      "_blank"
-    );
-    setModal(false);
-  }
+  window.open(
+    `https://wa.me/91${ADMIN_MOBILE}?text=${encodeURIComponent(msg)}`,
+    "_blank"
+  );
+
+  setModal(false);
+}
+ 
 
   return(
     <>
