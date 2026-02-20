@@ -105,6 +105,25 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   opacity: 0.5;
   z-index: -1;
 }
+  #modalContent{
+  position:relative;   /* required for absolute positioning */
+}
+
+.close-btn{
+  position:absolute;
+  top:10px;
+  right:12px;
+  background:none;
+  border:none;
+  font-size:18px;
+  cursor:pointer;
+  font-weight:bold;
+  color:#555;
+}
+
+.close-btn:hover{
+  color:#ef4444;
+}
 /* Modal */
 #modalBackdrop{
   position:fixed;inset:0;
@@ -254,9 +273,16 @@ async function sendToAdmin(e){
         ))}
       </div>
 
-      {modal && (
-        <div id="modalBackdrop">
-          <div id="modalContent">
+    {modal && (
+  <div id="modalBackdrop" onClick={()=>setModal(false)}>
+    <div id="modalContent" onClick={(e)=>e.stopPropagation()}>
+      
+      <button 
+        className="close-btn" 
+        onClick={()=>setModal(false)}
+      >
+        ✖
+      </button>
             <h3>Add Listing</h3>
             <form onSubmit={sendToAdmin}>
               <input placeholder="Title" required onChange={e=>setForm({...form,title:e.target.value})}/>
