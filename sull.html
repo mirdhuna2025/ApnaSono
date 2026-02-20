@@ -23,7 +23,37 @@
 body{margin:0;font-family:system-ui;background:var(--bg)}
 #listingsContainer{max-width:760px;margin:auto;padding:16px}
 
-/* Card */
+.rainbow-header{
+  text-align:center;
+  font-size:32px;
+  font-weight:800;
+  padding:18px 0;
+  background: linear-gradient(
+    90deg,
+    red,
+    orange,
+    yellow,
+    green,
+    blue,
+    indigo,
+    violet
+  );
+  background-size: 400% 400%;
+  animation: rainbow 6s ease infinite;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+  
+  /* Card */
+
+  
 .item-card{
   background:var(--card);
   border-radius:var(--radius);
@@ -273,6 +303,9 @@ async function sendToAdmin(e){
         ))}
       </div>
 
+
+<div class="rainbow-header">  SONO OLX </div>
+      
     {modal && (
   <div id="modalBackdrop" onClick={()=>setModal(false)}>
     <div id="modalContent" onClick={(e)=>e.stopPropagation()}>
