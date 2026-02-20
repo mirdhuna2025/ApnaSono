@@ -1,6 +1,4 @@
-
-
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -13,6 +11,7 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <style>
+/* Header */
 header {
   backdrop-filter: blur(12px);
   background: #d4edda;   
@@ -21,7 +20,6 @@ header {
   z-index: 1000;
   padding: 1px 0;
 }
-
 .header-container {
   display: flex;
   flex-direction: column;
@@ -33,8 +31,6 @@ header {
   margin: 0 auto;
   padding: 0 18px;
 }
-
-/* FIXED CLASS NAME */
 .sono-olx {
   background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
   background-size: 400% 400%;
@@ -46,13 +42,13 @@ header {
   margin: 0;
   font-family: 'Playfair Display', serif;
 }
-
 @keyframes rainbow {
   0% { background-position: 0% 50% }
   50% { background-position: 100% 50% }
   100% { background-position: 0% 50% }
 }
 
+/* Root & Cards */
 :root{
   --primary:#25D366;
   --danger:#ef4444;
@@ -61,7 +57,6 @@ header {
   --radius:14px;
   --shadow:0 10px 25px rgba(0,0,0,.08);
 }
-
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui;background:var(--bg)}
 #listingsContainer{max-width:760px;margin:auto;padding:16px}
@@ -74,13 +69,12 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   box-shadow:var(--shadow);
   overflow:hidden;
 }
-
 .item-info{padding:12px}
 .item-title{font-weight:600}
 .item-price{color:var(--danger);font-weight:700}
 
 /* Slider */
-.slider{position:relative}
+.slider{position:relative; cursor:pointer;}
 .slider img{
   width:100%;
   height:220px;
@@ -130,7 +124,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   cursor: pointer;
   z-index: 9999;
 }
-
 .fab::after {
   content: '';
   position: absolute;
@@ -165,7 +158,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   padding:12px;
   margin-bottom:10px;
 }
-
 .close-btn{
   position:absolute;
   top:10px;
@@ -180,6 +172,24 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 .close-btn:hover{
   color:#ef4444;
 }
+
+/* Image Preview */
+#previewBackdrop{
+  position: fixed;
+  inset:0;
+  background: rgba(0,0,0,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10000;
+}
+#previewBackdrop img{
+  max-width:95%;
+  max-height:95%;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  object-fit:contain;
+}
 </style>
 </head>
 
@@ -193,49 +203,39 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 
 <div id="root"></div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getStorage, ref, listAll, getDownloadURL, uploadBytes
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 window.firebase = (() => {
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
     authDomain: "mirdhuna-25542.firebaseapp.com",
     projectId: "mirdhuna-25542",
     storageBucket: "mirdhuna-25542.firebasestorage.app",
     appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
   };
-
-  
   const app = initializeApp(firebaseConfig);
-  return {
-    storage: getStorage(app),
-    ref, listAll, getDownloadURL, uploadBytes
-  };
+  return { storage: getStorage(app), ref, listAll, getDownloadURL, uploadBytes };
 })();
 </script>
 
 <script type="text/babel">
 const {useState,useEffect} = React;
 
-/* Slider */
-function Slider({images=[]}){
-  const [i,setI]=useState(0);
-
+/* Slider with preview */
+function Slider({images=[], onPreview}) {
+  const [i,setI] = useState(0);
   useEffect(()=>{
     if(images.length<2) return;
-    const t=setInterval(()=>setI(x=>(x+1)%images.length),3000);
+    const t = setInterval(()=>setI(x=>(x+1)%images.length),3000);
     return ()=>clearInterval(t);
   },[images]);
-
   if(!images.length) return null;
 
   return(
     <div className="slider">
-      <img src={images[i]} />
+      <img src={images[i]} onClick={()=>onPreview(i)} />
       <div className="dots">
         {images.map((_,d)=>(
           <span key={d} className={"dot "+(d===i?"active":"")}></span>
@@ -250,8 +250,9 @@ function App(){
   const [modal,setModal]=useState(false);
   const [form,setForm]=useState({});
   const [files,setFiles]=useState([]);
+  const [preview,setPreview]=useState({open:false, images:[], index:0});
 
-  /* SAFE LOAD */
+  /* Load listings safely */
   useEffect(()=>{
     const load=async()=>{
       try{
@@ -264,51 +265,33 @@ function App(){
             try{
               const meta=await getDownloadURL(ref(storage,p.fullPath+"/data.json"));
               return await (await fetch(meta)).json();
-            }catch{
-              return null;
-            }
+            }catch{return null;}
           })
         );
 
-        const clean=items.filter(Boolean);
-        clean.sort((a,b)=>b.createdAt-a.createdAt);
+        const clean = items.filter(Boolean).sort((a,b)=>b.createdAt-a.createdAt);
         setListings(clean);
-      }catch(err){
-        console.log("No listings found");
-      }
+      }catch(err){ console.log("No listings found"); }
     };
     load();
   },[]);
 
   async function sendToAdmin(e){
     e.preventDefault();
-
     const { storage, ref, uploadBytes, getDownloadURL } = window.firebase;
-
     const id = Date.now().toString();
     const basePath = "pendingListings/" + id;
-
     const imageUrls = [];
     for(const f of files){
       const imgRef = ref(storage, `${basePath}/images/${f.name}`);
       await uploadBytes(imgRef, f);
       imageUrls.push(await getDownloadURL(imgRef));
     }
-
-    const data = {
-      ...form,
-      images: imageUrls,
-      status: "pending",
-      createdAt: Date.now()
-    };
-
-    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    const data = { ...form, images: imageUrls, status:"pending", createdAt:Date.now() };
+    const blob = new Blob([JSON.stringify(data)], { type:"application/json" });
     await uploadBytes(ref(storage, `${basePath}/data.json`), blob);
-
     alert("✅ Listing sent for admin approval");
-    setModal(false);
-    setForm({});
-    setFiles([]);
+    setModal(false); setForm({}); setFiles([]);
   }
 
   return(
@@ -318,15 +301,11 @@ function App(){
       <div id="listingsContainer">
         {listings.map((i,idx)=>(
           <div className="item-card" key={idx}>
-            <Slider images={i.images}/>
+            <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
             <div className="item-info">
               <div className="item-title">{i.title}</div>
               <div className="item-price">₹{i.price}</div>
-              <a 
-                className="btn btn-success"
-                target="_blank"
-                rel="noopener noreferrer"
-                href={`https://wa.me/91${i.mobile}`}>
+              <a className="btn btn-success" target="_blank" rel="noopener noreferrer" href={`https://wa.me/91${i.mobile}`}>
                 💬 WhatsApp
               </a>
             </div>
@@ -334,9 +313,10 @@ function App(){
         ))}
       </div>
 
+      {/* Add Listing Modal */}
       {modal && (
         <div id="modalBackdrop" onClick={()=>setModal(false)}>
-          <div id="modalContent" onClick={(e)=>e.stopPropagation()}>
+          <div id="modalContent" onClick={e=>e.stopPropagation()}>
             <button className="close-btn" onClick={()=>setModal(false)}>✖</button>
             <h3>Add Listing</h3>
             <form onSubmit={sendToAdmin}>
@@ -350,11 +330,18 @@ function App(){
           </div>
         </div>
       )}
+
+      {/* Image Preview Modal */}
+      {preview.open && (
+        <div id="previewBackdrop" onClick={()=>setPreview({open:false, images:[], index:0})}>
+          <img src={preview.images[preview.index]} />
+        </div>
+      )}
     </>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 
 </body>
