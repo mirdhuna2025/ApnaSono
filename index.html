@@ -44,22 +44,15 @@
     
     .ad-column[id^="container-"] {
       min-height: 250px; /* Prevent layout shift */
-      width: 100%;
+      width: 50%;
     }
     
     /* Responsive: Stack on mobile */
     @media (max-width: 768px) {
       .ad-column {
-        max-width: 100%;
-        min-width: 100%;
+        max-width: 50%;
+        min-width: 50%;
       }
-    }
-    
-    /* Optional: Ad placeholder styling while loading */
-    .ad-column:empty::before {
-      content: "Loading ad...";
-      color: #888;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -82,8 +75,8 @@
 
   <!-- Side-by-Side Ad Columns -->
   <div class="ad-wrapper">
-    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d-1"></div>
-    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d-2"></div>
+    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d"></div>
+   
   </div>
 
   <!-- Sticky Bar -->
