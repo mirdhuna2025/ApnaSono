@@ -47,7 +47,7 @@ header {
   100% { background-position: 0% 50% }
 }
 
-/* Ad Container */
+/* Ad Container (top) */
 #ad-container {
   display: flex;
   justify-content: center;
@@ -133,6 +133,19 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   background:#ddd;
 }
 .dot.active{background:#25D366}
+
+/* 🔹 AD CARD (full row) */
+.ad-card {
+  grid-column: 1 / -1; /* Span all columns */
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70px;
+}
 
 /* FAB */
 .fab {
@@ -224,10 +237,8 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 </head>
 <body>
 
-<!-- 🔹 AD SCRIPT AT TOP -->
-
-
-  <div id="ad-container">
+<!-- 🔹 TOP AD -->
+<div id="ad-container">
   <script>
     atOptions = {
       'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
@@ -240,24 +251,18 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
 </div>
 
-
-
-  
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-      authDomain: "mirdhuna-25542.firebaseapp.com",
-      projectId: "mirdhuna-25542",
-      storageBucket: "mirdhuna-25542.firebasestorage.app",
-      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
-    };
-    firebase.initializeApp(firebaseConfig);
-    window.storage = firebase.storage();
-  </script>
-</div>
+<!-- Firebase Init (fixed - no duplicates) -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+    authDomain: "mirdhuna-25542.firebaseapp.com",
+    projectId: "mirdhuna-25542",
+    storageBucket: "mirdhuna-25542.firebasestorage.app",
+    appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+  };
+  firebase.initializeApp(firebaseConfig);
+  window.storage = firebase.storage();
+</script>
 
 <header>
   <div class="header-container">
@@ -296,6 +301,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 let listings = [];
 let previewImages = [];
 let previewIndex = 0;
+let resizeTimeout;
 
 // ============ DOM ELEMENTS ============
 const container = document.getElementById('listingsContainer');
@@ -305,6 +311,35 @@ const closeModal = document.getElementById('closeModal');
 const listingForm = document.getElementById('listingForm');
 const previewBackdrop = document.getElementById('previewBackdrop');
 const previewImg = document.getElementById('previewImg');
+
+// ============ HELPER: Get current grid column count ============
+function getGridColumnCount() {
+  const style = getComputedStyle(container);
+  // Count the number of column tracks (e.g., "1fr 1fr" → 2)
+  return style.gridTemplateColumns.split(' ').filter(c => c.trim()).length;
+}
+
+// ============ HELPER: Create ad card element ============
+function createAdCard() {
+  const adCard = document.createElement('div');
+  adCard.className = 'ad-card';
+  adCard.innerHTML = `
+    <div style="width:100%;max-width:728px;text-align:center;">
+      <script>
+        atOptions = {
+          'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      </script>
+      <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+      <noscript><a href="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke" target="_blank"><img src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke" alt="ad" border="0"></a></noscript>
+    </div>
+  `;
+  return adCard;
+}
 
 // ============ LOAD LISTINGS ============
 async function loadListings() {
@@ -335,98 +370,123 @@ async function loadListings() {
   }
 }
 
-// ============ RENDER LISTINGS ============
+// ============ RENDER LISTINGS (with ads on even rows) ============
 function renderListings() {
   container.innerHTML = '';
+  const cols = getGridColumnCount();
+  let itemCounter = 0;
+  let rowNumber = 1;
   
   listings.forEach((item, idx) => {
-    const card = document.createElement('div');
-    card.className = 'item-card';
-    
-    // Slider
-    const slider = document.createElement('div');
-    slider.className = 'slider';
-    
-    if (item.images && item.images.length > 0) {
-      const img = document.createElement('img');
-      img.src = item.images[0];
-      img.dataset.index = '0';
-      img.dataset.listing = idx;
-      img.onclick = () => openPreview(item.images, 0);
-      
-      // Auto-rotate slider
-      if (item.images.length > 1) {
-        let current = 0;
-        setInterval(() => {
-          if (document.contains(img)) {
-            current = (current + 1) % item.images.length;
-            img.src = item.images[current];
-            img.dataset.index = current;
-            // Update dots
-            const dots = slider.querySelectorAll('.dot');
-            dots.forEach((d, i) => d.classList.toggle('active', i === current));
-          }
-        }, 3000);
+    // Check if we're starting a new row
+    if (itemCounter > 0 && itemCounter % cols === 0) {
+      rowNumber++;
+      // Insert ad on even rows (2, 4, 6...)
+      if (rowNumber % 2 === 0) {
+        container.appendChild(createAdCard());
       }
-      
-      slider.appendChild(img);
-      
-      // Dots
-      const dots = document.createElement('div');
-      dots.className = 'dots';
-      item.images.forEach((_, i) => {
-        const dot = document.createElement('span');
-        dot.className = 'dot' + (i === 0 ? ' active' : '');
-        dot.onclick = (e) => {
-          e.stopPropagation();
-          img.src = item.images[i];
-          img.dataset.index = i;
-          dots.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-          dot.classList.add('active');
-        };
-        dots.appendChild(dot);
-      });
-      slider.appendChild(dots);
     }
     
-    // Info
-    const info = document.createElement('div');
-    info.className = 'item-info';
-    
-    const title = document.createElement('div');
-    title.className = 'item-title';
-    title.textContent = item.title;
-    
-    const price = document.createElement('div');
-    price.className = 'item-price';
-    price.textContent = '₹' + item.price;
-    
-    const location = document.createElement('div');
-    location.className = 'item-location';
-    location.textContent = '📍 ' + item.location;
-    
-    const callBtn = document.createElement('a');
-    callBtn.href = `tel:${item.mobile}`;
-    callBtn.className = 'btn btn-call';
-    callBtn.textContent = '📞';
-    
-    const waBtn = document.createElement('a');
-    waBtn.href = `https://wa.me/91${item.mobile}`;
-    waBtn.className = 'btn btn-whatsapp';
-    waBtn.textContent = '💬 WhatsApp';
-    waBtn.target = '_blank';
-    waBtn.rel = 'noopener noreferrer';
-    
-    info.appendChild(title);
-    info.appendChild(price);
-    info.appendChild(location);
-    info.appendChild(callBtn);
-    info.appendChild(waBtn);
-    
-    card.appendChild(slider);
-    card.appendChild(info);
-    container.appendChild(card);
+    // Create and append item card
+    container.appendChild(createItemCard(item, idx));
+    itemCounter++;
   });
+  
+  // Handle trailing ad if last row was even and empty (optional)
+  // Not needed for most cases
+}
+
+// ============ CREATE ITEM CARD ============
+function createItemCard(item, idx) {
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  
+  // Slider
+  const slider = document.createElement('div');
+  slider.className = 'slider';
+  
+  if (item.images && item.images.length > 0) {
+    const img = document.createElement('img');
+    img.src = item.images[0];
+    img.dataset.index = '0';
+    img.dataset.listing = idx;
+    img.onclick = () => openPreview(item.images, 0);
+    
+    // Auto-rotate slider (only if multiple images)
+    if (item.images.length > 1) {
+      let current = 0;
+      const interval = setInterval(() => {
+        if (document.contains(img)) {
+          current = (current + 1) % item.images.length;
+          img.src = item.images[current];
+          img.dataset.index = current;
+          // Update dots
+          const dots = slider.querySelectorAll('.dot');
+          dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        } else {
+          clearInterval(interval);
+        }
+      }, 3000);
+    }
+    
+    slider.appendChild(img);
+    
+    // Dots navigation
+    const dots = document.createElement('div');
+    dots.className = 'dots';
+    item.images.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.onclick = (e) => {
+        e.stopPropagation();
+        img.src = item.images[i];
+        img.dataset.index = i;
+        dots.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+      };
+      dots.appendChild(dot);
+    });
+    slider.appendChild(dots);
+  }
+  
+  // Info section
+  const info = document.createElement('div');
+  info.className = 'item-info';
+  
+  const title = document.createElement('div');
+  title.className = 'item-title';
+  title.textContent = item.title;
+  
+  const price = document.createElement('div');
+  price.className = 'item-price';
+  price.textContent = '₹' + item.price;
+  
+  const location = document.createElement('div');
+  location.className = 'item-location';
+  location.textContent = '📍 ' + item.location;
+  
+  const callBtn = document.createElement('a');
+  callBtn.href = `tel:${item.mobile}`;
+  callBtn.className = 'btn btn-call';
+  callBtn.textContent = '📞';
+  
+  // ✅ Fixed: Removed extra spaces in WhatsApp URL
+  const waBtn = document.createElement('a');
+  waBtn.href = `https://wa.me/91${item.mobile.replace(/\D/g,'')}`;
+  waBtn.className = 'btn btn-whatsapp';
+  waBtn.textContent = '💬 WhatsApp';
+  waBtn.target = '_blank';
+  waBtn.rel = 'noopener noreferrer';
+  
+  info.appendChild(title);
+  info.appendChild(price);
+  info.appendChild(location);
+  info.appendChild(callBtn);
+  info.appendChild(waBtn);
+  
+  card.appendChild(slider);
+  card.appendChild(info);
+  return card;
 }
 
 // ============ MODAL FUNCTIONS ============
@@ -441,7 +501,7 @@ listingForm.onsubmit = async (e) => {
   const title = document.getElementById('inpTitle').value;
   const price = document.getElementById('inpPrice').value;
   const location = document.getElementById('inpLocation').value;
-  const mobile = document.getElementById('inpMobile').value;
+  const mobile = document.getElementById('inpMobile').value.replace(/\D/g,'');
   const files = document.getElementById('inpImages').files;
   
   const id = Date.now().toString();
@@ -501,6 +561,21 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// ============ RESIZE HANDLER (re-render ads on breakpoint change) ============
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    // Only re-render if column count actually changed
+    const newCols = getGridColumnCount();
+    if (newCols !== window.lastColCount) {
+      window.lastColCount = newCols;
+      renderListings();
+    }
+  }, 150);
+});
+// Initialize lastColCount
+window.lastColCount = getGridColumnCount();
 
 // ============ INIT ============
 window.addEventListener('DOMContentLoaded', loadListings);
