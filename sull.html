@@ -59,8 +59,24 @@ header {
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui;background:var(--bg)}
-#listingsContainer{max-width:760px;margin:auto;padding:16px}
+#listingsContainer{
+  display:grid;
+  gap:12px;
+  padding:12px;
+  grid-template-columns: repeat(2, 1fr); /* mobile */
+}
 
+@media(min-width:768px){
+  #listingsContainer{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(min-width:1024px){
+  #listingsContainer{
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 /* Card */
 .item-card{
   background:var(--card);
