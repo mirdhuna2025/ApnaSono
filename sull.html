@@ -281,6 +281,8 @@ function App(){
   const [form,setForm]=useState({});
   const [files,setFiles]=useState([]);
   const [preview,setPreview]=useState({open:false, images:[], index:0});
+  
+<a href={`tel:${i.mobile}`} className="item-mobile">📞 {i.mobile}</a>
 
   /* Load listings safely */
   useEffect(()=>{
@@ -379,7 +381,6 @@ function App(){
     </>
   );
 }
-<a href={`tel:${i.mobile}`} className="item-mobile">📞 {i.mobile}</a>
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 
