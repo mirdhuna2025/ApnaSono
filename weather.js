@@ -95,4 +95,4 @@ closeBtn.addEventListener("click", (e) => {
   await getTodayWeather();
   await getForecast();
 })();
-</script>
+
