@@ -348,7 +348,60 @@ function App(){
       <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
 
       <div id="listingsContainer">
-        {listings.map((i,idx)=>(
+       
+  {listings.map((i, idx) => (
+  <React.Fragment key={idx}>
+    
+    {/* Item Card */}
+    <div className="item-card">
+      <Slider 
+        images={i.images} 
+        onPreview={index=>setPreview({open:true, images:i.images, index})} 
+      />
+      <div className="item-info">
+        <div className="item-title">{i.title}</div>
+        <div className="item-price">₹{i.price}</div>
+        <div className="item-location">📍 {i.location}</div>
+
+        <a href={`tel:${i.mobile}`} className="btn btn-call">📞</a>
+
+        <a 
+          className="btn btn-success" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          href={`https://wa.me/91${i.mobile}`}
+        >
+          💬 WhatsApp
+        </a>
+      </div>
+    </div>
+
+    {/* Show Ad After Every 4 Items (2 Rows in Mobile) */}
+    {(idx + 1) % 4 === 0 && (
+      <div style={{
+        gridColumn: "1 / -1",
+        textAlign: "center",
+        margin: "15px 0"
+      }}>
+        <script>
+          {`
+            atOptions = {
+              'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
+              'format' : 'iframe',
+              'height' : 60,
+              'width' : 468,
+              'params' : {}
+            };
+          `}
+        </script>
+        <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+      </div>
+    )}
+
+  </React.Fragment>
+))}
+
+        
           <div className="item-card" key={idx}>
             <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
            <div className="item-info">
