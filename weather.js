@@ -1,4 +1,4 @@
-<script>
+
 // 🔑 Tomorrow.io API Key
 const apiKey = "RsFPY8ETXFqDDTN8rbKQHoospZTMXsvA";
 
