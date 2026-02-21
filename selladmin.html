@@ -3,45 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel</title>
+  <title>Admin Panel - Mirdhuna</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    .container { max-width: 900px; margin: 0 auto; }
-    h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    :root {
+      --primary: #007bff;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --border: #dee2e6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa; color: #333; line-height: 1.5;
+      padding: 20px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    /* Header & Tabs */
+    header { 
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 20px; background: white; border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px;
+    }
+    h1 { font-size: 1.4rem; color: var(--dark); }
+    .tabs { display: flex; gap: 5px; background: var(--light); padding: 4px; border-radius: 8px; }
+    .tab-btn {
+      padding: 10px 20px; border: none; background: transparent;
+      border-radius: 6px; cursor: pointer; font-weight: 500;
+      transition: all 0.2s; color: #555;
+    }
+    .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .tab-btn:hover:not(.active) { color: var(--primary); }
+    
+    /* Content Sections */
+    .section { display: none; animation: fadeIn 0.3s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Cards */
     .item-card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: start;
     }
-    .item-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
-    .item-price { color: #28a745; font-weight: bold; margin-bottom: 10px; }
-    .item-images { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    @media (max-width: 600px) {
+      .item-card { grid-template-columns: 1fr; }
+    }
+    .item-info { min-width: 0; }
+    .item-title { 
+      font-weight: 600; font-size: 1.1rem; margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item-price { color: var(--success); font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; }
+    .item-meta { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+    .item-images { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
     .item-images img {
-      width: 70px; height: 70px; object-fit: cover;
-      border-radius: 4px; border: 1px solid #eee;
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 6px; border: 1px solid var(--border);
+      transition: transform 0.2s; cursor: pointer;
     }
-    .actions { display: flex; gap: 10px; }
+    .item-images img:hover { transform: scale(1.05); }
+    
+    /* Actions */
+    .actions { display: flex; flex-direction: column; gap: 8px; min-width: 140px; }
     button {
-      padding: 8px 16px; border: none; border-radius: 4px;
-      cursor: pointer; font-weight: 500; transition: background 0.2s;
+      padding: 9px 16px; border: none; border-radius: 6px;
+      cursor: pointer; font-weight: 500; transition: all 0.2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .approve-btn { background: #28a745; color: white; }
-    .approve-btn:hover { background: #218838; }
-    .remove-btn { background: #dc3545; color: white; }
-    .remove-btn:hover { background: #c82333; }
-    .loading { color: #666; font-style: italic; }
-    .empty { color: #888; text-align: center; padding: 30px; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .approve-btn { background: var(--success); color: white; }
+    .approve-btn:hover:not(:disabled) { background: #218838; }
+    .remove-btn { background: var(--warning); color: #212529; }
+    .remove-btn:hover:not(:disabled) { background: #e0a800; }
+    .delete-btn { background: var(--danger); color: white; }
+    .delete-btn:hover:not(:disabled) { background: #c82333; }
+    .view-btn { background: var(--primary); color: white; }
+    .view-btn:hover:not(:disabled) { background: #0056b3; }
+    
+    /* States */
+    .loading, .empty { 
+      text-align: center; padding: 40px 20px; color: #666;
+      background: white; border-radius: 10px; border: 1px dashed var(--border);
+    }
+    .error { 
+      background: #fff5f5; color: #c53030; padding: 12px;
+      border-radius: 8px; border-left: 4px solid var(--danger);
+      margin: 15px 0;
+    }
+    
+    /* Badge */
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-published { background: #d4edda; color: #155724; }
+    
+    /* Refresh Button */
+    .refresh-btn {
+      background: white; border: 1px solid var(--border);
+      color: var(--dark); padding: 8px 15px; border-radius: 6px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: var(--light); border-color: #ccc; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>⏳ Pending Listings</h2>
-    <div id="listings-container">
-      <p class="loading">Loading listings...</p>
-    </div>
+    <header>
+      <h1>🛍️ Admin Panel</h1>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="refresh-btn" id="refreshBtn" title="Refresh listings">
+          🔄 Refresh
+        </button>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="pending">⏳ Pending</button>
+          <button class="tab-btn" data-tab="published">✅ Published</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Pending Listings Section -->
+    <section id="pending-section" class="section active">
+      <h2 style="margin-bottom:15px;color:var(--dark)">Pending Listings <span class="badge badge-pending">Awaiting Approval</span></h2>
+      <div id="pending-container">
+        <p class="loading">Loading pending listings...</p>
+      </div>
+    </section>
+
+    <!-- Published Listings Section -->
+    <section id="published-section" class="section">
+      <h2 style="margin-bottom:15px;color:var(--dark)">Published Listings <span class="badge badge-published">Live</span></h2>
+      <div id="published-container">
+        <p class="loading">Loading published listings...</p>
+      </div>
+    </section>
   </div>
 
   <!-- Firebase SDK (ES Modules) -->
@@ -51,7 +152,7 @@
       getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // Initialize Firebase
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
       authDomain: "mirdhuna-25542.firebaseapp.com",
@@ -61,17 +162,46 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
 
-    // DOM Elements
-    const container = document.getElementById('listings-container');
+    // State
+    let currentTab = 'pending';
 
-    // Load and render pending listings
+    // DOM Elements
+    const pendingContainer = document.getElementById('pending-container');
+    const publishedContainer = document.getElementById('published-container');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+
+    // Tab Switching
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`${currentTab}-section`).classList.add('active');
+        
+        // Load data for active tab
+        if (currentTab === 'pending') loadPendingListings();
+        else loadPublishedListings();
+      });
+    });
+
+    // Refresh Button
+    refreshBtn.addEventListener('click', () => {
+      if (currentTab === 'pending') loadPendingListings();
+      else loadPublishedListings();
+    });
+
+    // Load Pending Listings (from pendingListings/)
     async function loadPendingListings() {
       try {
+        pendingContainer.innerHTML = '<p class="loading">Loading pending listings...</p>';
         const storageRef = ref(storage, "pendingListings");
         const result = await listAll(storageRef);
         
         if (result.prefixes.length === 0) {
-          container.innerHTML = '<p class="empty">No pending listings found ✅</p>';
+          pendingContainer.innerHTML = '<p class="empty">✨ No pending listings - all caught up!</p>';
           return;
         }
 
@@ -81,44 +211,90 @@
               const dataUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/data.json`));
               const response = await fetch(dataUrl);
               const data = await response.json();
-              return { id: folderRef.name, ...data, folderPath: folderRef.fullPath };
+              return { id: folderRef.name, ...data, folderPath: folderRef.fullPath, type: 'pending' };
             } catch (err) {
-              console.error(`Error loading ${folderRef.name}:`, err);
+              console.error(`Error loading pending ${folderRef.name}:`, err);
               return null;
             }
           })
         );
         
-        // Filter out failed loads
         const validItems = items.filter(item => item !== null);
-        renderListings(validItems);
+        renderListings(validItems, pendingContainer, 'pending');
         
       } catch (error) {
-        console.error("Error loading listings:", error);
-        container.innerHTML = `<p style="color:#dc3545">❌ Error loading listings: ${error.message}</p>`;
+        console.error("Error loading pending listings:", error);
+        pendingContainer.innerHTML = `<p class="error">❌ Error: ${escapeHtml(error.message)}</p>`;
       }
     }
 
-    // Render listings to DOM
-    function renderListings(items) {
+    // Load Published Listings (from listings/)
+    async function loadPublishedListings() {
+      try {
+        publishedContainer.innerHTML = '<p class="loading">Loading published listings...</p>';
+        const storageRef = ref(storage, "listings");
+        const result = await listAll(storageRef);
+        
+        if (result.prefixes.length === 0) {
+          publishedContainer.innerHTML = '<p class="empty">📭 No published listings yet</p>';
+          return;
+        }
+
+        const items = await Promise.all(
+          result.prefixes.map(async (folderRef) => {
+            try {
+              const dataUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/data.json`));
+              const response = await fetch(dataUrl);
+              const data = await response.json();
+              return { id: folderRef.name, ...data, folderPath: folderRef.fullPath, type: 'published' };
+            } catch (err) {
+              console.error(`Error loading published ${folderRef.name}:`, err);
+              return null;
+            }
+          })
+        );
+        
+        const validItems = items.filter(item => item !== null);
+        renderListings(validItems, publishedContainer, 'published');
+        
+      } catch (error) {
+        console.error("Error loading published listings:", error);
+        publishedContainer.innerHTML = `<p class="error">❌ Error: ${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    // Render Listings to Container
+    function renderListings(items, container, type) {
       if (items.length === 0) {
-        container.innerHTML = '<p class="empty">No pending listings found ✅</p>';
+        container.innerHTML = `<p class="empty">${type === 'pending' ? '✨ No pending listings' : '📭 No published listings'}</p>`;
         return;
       }
 
       container.innerHTML = items.map(item => {
-        const imagesHtml = (item.images || []).map(imgUrl => 
-          `<img src="${imgUrl}" alt="${item.title || 'Listing'}" onerror="this.style.display='none'"/>`
-        ).join('');
+        const imagesHtml = (item.images || []).slice(0, 5).map(imgUrl => 
+          `<img src="${imgUrl}" alt="${escapeHtml(item.title || 'Item')}" onerror="this.parentElement.removeChild(this)"/>`
+        ).join('') || '<small style="color:#999">No images</small>';
+        
+        const isPending = type === 'pending';
         
         return `
           <div class="item-card" data-id="${item.id}" data-path="${item.folderPath}">
-            <div class="item-title">${escapeHtml(item.title || 'Untitled')}</div>
-            <div class="item-price">₹${item.price || '0'}</div>
-            <div class="item-images">${imagesHtml || '<small>No images</small>'}</div>
+            <div class="item-info">
+              <div class="item-title">${escapeHtml(item.title || 'Untitled')}</div>
+              <div class="item-price">₹${escapeHtml(item.price || '0')}</div>
+              ${item.mobile ? `<div class="item-meta">📱 ${escapeHtml(item.mobile)}</div>` : ''}
+              ${item.location ? `<div class="item-meta">📍 ${escapeHtml(item.location)}</div>` : ''}
+              <div class="item-images">${imagesHtml}</div>
+              ${item.description ? `<div style="color:#555;font-size:0.95rem;margin-top:8px">${escapeHtml(item.description).substring(0,120)}${item.description.length>120?'...':''}</div>` : ''}
+            </div>
             <div class="actions">
-              <button class="approve-btn" data-action="approve">✅ Approve</button>
-              <button class="remove-btn" data-action="remove">🗑️ Remove</button>
+              ${isPending ? `
+                <button class="approve-btn" data-action="approve">✅ Approve</button>
+                <button class="remove-btn" data-action="remove">🗑️ Remove</button>
+              ` : `
+                <button class="view-btn" data-action="view">👁️ View</button>
+                <button class="delete-btn" data-action="delete-sold">🗑️ Mark as Sold</button>
+              `}
             </div>
           </div>
         `;
@@ -126,41 +302,60 @@
 
       // Attach event listeners
       container.querySelectorAll('button[data-action]').forEach(btn => {
-        btn.addEventListener('click', handleAction);
+        btn.addEventListener('click', (e) => handleAction(e, type));
       });
     }
 
-    // Handle Approve / Remove actions
-    async function handleAction(e) {
+    // Handle Button Actions
+    async function handleAction(e, type) {
       const button = e.currentTarget;
       const card = button.closest('.item-card');
       const id = card.dataset.id;
       const folderPath = card.dataset.path;
       const action = button.dataset.action;
 
+      // Disable button during operation
+      const originalText = button.innerHTML;
       button.disabled = true;
-      const originalText = button.textContent;
-      button.textContent = action === 'approve' ? 'Processing...' : 'Deleting...';
+      button.innerHTML = action.includes('delete') || action === 'remove' ? '⏳ Deleting...' : '⏳ Processing...';
 
       try {
-        if (action === 'approve') {
-          await approveListing(id, folderPath);
-          button.textContent = '✅ Approved';
-          setTimeout(() => card.remove(), 800);
-        } else if (action === 'remove') {
-          await removeListing(folderPath);
-          button.textContent = '🗑️ Removed';
-          setTimeout(() => card.remove(), 800);
+        if (type === 'pending') {
+          if (action === 'approve') await approveListing(id, folderPath);
+          else if (action === 'remove') await removePendingListing(folderPath);
+        } else {
+          if (action === 'delete-sold') await deleteSoldListing(folderPath, id);
+          else if (action === 'view') {
+            // Open first image or show alert
+            const dataUrl = await getDownloadURL(ref(storage, `${folderPath}/data.json`));
+            const data = await (await fetch(dataUrl)).json();
+            if (data.images?.[0]) window.open(data.images[0], '_blank');
+            else alert('No images available for this item');
+            button.disabled = false;
+            button.innerHTML = originalText;
+            return;
+          }
         }
+        
+        // Remove card from UI after success
+        card.style.opacity = '0.5';
+        setTimeout(() => card.remove(), 300);
+        
+        // Check if container is now empty
+        const container = type === 'pending' ? pendingContainer : publishedContainer;
+        if (container.children.length === 0) {
+          container.innerHTML = `<p class="empty">${type === 'pending' ? '✨ All pending items processed!' : '📭 No more published items'}</p>`;
+        }
+        
       } catch (err) {
         console.error(`${action} error:`, err);
-        alert(`❌ ${action === 'approve' ? 'Approval' : 'Removal'} failed: ${err.message}`);
+        alert(`❌ Operation failed: ${err.message}`);
         button.disabled = false;
-        button.textContent = originalText;
+        button.innerHTML = originalText;
       }
     }
 
-    // Approve: Move item from pendingListings to listings
+    // Approve: Move from pendingListings to listings
     async function approveListing(id, sourcePath) {
       // Read data from pending
       const sourceDataRef = ref(storage, `${sourcePath}/data.json`);
@@ -173,28 +368,57 @@
       const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
       await uploadBytes(destRef, blob);
 
-      // Optionally: delete from pending after successful copy
+      // Delete from pending after successful copy
       await deleteObject(sourceDataRef);
-      // Delete folder metadata if needed (Firebase Storage doesn't have real folders)
       
-      alert(`✅ "${data.title}" approved & published!`);
+      // Show success message
+      const title = data.title || 'Item';
+      alert(`✅ "${title}" approved & published successfully!`);
     }
 
-    // Remove: Delete item from pendingListings
-    async function removeListing(folderPath) {
-      if (!confirm('⚠️ Are you sure you want to REMOVE this pending listing? This cannot be undone.')) {
+    // Remove Pending Listing (reject/delete)
+    async function removePendingListing(folderPath) {
+      if (!confirm('⚠️ Remove this pending listing? This cannot be undone.')) {
         return;
       }
       
-      // Delete the data.json file (primary reference)
+      // Delete the data.json file
       const dataRef = ref(storage, `${folderPath}/data.json`);
       await deleteObject(dataRef);
       
-      // Note: Firebase Storage doesn't support deleting "folders" directly.
-      // If you have image files in the same folder, you'd need to list and delete them too.
-      // For now, we delete the metadata which effectively removes the listing.
+      // Optional: Delete associated images in same folder
+      try {
+        const folderRef = ref(storage, folderPath);
+        const res = await listAll(folderRef);
+        // Delete all files in this folder prefix
+        await Promise.all(res.items.map(itemRef => deleteObject(itemRef).catch(()=>{})));
+      } catch(e) {
+        console.warn('Could not clean up folder images:', e);
+      }
       
-      alert('🗑️ Listing removed from pending');
+      alert('🗑️ Pending listing removed');
+    }
+
+    // Delete Sold Listing (remove from published)
+    async function deleteSoldListing(folderPath, id) {
+      if (!confirm(`🗑️ Mark "${id}" as SOLD and remove from listings?`)) {
+        return;
+      }
+      
+      // Delete the main data file
+      const dataRef = ref(storage, `${folderPath}/data.json`);
+      await deleteObject(dataRef);
+      
+      // Clean up images in the same folder (optional but recommended)
+      try {
+        const folderRef = ref(storage, folderPath);
+        const res = await listAll(folderRef);
+        await Promise.all(res.items.map(itemRef => deleteObject(itemRef).catch(()=>{})));
+      } catch(e) {
+        console.warn('Image cleanup warning:', e);
+      }
+      
+      alert('✅ Item marked as sold and removed from listings!');
     }
 
     // Utility: Escape HTML to prevent XSS
@@ -205,8 +429,18 @@
       return div.innerHTML;
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', loadPendingListings);
+    // Initialize - Load pending by default
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPendingListings();
+    });
+
+    // Auto-refresh every 60 seconds (optional)
+    // setInterval(() => {
+    //   if (document.visibilityState === 'visible') {
+    //     if (currentTab === 'pending') loadPendingListings();
+    //     else loadPublishedListings();
+    //   }
+    // }, 60000);
   </script>
 </body>
 </html>
