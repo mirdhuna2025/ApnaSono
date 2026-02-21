@@ -10,9 +10,25 @@
       font-family: Arial, sans-serif;
       background: #FFFFE0;
     }
-    div {
-      width: 100%;
+    div {width: 100%;  }
+    
+    /* Container for images using flex */
+    .image-container {
+      display: flex;
+      flex-wrap: wrap; /* Ensures images wrap to the next line if they overflow */
+      gap: 20px; /* Space between images */
+      padding: 20px;
+      justify-content: center; /* Center the images horizontally */
     }
+
+    .image-container img {
+      flex: 1 1 25%; /* Flex-grow, flex-shrink, flex-basis set to 25% */
+      max-width: 25%; /* Prevents images from exceeding the container width */
+      height: auto;
+      border-radius: 8px;
+      object-fit: cover; /* Ensures images fill the grid cells nicely */
+    }
+
   </style>
 </head>
 <body>
@@ -30,20 +46,13 @@
   <div data-html="offer.html"></div>
 
    <!-- 🔥 Native Banner Ad (ONLY below Offer) -->
-  <div style="position: relative;  padding: 0px; border-radius: 8px;margin:30px auto; max-width:50%; text-align:center;">
+  <div style="position: flex;  padding: 0px; border-radius: 8px;margin:30px auto; max-width:50%; text-align:center;">
     <script async data-cfasync="false"
       src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js"></script>
     <div id="container-10ea823d42f32bdece49fd7e65f0355d"></div>
   </div>
   <!-- 🔥 End Ad -->
 
-  <!-- Image Grid Section -->
-  <div class="image-container">
-    <img src="image1.jpg" alt="Image 1">
-    <img src="image2.jpg" alt="Image 2">
-    <img src="image3.jpg" alt="Image 3">
-    <img src="image4.jpg" alt="Image 4">
-  </div>
 
 
   <!-- Sticky Bar -->
