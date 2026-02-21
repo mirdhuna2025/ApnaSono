@@ -47,9 +47,6 @@
       width: 100% !important;
     }
 
-    
-    
-
     .gs-title a {
       color: #0056b3 !important;
       text-decoration: none !important;
@@ -72,13 +69,10 @@
       color: #888;
       margin: 30px 0;
     }
-
-    /* ⚠️ Removed floating button styles — no #newsBtn CSS */
   </style>
 </head>
 
 <body>
-
 
   <div class="content">
     <!-- Google CSE -->
@@ -86,9 +80,23 @@
     <div class="gcse-searchresults-only" data-query=""></div>
   </div>
 
+  <!-- Ad Code Section -->
+  <div class="ad-container" style="text-align: center; margin-top: 30px;">
+    <script>
+      atOptions = {
+        'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
+        'format' : 'iframe',
+        'height' : 60,
+        'width' : 468,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+  </div>
 
-
-  <!-- ✅ Button and its click handler removed -->
+  <footer>
+    <p>&copy; 2026 Sono Village News. All rights reserved.</p>
+  </footer>
 
   <!-- Script Section -->
   <script>
@@ -116,5 +124,6 @@
       if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
     }, 300);
   </script>
+
 </body>
 </html>
