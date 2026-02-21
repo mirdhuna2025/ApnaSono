@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Listings (React + Firebase 10)</title>
+<title>Listings (Vanilla JS + Firebase)</title>
 
-
+<!-- Firebase Compat (global firebase object) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <style>
 /* Header */
@@ -45,6 +47,17 @@ header {
   100% { background-position: 0% 50% }
 }
 
+/* Ad Container */
+#ad-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+}
+
 /* Root & Cards */
 :root{
   --primary:#25D366;
@@ -60,68 +73,44 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   display:grid;
   gap:12px;
   padding:12px;
-  grid-template-columns: repeat(2, 1fr); /* mobile */
+  grid-template-columns: repeat(2, 1fr);
 }
-
 @media(min-width:768px){
-  #listingsContainer{
-    grid-template-columns: repeat(3, 1fr);
-  }
+  #listingsContainer{ grid-template-columns: repeat(3, 1fr); }
 }
-
 @media(min-width:1024px){
-  #listingsContainer{
-    grid-template-columns: repeat(4, 1fr);
-  }
+  #listingsContainer{ grid-template-columns: repeat(4, 1fr); }
 }
 
-/* Ad Container Styling */
-#ad-container {
+/* Card */
+.item-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 0;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  width: 100%;
+  flex-direction: column;
 }
-
-/* Item info layout */
 .item-info {
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+.item-title { font-weight: 600; }
+.item-price { color: var(--danger); font-weight: 700; float: right; }
+.item-location { color: #555; font-size: 14px; }
 
-.item-title,
-.item-price {
+.btn-call, .btn-whatsapp {
   display: inline-block;
-}
-.item-title {
-  font-weight: 600;
-}
-.item-price {
-  color: var(--danger);
-  font-weight: 700;
-  float: right;
-}
-
-.item-location {
-  display: inline-block;
-  color: #555;
-  font-size: 14px;
-}
-.btn-call {
-  display: inline-block;
-  margin-right: 8px;
   text-decoration: none;
   padding: 6px 10px;
   border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
   font-weight: 500;
+  margin-right: 6px;
 }
+.btn-call { background: var(--primary); color: #fff; }
+.btn-whatsapp { background: #25D366; color: #fff; }
 
 /* Slider */
 .slider{position:relative; cursor:pointer;}
@@ -129,6 +118,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   width:100%;
   height:120px;
   object-fit:cover;
+  display: block;
 }
 .dots{
   position:absolute;
@@ -143,19 +133,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   background:#ddd;
 }
 .dot.active{background:#25D366}
-
-/* Buttons */
-.btn{
-  padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-  display:inline-block;
-  margin-top:8px;
-  text-decoration: none;
-}
-.btn-success{background:#25D366;color:#fff}
 
 /* FAB */
 .fab {
@@ -174,6 +151,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   cursor: pointer;
   z-index: 9999;
+  font-size: 24px;
 }
 .fab::after {
   content: '';
@@ -195,6 +173,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   display:flex;
   align-items:center;
   justify-content:center;
+  z-index:2000;
 }
 #modalContent{
   background:#fff;
@@ -208,6 +187,8 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   width:100%;
   padding:12px;
   margin-bottom:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
 }
 .close-btn{
   position:absolute;
@@ -220,9 +201,7 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   font-weight:bold;
   color:#555;
 }
-.close-btn:hover{
-  color:#ef4444;
-}
+.close-btn:hover{ color:#ef4444; }
 
 /* Image Preview */
 #previewBackdrop{
@@ -243,7 +222,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 }
 </style>
 </head>
-
 <body>
 
 <!-- 🔹 AD SCRIPT AT TOP -->
@@ -257,7 +235,20 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
       'params' : {}
     };
   </script>
-  <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+      authDomain: "mirdhuna-25542.firebaseapp.com",
+      projectId: "mirdhuna-25542",
+      storageBucket: "mirdhuna-25542.firebasestorage.app",
+      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.storage = firebase.storage();
+  </script>
 </div>
 
 <header>
@@ -266,146 +257,245 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   </div>
 </header>
 
-<div id="root"></div>
+<div id="listingsContainer"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+<!-- FAB Button -->
+<button class="fab" id="fabBtn">+ Sell</button>
 
-window.firebase = (() => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-    authDomain: "mirdhuna-25542.firebaseapp.com",
-    projectId: "mirdhuna-25542",
-    storageBucket: "mirdhuna-25542.firebasestorage.app",
-    appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
-  };
-  const app = initializeApp(firebaseConfig);
-  return { storage: getStorage(app), ref, listAll, getDownloadURL, uploadBytes };
-})();
-</script>
+<!-- Add Listing Modal -->
+<div id="modalBackdrop" style="display:none;">
+  <div id="modalContent">
+    <button class="close-btn" id="closeModal">✖</button>
+    <h3>Add Listing</h3>
+    <form id="listingForm">
+      <input type="text" id="inpTitle" placeholder="Title" required />
+      <input type="number" id="inpPrice" placeholder="Price" required />
+      <input type="text" id="inpLocation" placeholder="Location" required />
+      <input type="tel" id="inpMobile" placeholder="Mobile" required />
+      <input type="file" id="inpImages" multiple accept="image/*" required />
+      <button type="submit" class="btn btn-success">Send to Admin</button>
+    </form>
+  </div>
+</div>
 
-<script type="text/babel">
-const {useState,useEffect} = React;
+<!-- Image Preview Modal -->
+<div id="previewBackdrop" style="display:none;">
+  <img id="previewImg" src="" alt="Preview" />
+</div>
 
-/* Slider with preview */
-function Slider({images=[], onPreview}) {
-  const [i,setI] = useState(0);
-  useEffect(()=>{
-    if(images.length<2) return;
-    const t = setInterval(()=>setI(x=>(x+1)%images.length),3000);
-    return ()=>clearInterval(t);
-  },[images]);
-  if(!images.length) return null;
+<script>
+// ============ STATE ============
+let listings = [];
+let previewImages = [];
+let previewIndex = 0;
 
-  return(
-    <div className="slider">
-      <img src={images[i]} onClick={()=>onPreview(i)} />
-      <div className="dots">
-        {images.map((_,d)=>(
-          <span key={d} className={"dot "+(d===i?"active":"")}></span>
-        ))}
-      </div>
-    </div>
-  );
-}
+// ============ DOM ELEMENTS ============
+const container = document.getElementById('listingsContainer');
+const fabBtn = document.getElementById('fabBtn');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const closeModal = document.getElementById('closeModal');
+const listingForm = document.getElementById('listingForm');
+const previewBackdrop = document.getElementById('previewBackdrop');
+const previewImg = document.getElementById('previewImg');
 
-function App(){
-  const [listings,setListings]=useState([]);
-  const [modal,setModal]=useState(false);
-  const [form,setForm]=useState({});
-  const [files,setFiles]=useState([]);
-  const [preview,setPreview]=useState({open:false, images:[], index:0});
-
-  /* Load listings safely */
-  useEffect(()=>{
-    const load=async()=>{
-      try{
-        const {storage,ref,listAll,getDownloadURL}=window.firebase;
-        const folder=ref(storage,"listings");
-        const res=await listAll(folder);
-
-        const items=await Promise.all(
-          res.prefixes.map(async p=>{
-            try{
-              const meta=await getDownloadURL(ref(storage,p.fullPath+"/data.json"));
-              return await (await fetch(meta)).json();
-            }catch{return null;}
-          })
-        );
-
-        const clean = items.filter(Boolean).sort((a,b)=>b.createdAt-a.createdAt);
-        setListings(clean);
-      }catch(err){ console.log("No listings found"); }
-    };
-    load();
-  },[]);
-
-  async function sendToAdmin(e){
-    e.preventDefault();
-    const { storage, ref, uploadBytes, getDownloadURL } = window.firebase;
-    const id = Date.now().toString();
-    const basePath = "pendingListings/" + id;
-    const imageUrls = [];
-    for(const f of files){
-      const imgRef = ref(storage, `${basePath}/images/${f.name}`);
-      await uploadBytes(imgRef, f);
-      imageUrls.push(await getDownloadURL(imgRef));
-    }
-    const data = { ...form, images: imageUrls, status:"pending", createdAt:Date.now() };
-    const blob = new Blob([JSON.stringify(data)], { type:"application/json" });
-    await uploadBytes(ref(storage, `${basePath}/data.json`), blob);
-    alert("✅ Listing sent for admin approval");
-    setModal(false); setForm({}); setFiles([]);
+// ============ LOAD LISTINGS ============
+async function loadListings() {
+  try {
+    const storageRef = window.storage.ref('listings');
+    const res = await storageRef.listAll();
+    
+    const items = await Promise.all(
+      res.prefixes.map(async (folderRef) => {
+        try {
+          const jsonRef = folderRef.child('data.json');
+          const url = await jsonRef.getDownloadURL();
+          const response = await fetch(url);
+          return await response.json();
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+    
+    listings = items
+      .filter(Boolean)
+      .sort((a, b) => b.createdAt - a.createdAt);
+    
+    renderListings();
+  } catch (err) {
+    console.log("No listings found or error loading:", err);
   }
-
-  return(
-    <>
-      <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
-
-      <div id="listingsContainer">
-        {listings.map((i,idx)=>(
-          <div className="item-card" key={idx}>
-            <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
-           <div className="item-info">
-              <div className="item-title">{i.title}</div>
-              <div className="item-price">₹{i.price}</div>
-              <div className="item-location">📍 {i.location}</div>
-              <a href={`tel:${i.mobile}`} className="btn btn-call">📞</a>
-              <a className="btn btn-success" target="_blank" rel="noopener noreferrer" href={`https://wa.me/91${i.mobile}`}>💬 WhatsApp</a>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add Listing Modal */}
-      {modal && (
-        <div id="modalBackdrop" onClick={()=>setModal(false)}>
-          <div id="modalContent" onClick={e=>e.stopPropagation()}>
-            <button className="close-btn" onClick={()=>setModal(false)}>✖</button>
-            <h3>Add Listing</h3>
-            <form onSubmit={sendToAdmin}>
-              <input placeholder="Title" required onChange={e=>setForm({...form,title:e.target.value})}/>
-              <input type="number" placeholder="Price" required onChange={e=>setForm({...form,price:e.target.value})}/>
-              <input placeholder="Location" required onChange={e=>setForm({...form,location:e.target.value})}/>
-              <input placeholder="Mobile" required onChange={e=>setForm({...form,mobile:e.target.value})}/>
-              <input type="file" multiple accept="image/*" required onChange={e=>setFiles([...e.target.files])}/>
-              <button className="btn btn-success">Send to Admin</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Image Preview Modal */}
-      {preview.open && (
-        <div id="previewBackdrop" onClick={()=>setPreview({open:false, images:[], index:0})}>
-          <img src={preview.images[preview.index]} />
-        </div>
-      )}
-    </>
-  );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+// ============ RENDER LISTINGS ============
+function renderListings() {
+  container.innerHTML = '';
+  
+  listings.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    // Slider
+    const slider = document.createElement('div');
+    slider.className = 'slider';
+    
+    if (item.images && item.images.length > 0) {
+      const img = document.createElement('img');
+      img.src = item.images[0];
+      img.dataset.index = '0';
+      img.dataset.listing = idx;
+      img.onclick = () => openPreview(item.images, 0);
+      
+      // Auto-rotate slider
+      if (item.images.length > 1) {
+        let current = 0;
+        setInterval(() => {
+          if (document.contains(img)) {
+            current = (current + 1) % item.images.length;
+            img.src = item.images[current];
+            img.dataset.index = current;
+            // Update dots
+            const dots = slider.querySelectorAll('.dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === current));
+          }
+        }, 3000);
+      }
+      
+      slider.appendChild(img);
+      
+      // Dots
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      item.images.forEach((_, i) => {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.onclick = (e) => {
+          e.stopPropagation();
+          img.src = item.images[i];
+          img.dataset.index = i;
+          dots.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+          dot.classList.add('active');
+        };
+        dots.appendChild(dot);
+      });
+      slider.appendChild(dots);
+    }
+    
+    // Info
+    const info = document.createElement('div');
+    info.className = 'item-info';
+    
+    const title = document.createElement('div');
+    title.className = 'item-title';
+    title.textContent = item.title;
+    
+    const price = document.createElement('div');
+    price.className = 'item-price';
+    price.textContent = '₹' + item.price;
+    
+    const location = document.createElement('div');
+    location.className = 'item-location';
+    location.textContent = '📍 ' + item.location;
+    
+    const callBtn = document.createElement('a');
+    callBtn.href = `tel:${item.mobile}`;
+    callBtn.className = 'btn btn-call';
+    callBtn.textContent = '📞';
+    
+    const waBtn = document.createElement('a');
+    waBtn.href = `https://wa.me/91${item.mobile}`;
+    waBtn.className = 'btn btn-whatsapp';
+    waBtn.textContent = '💬 WhatsApp';
+    waBtn.target = '_blank';
+    waBtn.rel = 'noopener noreferrer';
+    
+    info.appendChild(title);
+    info.appendChild(price);
+    info.appendChild(location);
+    info.appendChild(callBtn);
+    info.appendChild(waBtn);
+    
+    card.appendChild(slider);
+    card.appendChild(info);
+    container.appendChild(card);
+  });
+}
+
+// ============ MODAL FUNCTIONS ============
+fabBtn.onclick = () => { modalBackdrop.style.display = 'flex'; };
+closeModal.onclick = () => { modalBackdrop.style.display = 'none'; };
+modalBackdrop.onclick = (e) => { if (e.target === modalBackdrop) modalBackdrop.style.display = 'none'; };
+
+// ============ FORM SUBMIT ============
+listingForm.onsubmit = async (e) => {
+  e.preventDefault();
+  
+  const title = document.getElementById('inpTitle').value;
+  const price = document.getElementById('inpPrice').value;
+  const location = document.getElementById('inpLocation').value;
+  const mobile = document.getElementById('inpMobile').value;
+  const files = document.getElementById('inpImages').files;
+  
+  const id = Date.now().toString();
+  const basePath = 'pendingListings/' + id;
+  const imageUrls = [];
+  
+  // Upload images
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const imgRef = window.storage.ref(`${basePath}/images/${file.name}`);
+    await imgRef.put(file);
+    const url = await imgRef.getDownloadURL();
+    imageUrls.push(url);
+  }
+  
+  // Upload data.json
+  const data = {
+    title, price, location, mobile,
+    images: imageUrls,
+    status: 'pending',
+    createdAt: Date.now()
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const jsonRef = window.storage.ref(`${basePath}/data.json`);
+  await jsonRef.put(blob);
+  
+  alert('✅ Listing sent for admin approval');
+  modalBackdrop.style.display = 'none';
+  listingForm.reset();
+};
+
+// ============ IMAGE PREVIEW ============
+function openPreview(images, index) {
+  previewImages = images;
+  previewIndex = index;
+  previewImg.src = images[index];
+  previewBackdrop.style.display = 'flex';
+}
+
+previewBackdrop.onclick = (e) => {
+  if (e.target === previewBackdrop) {
+    previewBackdrop.style.display = 'none';
+  }
+};
+
+// Keyboard navigation for preview
+document.addEventListener('keydown', (e) => {
+  if (previewBackdrop.style.display === 'flex') {
+    if (e.key === 'ArrowLeft') {
+      previewIndex = (previewIndex - 1 + previewImages.length) % previewImages.length;
+      previewImg.src = previewImages[previewIndex];
+    } else if (e.key === 'ArrowRight') {
+      previewIndex = (previewIndex + 1) % previewImages.length;
+      previewImg.src = previewImages[previewIndex];
+    } else if (e.key === 'Escape') {
+      previewBackdrop.style.display = 'none';
+    }
+  }
+});
+
+// ============ INIT ============
+window.addEventListener('DOMContentLoaded', loadListings);
 </script>
 
 </body>
