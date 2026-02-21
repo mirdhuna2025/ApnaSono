@@ -324,7 +324,12 @@ function App(){
   <div className="item-price">₹{i.price}</div>
 
   <div className="item-location">📍 {i.location}</div>
-  <div className="item-mobile">📞 {i.mobile}</div>
+  <a 
+  href={`tel:${i.mobile}`} 
+  className="btn btn-call"
+>
+  📞 Call
+</a>
 
   <a 
     className="btn btn-success" 
