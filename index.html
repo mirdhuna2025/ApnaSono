@@ -39,44 +39,41 @@
   <!-- Sticky Bar -->
   <div data-html="stickybar.html"></div>
 
-  <script>
+<script>
 async function loadSection(div){
   const file = div.dataset.html;
+  const useJs = div.dataset.js !== "false";
+
   try{
     const res = await fetch(file);
-    if(!res.ok) throw new Error(`Failed to load ${file}`);
+    if(!res.ok) throw new Error(file+" not found");
     const html = await res.text();
 
-    const temp = document.createElement('div');
+    const temp = document.createElement("div");
     temp.innerHTML = html;
 
-    // Move styles to head
-    temp.querySelectorAll('style').forEach(style => {
-      document.head.appendChild(style);
-    });
+    temp.querySelectorAll("style").forEach(s=>document.head.appendChild(s));
+    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi,'');
 
-    // Insert content without styles
-    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+    if(useJs){
+      const js = file.replace(".html",".js");
+      fetch(js).then(r=>{
+        if(r.ok){
+          const s = document.createElement("script");
+          s.type = "module";
+          s.src = js;
+          document.body.appendChild(s);
+        }
+      });
+    }
 
-    // Load optional JS
-    const jsFile = file.replace('.html', '.js');
-    fetch(jsFile).then(r=>{
-      if(r.ok){
-        const s = document.createElement('script');
-        s.src = jsFile;
-        s.defer = true;
-        document.body.appendChild(s);
-      }
-    });
-
-  }catch(err){
-    console.error(err);
-    div.innerHTML = "<p style='color:red'>Section failed to load</p>";
+  }catch(e){
+    console.error(e);
   }
 }
 
-document.addEventListener("DOMContentLoaded", ()=>{
-  document.querySelectorAll('[data-html]').forEach(loadSection);
+document.addEventListener("DOMContentLoaded",()=>{
+  document.querySelectorAll("[data-html]").forEach(loadSection);
 });
 </script>
  
