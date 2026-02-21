@@ -45,6 +45,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
+
+
+
+    
 /* Ensure emojis scale properly */
 .content img.emoji, #msg img.emoji {
   height: 1em;
@@ -128,6 +132,46 @@
     #msg, .content, .reply-inline, .name-line {
   font-family: inherit;  /* ✅ Inherit emoji-supporting font */
 }
+
+ #adOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+
+    #adBox {
+      background: #fff;
+      padding: 25px;
+      width: 320px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #adBox h3 {
+      margin-top: 0;
+    }
+
+    #adBox button {
+      background: #25D366;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #adBox button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+
+    
     #chatTitle {
       font-weight: 700;
       font-size: 18px;
@@ -563,6 +607,17 @@
 
 </head>
 <body>
+<!-- ===== AD POPUP ===== -->
+<div id="adOverlay" style="display:none;">
+  <div id="adBox">
+    <h3>🙏 Support Us</h3>
+    <p>Please watch a short ad to continue</p>
+    <button id="watchBtn" onclick="watchAd()">▶ Watch Ad</button>
+    <p id="adTimer"></p>
+  </div>
+</div>
+
+  
   <header>
     
     <button id="adminBtn" class="header-btn">🔐 </button>
@@ -664,7 +719,39 @@
   </div>
 <input type="file" id="cameraInput" accept="image/*,video/*" capture hidden>
 <input type="file" id="galleryInput" accept="image/*,video/*" hidden>
+  
+  /* ===== AD LOGIC ===== */
+let seconds = 8;
+let timerInterval;
+
+if (!sessionStorage.getItem("adWatched")) {
+  document.getElementById("adOverlay").style.display = "flex";
+}
+
+function watchAd() {
+  // 🔴 PUT YOUR ADSTERRA DIRECT LINK HERE
+  window.open("https://www.effectivegatecpm.com/bc0ad01h8?key=f6d9899d4a69c1635f9a55f29c87371c", "_blank");
+
+  const btn = document.getElementById("watchBtn");
+  const timer = document.getElementById("adTimer");
+
+  btn.disabled = true;
+  timer.innerText = "Please wait " + seconds + " seconds";
+
+  timerInterval = setInterval(() => {
+    seconds--;
+    timer.innerText = "Please wait " + seconds + " seconds";
+
+    if (seconds <= 0) {
+      clearInterval(timerInterval);
+      sessionStorage.setItem("adWatched", "yes");
+      document.getElementById("adOverlay").style.display = "none";
+    }
+  }, 1000);
+}
+  
   <script type="module" src="chat.js"></script>
+  
 </body>
 </html>
 
