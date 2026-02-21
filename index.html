@@ -5,14 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirdhuna</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #FFFFE0;
     }
-    div {width: 100%;  }
     
-  
+    div {
+      width: 100%;
+    }
+    
+    /* Ad Container Styles - Side by Side */
+    .ad-wrapper {
+      display: flex;
+      flex-wrap: wrap; /* Allows stacking on small screens */
+      gap: 10px;
+      padding: 10px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    
+    .ad-column {
+      flex: 1 1 0; /* Grow, shrink, base size */
+      min-width: 300px; /* Minimum width before stacking */
+      max-width: 50%; /* Max half width for side-by-side */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .ad-column[id^="container-"] {
+      min-height: 250px; /* Prevent layout shift */
+      width: 100%;
+    }
+    
+    /* Responsive: Stack on mobile */
+    @media (max-width: 768px) {
+      .ad-column {
+        max-width: 100%;
+        min-width: 100%;
+      }
+    }
+    
+    /* Optional: Ad placeholder styling while loading */
+    .ad-column:empty::before {
+      content: "Loading ad...";
+      color: #888;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -29,65 +77,58 @@
   <!-- Offer -->
   <div data-html="offer.html"></div>
 
-  
-<script async src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js"></script>
+  <!-- Ad Script -->
+  <script async src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js"></script>
 
-<div style="display:flex; gap:10px;">
-  <div id="container-10ea823d42f32bdece49fd7e65f0355d-1"></div>
-  <div id="container-10ea823d42f32bdece49fd7e65f0355d-2"></div>
-</div>
-
-
+  <!-- Side-by-Side Ad Columns -->
+  <div class="ad-wrapper">
+    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d-1"></div>
+    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d-2"></div>
+  </div>
 
   <!-- Sticky Bar -->
   <div data-html="stickybar.html"></div>
 
-<script>
-async function loadSection(div) {
-  const file = div.dataset.html;
-  const useJs = div.dataset.js !== "false";
+  <script>
+    async function loadSection(div) {
+      const file = div.dataset.html;
+      const useJs = div.dataset.js !== "false";
 
-  try {
-    // Fetch the HTML content for the section
-    const res = await fetch(file);
-    if (!res.ok) throw new Error(`${file} not found`);
-    
-    const html = await res.text();
-    const temp = document.createElement("div");
-    temp.innerHTML = html;
+      try {
+        const res = await fetch(file);
+        if (!res.ok) throw new Error(`${file} not found`);
+        
+        const html = await res.text();
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
 
-    // Move all styles from the section to the head for better isolation
-    temp.querySelectorAll("style").forEach(style => document.head.appendChild(style));
+        // Move styles to head
+        temp.querySelectorAll("style").forEach(style => document.head.appendChild(style));
 
-    // Insert the content into the div, excluding style tags
-    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+        // Insert content excluding style tags
+        div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
 
-    // If JS is present, load it as a module
-    if (useJs) {
-      const jsFile = file.replace(".html", ".js");
-      fetch(jsFile).then(response => {
-        if (response.ok) {
-          const script = document.createElement("script");
-          script.type = "module"; // Make sure the script is treated as a module
-          script.src = jsFile;
-          document.body.appendChild(script);
+        // Load associated JS module if enabled
+        if (useJs) {
+          const jsFile = file.replace(".html", ".js");
+          const response = await fetch(jsFile);
+          if (response.ok) {
+            const script = document.createElement("script");
+            script.type = "module";
+            script.src = jsFile;
+            document.body.appendChild(script);
+          }
         }
-      }).catch(err => {
-        console.error(`Failed to load JS file: ${jsFile}`, err);
-      });
+      } catch (error) {
+        console.error(`Error loading section: ${file}`, error);
+        div.innerHTML = "<p style='color:red;text-align:center;padding:10px;'>Error loading content. Please try again later.</p>";
+      }
     }
 
-  } catch (error) {
-    console.error(`Error loading section: ${file}`, error);
-    div.innerHTML = "<p style='color:red'>Error loading content. Please try again later.</p>";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Ensure content is only loaded after DOM is ready
-  document.querySelectorAll("[data-html]").forEach(loadSection);
-});
-</script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("[data-html]").forEach(loadSection);
+    });
+  </script>
 
 </body>
 </html>
