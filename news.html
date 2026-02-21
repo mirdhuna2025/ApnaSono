@@ -1,205 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sono Village News Today</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sono Village News Today</title>
 
-<style>
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #222;
-    margin: 0;
-    padding: 0;
-  }
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
 
-  header {
-    text-align: center;
-    padding: 20px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #ddd;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-  h1 {
-    margin: 0;
-    font-size: 1.8rem;
-  }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #222;
+    }
 
-  p {
-    margin: 4px 0 0;
-    color: #666;
-    font-size: 0.95rem;
-  }
+    p {
+      margin: 4px 0 0;
+      color: #666;
+      font-size: 0.95rem;
+    }
 
-  .content {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 0 16px;
-  }
+    .content {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
 
-  /* Google CSE styling */
-  .gs-title a {
-    color: #0056b3 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-  }
+    /* Google Search appearance overrides */
+    .gcse-search, .gcse-searchresults {
+      width: 100% !important;
+    }
 
-  .gs-snippet {
-    color: #333 !important;
-    font-size: 0.95rem !important;
-  }
+    
+    
 
-  /* News API cards */
-  .news {
-    background: #fff;
-    padding: 14px;
-    margin-bottom: 12px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.08);
-  }
+    .gs-title a {
+      color: #0056b3 !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+    }
 
-  .news a {
-    color: #1a0dab;
-    font-weight: 600;
-    text-decoration: none;
-  }
+    .gs-title a:hover {
+      text-decoration: underline !important;
+    }
 
-  .news small {
-    display: block;
-    margin-top: 6px;
-    color: #666;
-  }
+    .gs-snippet {
+      color: #333 !important;
+      line-height: 1.5 !important;
+      font-size: 0.95rem !important;
+    }
 
-  footer {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #888;
-    margin: 30px 0;
-  }
-</style>
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+      margin: 30px 0;
+    }
+
+    /* ⚠️ Removed floating button styles — no #newsBtn CSS */
+  </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Sono Village News Today</h1>
-  <p>Sono • Jhajha • Jamui</p>
-</header>
 
-<div class="content">
+  <div class="content">
+    <!-- Google CSE -->
+    <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
+    <div class="gcse-searchresults-only" data-query=""></div>
+  </div>
 
-  <!-- 🔍 GOOGLE SEARCH RESULTS -->
-  <h2>Google Search Results</h2>
-  <script async src="https://cse.google.com/cse.js?cx=02dc72061b64943fc"></script>
-  <div class="gcse-searchresults-only"></div>
 
-  <hr style="margin:30px 0">
 
-  <!-- 📰 MULTI API NEWS -->
-  <h2>Latest News from APIs</h2>
-  <div id="newsBox">Loading news...</div>
+  <!-- ✅ Button and its click handler removed -->
 
-</div>
-
-<footer>
-  © 2026 Sono Local News
-</footer>
-
-<script>
-/* ===============================
-   GOOGLE CSE AUTO SEARCH
-================================ */
-const QUERY = "sono jhajha jamui";
-
-window.__gcse = {
-  callback: function () {
-    try {
-      const el = google.search.cse.element.getElement("searchresults-only0");
-      if (el) el.execute(QUERY);
-    } catch (e) {
-      console.warn("CSE error", e);
+  <!-- Script Section -->
+  <script>
+    // Google CSE auto query
+    function runSearch() {
+      const query = "sono jhajha jamui";
+      try {
+        if (window.google && google.search && google.search.cse) {
+          const element = google.search.cse.element.getElement('searchresults-only0');
+          if (element) {
+            element.execute(query);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("CSE not ready yet:", e);
+      }
+      return false;
     }
-  }
-};
 
-/* ===============================
-   MULTI API CONFIG
-================================ */
-const NEWS_QUERY = "Sono Jamui Jhajha";
-
-// 🔑 REPLACE WITH YOUR KEYS
-const NEWS_API_KEY  = "d9db7ef8a9784644a1c6d2a4b771fa9a";
-const GNEWS_API_KEY = "2261c4e3c38d7a0ded2df58d8690a8d3";
-
-/* ===============================
-   FETCH FUNCTIONS
-================================ */
-
-// NewsAPI
-async function fetchNewsAPI() {
-  const url = `https://newsapi.org/v2/everything?q=${NEWS_QUERY}&apiKey=${NEWS_API_KEY}`;
-  const r = await fetch(url);
-  const d = await r.json();
-  return (d.articles || []).map(n => ({
-    title: n.title,
-    url: n.url,
-    source: "NewsAPI",
-    time: n.publishedAt
-  }));
-}
-
-// GNews
-async function fetchGNews() {
-  const url = `https://gnews.io/api/v4/search?q=${NEWS_QUERY}&apikey=${GNEWS_API_KEY}`;
-  const r = await fetch(url);
-  const d = await r.json();
-  return (d.articles || []).map(n => ({
-    title: n.title,
-    url: n.url,
-    source: "GNews",
-    time: n.publishedAt
-  }));
-}
-
-/* ===============================
-   LOAD & RENDER
-================================ */
-async function loadNews() {
-  const box = document.getElementById("newsBox");
-
-  const results = await Promise.allSettled([
-    fetchNewsAPI(),
-    fetchGNews()
-  ]);
-
-  const news = results
-    .filter(r => r.status === "fulfilled")
-    .flatMap(r => r.value)
-    .sort((a,b) => (b.time || "").localeCompare(a.time || ""));
-
-  box.innerHTML = "";
-
-  if (!news.length) {
-    box.innerHTML = "No API news available.";
-    return;
-  }
-
-  news.forEach(n => {
-    box.innerHTML += `
-      <div class="news">
-        <a href="${n.url}" target="_blank">${n.title}</a>
-        <small>${n.source} ${n.time ? "• " + n.time : ""}</small>
-      </div>
-    `;
-  });
-}
-
-loadNews();
-</script>
-
+    // Try every 300ms until CSE loads
+    let attempts = 0;
+    const maxAttempts = 17;
+    const interval = setInterval(() => {
+      if (runSearch() || ++attempts >= maxAttempts) clearInterval(interval);
+    }, 300);
+  </script>
 </body>
 </html>
