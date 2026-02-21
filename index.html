@@ -10,7 +10,9 @@
       font-family: Arial, sans-serif;
       background: #FFFFE0;
     }
-    div { width: 100%; }
+    div {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -30,8 +32,7 @@
   <!-- 🔥 Native Banner Ad (ONLY below Offer) -->
   <div style="margin:10px auto; max-width:100%; text-align:center;">
     <script async data-cfasync="false"
-      src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js">
-    </script>
+      src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js"></script>
     <div id="container-10ea823d42f32bdece49fd7e65f0355d"></div>
   </div>
   <!-- 🔥 End Ad -->
@@ -40,43 +41,51 @@
   <div data-html="stickybar.html"></div>
 
 <script>
-async function loadSection(div){
+async function loadSection(div) {
   const file = div.dataset.html;
   const useJs = div.dataset.js !== "false";
 
-  try{
+  try {
+    // Fetch the HTML content for the section
     const res = await fetch(file);
-    if(!res.ok) throw new Error(file+" not found");
+    if (!res.ok) throw new Error(`${file} not found`);
+    
     const html = await res.text();
-
     const temp = document.createElement("div");
     temp.innerHTML = html;
 
-    temp.querySelectorAll("style").forEach(s=>document.head.appendChild(s));
-    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi,'');
+    // Move all styles from the section to the head for better isolation
+    temp.querySelectorAll("style").forEach(style => document.head.appendChild(style));
 
-    if(useJs){
-      const js = file.replace(".html",".js");
-      fetch(js).then(r=>{
-        if(r.ok){
-          const s = document.createElement("script");
-          s.type = "module";
-          s.src = js;
-          document.body.appendChild(s);
+    // Insert the content into the div, excluding style tags
+    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+
+    // If JS is present, load it as a module
+    if (useJs) {
+      const jsFile = file.replace(".html", ".js");
+      fetch(jsFile).then(response => {
+        if (response.ok) {
+          const script = document.createElement("script");
+          script.type = "module"; // Make sure the script is treated as a module
+          script.src = jsFile;
+          document.body.appendChild(script);
         }
+      }).catch(err => {
+        console.error(`Failed to load JS file: ${jsFile}`, err);
       });
     }
 
-  }catch(e){
-    console.error(e);
+  } catch (error) {
+    console.error(`Error loading section: ${file}`, error);
+    div.innerHTML = "<p style='color:red'>Error loading content. Please try again later.</p>";
   }
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", () => {
+  // Ensure content is only loaded after DOM is ready
   document.querySelectorAll("[data-html]").forEach(loadSection);
 });
 </script>
- 
 
 </body>
 </html>
