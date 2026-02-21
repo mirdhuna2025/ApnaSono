@@ -77,16 +77,26 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
     grid-template-columns: repeat(4, 1fr);
   }
 }
-/* Card */
+
+/* Ad Container Styling */
+#ad-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+}
+
 /* Item info layout */
 .item-info {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px; /* spacing between rows */
+  gap: 6px;
 }
 
-/* Top row: title and price */
 .item-title,
 .item-price {
   display: inline-block;
@@ -97,10 +107,9 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 .item-price {
   color: var(--danger);
   font-weight: 700;
-  float: right; /* pushes price to the right */
+  float: right;
 }
 
-/* Middle row: call button and location */
 .item-location {
   display: inline-block;
   color: #555;
@@ -116,7 +125,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   color: #fff;
   font-weight: 500;
 }
-
 
 /* Slider */
 .slider{position:relative; cursor:pointer;}
@@ -148,7 +156,8 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   font-weight:600;
   display:inline-block;
   margin-top:8px;
-  text-decoration: none;}
+  text-decoration: none;
+}
 .btn-success{background:#25D366;color:#fff}
 
 /* FAB */
@@ -181,8 +190,6 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   z-index: -1;
 }
 
-
-  
 /* Modal */
 #modalBackdrop{
   position:fixed;
@@ -242,6 +249,20 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
 
 <body>
 
+<!-- 🔹 AD SCRIPT AT TOP -->
+<div id="ad-container">
+  <script>
+    atOptions = {
+      'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
+      'format' : 'iframe',
+      'height' : 60,
+      'width' : 468,
+      'params' : {}
+    };
+  </script>
+  <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+</div>
+
 <header>
   <div class="header-container">
     <h1 class="sono-olx">SONO OLX</h1>
@@ -298,8 +319,6 @@ function App(){
   const [form,setForm]=useState({});
   const [files,setFiles]=useState([]);
   const [preview,setPreview]=useState({open:false, images:[], index:0});
-  
-
 
   /* Load listings safely */
   useEffect(()=>{
@@ -348,83 +367,16 @@ function App(){
       <button className="fab" onClick={()=>setModal(true)}>+ Sell</button>
 
       <div id="listingsContainer">
-       
-  {listings.map((i, idx) => (
-  <React.Fragment key={idx}>
-    
-    {/* Item Card */}
-    <div className="item-card">
-      <Slider 
-        images={i.images} 
-        onPreview={index=>setPreview({open:true, images:i.images, index})} 
-      />
-      <div className="item-info">
-        <div className="item-title">{i.title}</div>
-        <div className="item-price">₹{i.price}</div>
-        <div className="item-location">📍 {i.location}</div>
-
-        <a href={`tel:${i.mobile}`} className="btn btn-call">📞</a>
-
-        <a 
-          className="btn btn-success" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          href={`https://wa.me/91${i.mobile}`}
-        >
-          💬 WhatsApp
-        </a>
-      </div>
-    </div>
-
-    {/* Show Ad After Every 4 Items (2 Rows in Mobile) */}
-    {(idx + 1) % 4 === 0 && (
-      <div style={{
-        gridColumn: "1 / -1",
-        textAlign: "center",
-        margin: "15px 0"
-      }}>
-        <script>
-          {`
-            atOptions = {
-              'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
-              'format' : 'iframe',
-              'height' : 60,
-              'width' : 468,
-              'params' : {}
-            };
-          `}
-        </script>
-        <script src="https://www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
-      </div>
-    )}
-
-  </React.Fragment>
-))}
-
-        
+        {listings.map((i,idx)=>(
           <div className="item-card" key={idx}>
             <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
            <div className="item-info">
-  <div className="item-title">{i.title}</div>
-  <div className="item-price">₹{i.price}</div>
-
-  <div className="item-location">📍 {i.location}</div>
-  <a 
-  href={`tel:${i.mobile}`} 
-  className="btn btn-call"
->
- 📞
-</a>
-
-  <a 
-    className="btn btn-success" 
-    target="_blank" 
-    rel="noopener noreferrer" 
-    href={`https://wa.me/91${i.mobile}`}
-  >  
-    💬 WhatsApp
-  </a>
-</div>
+              <div className="item-title">{i.title}</div>
+              <div className="item-price">₹{i.price}</div>
+              <div className="item-location">📍 {i.location}</div>
+              <a href={`tel:${i.mobile}`} className="btn btn-call">📞</a>
+              <a className="btn btn-success" target="_blank" rel="noopener noreferrer" href={`https://wa.me/91${i.mobile}`}>💬 WhatsApp</a>
+            </div>
           </div>
         ))}
       </div>
@@ -460,4 +412,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 
 </body>
-</html>  
+</html>
