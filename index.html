@@ -109,35 +109,7 @@ async function loadSection(div){
 
 document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
 
-/* ===== AD LOGIC ===== */
-let seconds = 8;
-let timerInterval;
 
-if (!sessionStorage.getItem("adWatched")) {
-  document.getElementById("adOverlay").style.display = "flex";
-}
-
-function watchAd() {
-  // 🔴 PUT YOUR ADSTERRA DIRECT LINK HERE
-  window.open("https://www.effectivegatecpm.com/bc0ad01h8?key=f6d9899d4a69c1635f9a55f29c87371c", "_blank");
-
-  const btn = document.getElementById("watchBtn");
-  const timer = document.getElementById("adTimer");
-
-  btn.disabled = true;
-  timer.innerText = "Please wait " + seconds + " seconds";
-
-  timerInterval = setInterval(() => {
-    seconds--;
-    timer.innerText = "Please wait " + seconds + " seconds";
-
-    if (seconds <= 0) {
-      clearInterval(timerInterval);
-      sessionStorage.setItem("adWatched", "yes");
-      document.getElementById("adOverlay").style.display = "none";
-    }
-  }, 1000);
-}
 </script>
 
 </body>
