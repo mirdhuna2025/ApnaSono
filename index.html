@@ -1,116 +1,64 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirdhuna</title>
-
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #FFFFE0;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #FFFFE0; }
     div { width: 100%; }
-
-    /* ===== Ad Overlay ===== */
-    #adOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-    }
-
-    #adBox {
-      background: #fff;
-      padding: 25px;
-      width: 320px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    #adBox h3 {
-      margin-top: 0;
-    }
-
-    #adBox button {
-      background: #25D366;
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    #adBox button:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
   </style>
 </head>
-
 <body>
 
-<!-- ===== AD POPUP ===== -->
-<div id="adOverlay" style="display:none;">
-  <div id="adBox">
-    <h3>🙏 Support Us</h3>
-    <p>Please watch a short ad to continue</p>
-    <button id="watchBtn" onclick="watchAd()">▶ Watch Ad</button>
-    <p id="adTimer"></p>
-  </div>
-</div>
-
-<!-- ===== SITE CONTENT ===== -->
-<div id="siteContent">
-
+ 
   <div data-html="headerlogo.html"></div>
   <div data-html="weather.html"></div>
   <div data-html="slider.html"></div>
   <div data-html="offer.html"></div>
-  <div data-html="stickybar.html"></div>
+   
+    <div data-html="stickybar.html"></div>
 
-</div>
+ 
 
-<script>
-/* ===== HTML SECTION LOADER ===== */
-async function loadSection(div){
-  const file = div.getAttribute('data-html');
-  try{
-    const res = await fetch(file);
-    if(!res.ok) throw new Error(`Cannot load ${file}`);
-    const text = await res.text();
 
-    const temp = document.createElement('div');
-    temp.innerHTML = text;
 
-    temp.querySelectorAll('style').forEach(s => document.head.appendChild(s));
-    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
 
-    const jsFile = file.replace('.html', '.js');
-    fetch(jsFile).then(r=>{
-      if(r.ok){
-        const script = document.createElement('script');
-        script.type = 'module';
-        script.src = jsFile;
-        document.body.appendChild(script);
+  <script>
+    async function loadSection(div){
+      const file = div.getAttribute('data-html');
+      try{
+        const res = await fetch(file);
+        if(!res.ok) throw new Error(`Cannot load ${file}`);
+        const text = await res.text();
+
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+
+        // Append style tags to head
+        temp.querySelectorAll('style').forEach(s => document.head.appendChild(s));
+
+        // Insert HTML without styles
+        div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+
+        // Append JS file if exists
+        const jsFile = file.replace('.html', '.js');
+        fetch(jsFile).then(r=>{
+          if(r.ok){
+            const script = document.createElement('script');
+            script.type = 'module';  // Important for Firebase
+            script.src = jsFile;
+            document.body.appendChild(script);
+          }
+        }).catch(()=>{});
+
+      } catch(e){
+        console.error(e);
       }
-    }).catch(()=>{});
+    }
 
-  } catch(e){
-    console.error(e);
-  }
-}
-
-document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
-
-
-</script>
+    document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
+  </script>
 
 </body>
 </html>
