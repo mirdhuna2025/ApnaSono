@@ -318,13 +318,22 @@ function App(){
         {listings.map((i,idx)=>(
           <div className="item-card" key={idx}>
             <Slider images={i.images} onPreview={index=>setPreview({open:true, images:i.images, index})} />
-            <div className="item-info">
-              <div className="item-title">{i.title}</div>
-              <div className="item-price">₹{i.price}</div>
-              <a className="btn btn-success" target="_blank" rel="noopener noreferrer" href={`https://wa.me/91${i.mobile}`}>
-                💬 WhatsApp
-              </a>
-            </div>
+           <div className="item-info">
+  <div className="item-title">{i.title}</div>
+  <div className="item-price">₹{i.price}</div>
+
+  <div className="item-location">📍 {i.location}</div>
+  <div className="item-mobile">📞 {i.mobile}</div>
+
+  <a 
+    className="btn btn-success" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    href={`https://wa.me/91${i.mobile}`}
+  >
+    💬 WhatsApp
+  </a>
+</div>
           </div>
         ))}
       </div>
