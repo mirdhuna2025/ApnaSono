@@ -40,40 +40,46 @@
   <div data-html="stickybar.html"></div>
 
   <script>
-    async function loadSection(div){
-      const file = div.getAttribute('data-html');
-      try{
-        const res = await fetch(file);
-        if(!res.ok) throw new Error(`Cannot load ${file}`);
-        const text = await res.text();
+async function loadSection(div){
+  const file = div.dataset.html;
+  try{
+    const res = await fetch(file);
+    if(!res.ok) throw new Error(`Failed to load ${file}`);
+    const html = await res.text();
 
-        const temp = document.createElement('div');
-        temp.innerHTML = text;
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
 
-        // Move styles to head
-        temp.querySelectorAll('style').forEach(s => document.head.appendChild(s));
+    // Move styles to head
+    temp.querySelectorAll('style').forEach(style => {
+      document.head.appendChild(style);
+    });
 
-        // Insert HTML without styles
-        div.innerHTML = temp.innerHTML.replace(/<style[\\s\\S]*?<\\/style>/gi, '');
+    // Insert content without styles
+    div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
 
-        // Load JS if exists
-        const jsFile = file.replace('.html', '.js');
-        fetch(jsFile).then(r=>{
-          if(r.ok){
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = jsFile;
-            document.body.appendChild(script);
-          }
-        }).catch(()=>{});
-
-      } catch(e){
-        console.error(e);
+    // Load optional JS
+    const jsFile = file.replace('.html', '.js');
+    fetch(jsFile).then(r=>{
+      if(r.ok){
+        const s = document.createElement('script');
+        s.src = jsFile;
+        s.defer = true;
+        document.body.appendChild(s);
       }
-    }
+    });
 
-    document.querySelectorAll('div[data-html]').forEach(div => loadSection(div));
-  </script>
+  }catch(err){
+    console.error(err);
+    div.innerHTML = "<p style='color:red'>Section failed to load</p>";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.querySelectorAll('[data-html]').forEach(loadSection);
+});
+</script>
+ 
 
 </body>
 </html>
