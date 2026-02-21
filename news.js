@@ -1,38 +1,50 @@
-// Automatically run search for "sono jhajha jamui"
-document.addEventListener('DOMContentLoaded', function () {
-  const query = "sono jhajha jamui";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Google CSE Auto Search</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  const executeSearch = () => {
-    try {
-      // Google CSE assigns IDs like 'searchresults-only0', 'searchresults-only1', etc.
-      // Using getElement() without ID fallback may fail if multiple instances exist.
-      // Safer: get by class → then infer CSE ID (most reliable is waiting for element to exist)
-      const cseElement = document.querySelector('.gcse-searchresults-only');
-      if (!cseElement) return;
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f4f6f8;
+  }
+  h2 {
+    margin-bottom: 15px;
+  }
+</style>
 
-      // Attempt to get the CSE control by standard generated ID
-      const cseId = cseElement.getAttribute('id') || 'searchresults-only0';
-      const cseControl = window.google?.search?.cse?.element?.getElement(cseId);
+<!-- Google Programmable Search Engine -->
+<script async src="https://cse.google.com/cse.js?cx=81f189089ee82423b"></script>
 
-      if (cseControl) {
-        cseControl.execute(query);
-      } else {
-        console.warn("Google CSE not ready yet — retrying shortly.");
-        setTimeout(executeSearch, 300);
+<script>
+  // Query to auto-search
+  const QUERY = "sono jhajha jamui";
+
+  // This callback is officially supported
+  window.__gcse = {
+    callback: function () {
+      try {
+        const searchElement = google.search.cse.element.getElement("search");
+        if (searchElement) {
+          searchElement.execute(QUERY);
+        }
+      } catch (e) {
+        console.error("CSE not ready yet", e);
       }
-    } catch (error) {
-      console.error("Error executing Google CSE search:", error);
     }
   };
+</script>
+</head>
 
-  // Wait for Google CSE script to load & initialize
-  const waitForCSE = () => {
-    if (window.google && window.google.search && window.google.search.cse) {
-      executeSearch();
-    } else {
-      setTimeout(waitForCSE, 300);
-    }
-  };
+<body>
 
-  waitForCSE();
-});
+<h2>Search Results</h2>
+
+<!-- Search box + results -->
+<div class="gcse-search"></div>
+
+</body>
+</html>
