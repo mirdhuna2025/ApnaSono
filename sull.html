@@ -116,7 +116,29 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   color: #fff;
   font-weight: 500;
 }
+  /* Contact icon row */
+.contact-row{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
 
+.contact-icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:#fff;
+  font-size:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+
+.contact-call{background:#2563eb;}
+.contact-wa{background:#25D366;}
+.contact-tg{background:#229ED9;}
 
 /* Slider */
 .slider{position:relative; cursor:pointer;}
@@ -355,21 +377,35 @@ function App(){
   <div className="item-title">{i.title}</div>
   <div className="item-price">₹{i.price}</div>
 
-  <div className="item-location">📍 {i.location}</div>
-  <a 
-  href={`tel:${i.mobile}`} 
-  className="btn btn-call"
->
- 📞
-</a>
+ <div className="item-location">📍 {i.location}</div>
 
-  <a 
-    className="btn btn-success" 
-    target="_blank" 
-    rel="noopener noreferrer" 
+<div className="contact-row">
+  <a
+    href={`tel:${i.mobile}`}
+    className="contact-icon contact-call"
+    title="Call"
+  >
+    📞
+  </a>
+
+  <a
     href={`https://wa.me/91${i.mobile}`}
-  >  
-    💬 WhatsApp
+    target="_blank"
+    rel="noopener noreferrer"
+    className="contact-icon contact-wa"
+    title="WhatsApp"
+  >
+    💬
+  </a>
+
+  <a
+    href={`https://t.me/+91${i.mobile}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="contact-icon contact-tg"
+    title="Telegram"
+  >
+    ✈️
   </a>
 </div>
           </div>
