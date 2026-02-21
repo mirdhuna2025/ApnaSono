@@ -78,12 +78,44 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   }
 }
 /* Card */
-.item-card{background:var(--card); border-radius:var(--radius); margin-bottom:16px; box-shadow:var(--shadow); overflow:hidden;}
-.item-info{padding:12px}
-.item-title{font-weight:600}
-.item-price{color:var(--danger);font-weight:700}
-.item-location{position:relaive; left: 120px;top: 30px; font-size:14px; color:#555; margin-top:4px;}
-.item-mobile{ font-size:14px; color:#333;  font-weight:500;  margin-top:2px;}
+/* Item info layout */
+.item-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* spacing between rows */
+}
+
+/* Top row: title and price */
+.item-title,
+.item-price {
+  display: inline-block;
+}
+.item-title {
+  font-weight: 600;
+}
+.item-price {
+  color: var(--danger);
+  font-weight: 700;
+  float: right; /* pushes price to the right */
+}
+
+/* Middle row: call button and location */
+.item-location {
+  display: inline-block;
+  color: #555;
+  font-size: 14px;
+}
+.btn-call {
+  display: inline-block;
+  margin-right: 8px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 500;
+}
 
 
 /* Slider */
