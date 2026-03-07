@@ -17,95 +17,103 @@ const firebaseConfig = {
 // ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-// Optional: analytics if you need it
-// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-// const analytics = getAnalytics(app);
 
-// 🔹 Slider DOM Elements
+// 🔹 Slider DOM Elements (with null-checks)
 const slider = document.getElementById("slideSlider");
 const nav = document.getElementById("slideNav");
-let slides = [];
-let index = 0;
-let autoSlideInterval;
 
-// 🔥 Load slides from Firebase Storage folder 'slideslide/'
-async function loadSlidesFromStorage() {
-  if (autoSlideInterval) clearInterval(autoSlideInterval);
-  slider.innerHTML = "";
-  nav.innerHTML = "";
-  slides = [];
+// Guard clause: exit early if required elements are missing
+if (!slider || !nav) {
+  console.warn("⚠️ Slider elements not found. Ensure #slideSlider and #slideNav exist in your HTML.");
+} else {
+  let slides = [];
+  let index = 0;
+  let autoSlideInterval;
 
-  try {
-    const folderRef = ref(storage, "slideslide/");
-    const result = await listAll(folderRef);
-    
-    // Filter for common image file types only
-    const imageFiles = result.items.filter(item => 
-      /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)
-    );
+  // 🔥 Load slides from Firebase Storage folder 'slideslide/'
+  async function loadSlidesFromStorage() {
+    if (autoSlideInterval) clearInterval(autoSlideInterval);
+    slider.innerHTML = "";
+    nav.innerHTML = "";
+    slides = [];
 
-    // Get public download URLs for each image
-    const imageUrls = await Promise.all(
-      imageFiles.map(item => getDownloadURL(item))
-    );
+    try {
+      const folderRef = ref(storage, "slideslide/");
+      const result = await listAll(folderRef);
+      
+      // Filter for common image file types only
+      const imageFiles = result.items.filter(item => 
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)
+      );
 
-    // Create slide elements
-    imageUrls.forEach((imageUrl) => {
-      const div = document.createElement("div");
-      div.classList.add("slide-slide");
-      div.dataset.image = imageUrl;
-      div.style.backgroundImage = `url('${imageUrl}')`;
-      slider.appendChild(div);
-      slides.push(div);
+      if (imageFiles.length === 0) {
+        slider.innerHTML = `<div style="padding:20px;color:#f5576c">No images found in 'slideslide/' folder.</div>`;
+        return;
+      }
+
+      // Get public download URLs for each image
+      const imageUrls = await Promise.all(
+        imageFiles.map(item => getDownloadURL(item))
+      );
+
+      // Create slide elements
+      imageUrls.forEach((imageUrl) => {
+        const div = document.createElement("div");
+        div.classList.add("slide-slide");
+        div.dataset.image = imageUrl;
+        div.style.backgroundImage = `url('${imageUrl}')`;
+        slider.appendChild(div);
+        slides.push(div);
+      });
+
+      if (slides.length > 0) {
+        setupSlideSlider();
+      }
+    } catch (error) {
+      console.error("❌ Error loading slides from Firebase Storage:", error);
+      slider.innerHTML = `<div style="padding:20px;color:#f5576c">Failed to load images. Check console.</div>`;
+    }
+  }
+
+  function setupSlideSlider() {
+    const dots = [];
+    nav.innerHTML = "";
+
+    slides.forEach((slide, i) => {
+      // Create navigation dots
+      const dot = document.createElement("div");
+      dot.classList.add("slide-dot");
+      if (i === 0) dot.classList.add("active");
+      dot.addEventListener("click", () => goToSlide(i));
+      nav.appendChild(dot);
+      dots.push(dot);
     });
 
-    if (slides.length > 0) {
-      setupslideSlider();
+    function goToSlide(i) {
+      index = i;
+      slider.style.transform = `translateX(-${i * 100}%)`;
+      dots.forEach((d, j) => d.classList.toggle("active", i === j));
     }
-  } catch (error) {
-    console.error("❌ Error loading slides from Firebase Storage:", error);
-    slider.innerHTML = `<div style="padding:20px;color:#f5576c">Failed to load images. Check console.</div>`;
-  }
-}
 
-function setupslideSlider() {
-  const dots = [];
-  nav.innerHTML = "";
+    // Safe event listener attachment with optional chaining
+    document.querySelector(".prev")?.addEventListener("click", () => {
+      goToSlide((index - 1 + slides.length) % slides.length);
+    });
 
-  slides.forEach((slide, i) => {
-    // Create navigation dots
-    const dot = document.createElement("div");
-    dot.classList.add("slide-dot");
-    if (i === 0) dot.classList.add("active");
-    dot.addEventListener("click", () => goToSlide(i));
-    nav.appendChild(dot);
-    dots.push(dot);
-  });
+    document.querySelector(".next")?.addEventListener("click", () => {
+      goToSlide((index + 1) % slides.length);
+    });
 
-  function goToSlide(i) {
-    index = i;
-    slider.style.transform = `translateX(-${i * 100}%)`;
-    dots.forEach((d, j) => d.classList.toggle("active", i === j));
+    // Auto-advance slides
+    autoSlideInterval = setInterval(() => {
+      goToSlide((index + 1) % slides.length);
+    }, 2500);
   }
 
-  // Safe event listener attachment with optional chaining
-  document.querySelector(".prev")?.addEventListener("click", () => {
-    goToSlide((index - 1 + slides.length) % slides.length);
-  });
-
-  document.querySelector(".next")?.addEventListener("click", () => {
-    goToSlide((index + 1) % slides.length);
-  });
-
-  // Auto-advance slides
-  autoSlideInterval = setInterval(() => {
-    goToSlide((index + 1) % slides.length);
-  }, 2500);
-}
-
-// ✅ Initial load when page is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", loadSlidesFromStorage);
-} else {
-  loadSlidesFromStorage();
+  // ✅ Initial load when page is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadSlidesFromStorage);
+  } else {
+    loadSlidesFromStorage();
+  }
 }
