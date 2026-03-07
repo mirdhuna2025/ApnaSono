@@ -1,88 +1,72 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
 import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"
-import { getDatabase, ref as dbRef, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { getConfig } from "./config.js"
 
 const firebaseConfig = getConfig().firebase
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
 const storage = getStorage(app)
-const db = getDatabase(app) // Still used for logging clicks (analytics)
 
-// DOM Elements
-const slider = document.getElementById("slider")
-const nav = document.getElementById("sliderNav")
+const slider = document.getElementById("offerSlider")
+const nav = document.getElementById("offerNav")
 let slides = []
 let index = 0
 let autoSlideInterval
 
-// Load slides from Firebase Storage
-async function loadSlides() {
+// 🔥 Load slides directly from Firebase Storage folder 'offerslide/'
+async function loadSlidesFromStorage() {
+  if (autoSlideInterval) clearInterval(autoSlideInterval)
+  slider.innerHTML = ""
+  nav.innerHTML = ""
+  slides = []
+
   try {
-    // List all images in the 'slides/' folder in Firebase Storage
-    const storageRef = ref(storage, "slides/")
-    const result = await listAll(storageRef)
+    const folderRef = ref(storage, "offerslide/")
+    const result = await listAll(folderRef)
     
-    // Cleanup previous state
-    if (autoSlideInterval) clearInterval(autoSlideInterval)
-    slider.innerHTML = ""
-    nav.innerHTML = ""
-    slides = []
+    // Filter for common image file types only
+    const imageFiles = result.items.filter(item => 
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)
+    )
 
-    // Create slides for each image
-    for (const itemRef of result.items) {
-      try {
-        const imageUrl = await getDownloadURL(itemRef)
-        
-        const div = document.createElement("div")
-        div.classList.add("slide")
-        div.dataset.image = imageUrl // Store image URL for logging
-        div.style.backgroundImage = `url('${imageUrl}')`
-        
-        slider.appendChild(div)
-        slides.push(div)
-      } catch (err) {
-        console.error("Error getting download URL for slide:", err)
-      }
-    }
+    // Get public download URLs for each image
+    const imageUrls = await Promise.all(
+      imageFiles.map(item => getDownloadURL(item))
+    )
 
-    // Setup slider if we have slides
+    // Create slide elements
+    imageUrls.forEach((imageUrl) => {
+      const div = document.createElement("div")
+      div.classList.add("offer-slide")
+      div.dataset.image = imageUrl
+      div.style.backgroundImage = `url('${imageUrl}')`
+      slider.appendChild(div)
+      slides.push(div)
+    })
+
     if (slides.length > 0) {
-      setupSlider()
+      setupOfferSlider()
     }
   } catch (error) {
     console.error("Error loading slides from Firebase Storage:", error)
   }
 }
 
-// Initial load
-loadSlides()
-
-function setupSlider() {
+function setupOfferSlider() {
   const dots = []
   nav.innerHTML = ""
 
-  // Create navigation dots
   slides.forEach((slide, i) => {
+    // Create navigation dots
     const dot = document.createElement("div")
-    dot.classList.add("slider-dot")
+    dot.classList.add("offer-dot")
     if (i === 0) dot.classList.add("active")
     dot.addEventListener("click", () => goToSlide(i))
     nav.appendChild(dot)
     dots.push(dot)
 
-    // Click handler for slide - logs click only, NO URL redirect
-    slide.addEventListener("click", () => {
-      const imgUrl = slide.dataset.image
-
-      // Log click to Firebase Realtime Database (analytics)
-      push(dbRef(db, "slideClicks"), {
-        image: imgUrl,
-        clickedAt: new Date().toISOString(),
-      })
-      // No window.open() since URL feature was removed
-    })
+    // 🔥 URL navigation and click tracking REMOVED as requested
+    // Slides are now display-only. Add custom behavior here if needed.
   })
 
   function goToSlide(i) {
@@ -91,24 +75,20 @@ function setupSlider() {
     dots.forEach((d, j) => d.classList.toggle("active", i === j))
   }
 
-  // Navigation buttons with null checks
-  const prevBtn = document.querySelector(".prev")
-  const nextBtn = document.querySelector(".next")
-  
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      goToSlide((index - 1 + slides.length) % slides.length)
-    })
-  }
+  // Safe event listener attachment with optional chaining
+  document.querySelector(".prev")?.addEventListener("click", () => {
+    goToSlide((index - 1 + slides.length) % slides.length)
+  })
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      goToSlide((index + 1) % slides.length)
-    })
-  }
+  document.querySelector(".next")?.addEventListener("click", () => {
+    goToSlide((index + 1) % slides.length)
+  })
 
-  // Auto-slide every 5 seconds
+  // Auto-advance slides
   autoSlideInterval = setInterval(() => {
     goToSlide((index + 1) % slides.length)
-  }, 5000)
+  }, 2500)
 }
+
+// Initial load
+loadSlidesFromStorage()
