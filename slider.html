@@ -48,22 +48,35 @@
       background: #fff;
       transform: scale(1.3);
     }
-    .slide-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+   .slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-btn.prev{
+  left: 10px;
+}
+
+.slide-btn.next{
+  right: 10px;
+}
+
+.slide-btn:hover {
+  background: rgba(255,255,255,0.4);
+}
+    
     .slide-btn:hover {
       background: rgba(255,255,255,0.4);
     }
