@@ -5,24 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offer Slider Admin Panel</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; }
         h1 {
             color: white;
             text-align: center;
@@ -30,18 +20,13 @@
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
-
         .admin-panel {
             background: white;
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
+        .section { margin-bottom: 40px; }
         .section-title {
             font-size: 1.5rem;
             color: #333;
@@ -49,8 +34,6 @@
             padding-bottom: 10px;
             border-bottom: 3px solid #667eea;
         }
-
-        /* Upload Area */
         .upload-area {
             border: 3px dashed #667eea;
             border-radius: 10px;
@@ -60,29 +43,12 @@
             transition: all 0.3s ease;
             cursor: pointer;
         }
-
         .upload-area:hover, .upload-area.dragover {
             background: #eef0ff;
             border-color: #764ba2;
             transform: translateY(-2px);
         }
-
-        .upload-area i {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .upload-area p {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        .upload-area input[type="file"] {
-            display: none;
-        }
-
+        .upload-area input[type="file"] { display: none; }
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -95,62 +61,38 @@
             transition: all 0.3s ease;
             margin: 5px;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-
         .btn-danger {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
-
-        .btn-danger:hover {
-            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .btn-small {
-            padding: 8px 20px;
-            font-size: 0.9rem;
-        }
-
-        /* Image Grid */
+        .btn-small { padding: 8px 20px; font-size: 0.9rem; }
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-
         .image-card {
             background: white;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
-            position: relative;
         }
-
         .image-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .image-card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             display: block;
         }
-
-        .image-info {
-            padding: 15px;
-        }
-
+        .image-info { padding: 15px; }
         .image-name {
             font-weight: 600;
             color: #333;
@@ -158,26 +100,14 @@
             word-break: break-all;
             font-size: 0.9rem;
         }
-
-        .image-date {
-            color: #999;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-        }
-
-        .image-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* Loading & Messages */
+        .image-date { color: #999; font-size: 0.8rem; margin-bottom: 10px; }
+        .image-actions { display: flex; gap: 10px; }
         .loading {
             text-align: center;
             padding: 40px;
             color: #667eea;
             font-size: 1.2rem;
         }
-
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
@@ -187,40 +117,34 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .message {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: none;
         }
-
         .message.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
             display: block;
         }
-
         .message.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
             display: block;
         }
-
         .stats {
             display: flex;
             gap: 20px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -230,51 +154,24 @@
             min-width: 150px;
             text-align: center;
         }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
+        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { font-size: 0.9rem; opacity: 0.9; }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
         }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
         @media (max-width: 768px) {
-            .image-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
+            .image-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+            h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎨 Offer Slider Admin Panel</h1>
-        
         <div class="admin-panel">
-            <!-- Messages -->
             <div id="message" class="message"></div>
-
-            <!-- Stats -->
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-number" id="totalImages">0</div>
@@ -285,8 +182,6 @@
                     <div class="stat-label">Storage Used</div>
                 </div>
             </div>
-
-            <!-- Upload Section -->
             <div class="section">
                 <h2 class="section-title">📤 Upload Images</h2>
                 <div class="upload-area" id="uploadArea">
@@ -294,9 +189,7 @@
                     <p><strong>Click to upload</strong> or drag and drop</p>
                     <p style="font-size: 0.9rem; color: #999;">Supports: JPG, PNG, GIF, WebP (Max 10MB each)</p>
                     <input type="file" id="fileInput" multiple accept="image/*">
-                    <button class="btn" onclick="document.getElementById('fileInput').click()">
-                        Choose Files
-                    </button>
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">Choose Files</button>
                 </div>
                 <div id="uploadProgress" style="margin-top: 20px; display: none;">
                     <p>Uploading... <span id="uploadCount">0</span> files</p>
@@ -305,8 +198,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Current Images Section -->
             <div class="section">
                 <h2 class="section-title">🖼️ Current Slider Images</h2>
                 <div id="imagesContainer">
@@ -319,14 +210,21 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
+        // ✅ Firebase SDK Imports (clean URLs, no trailing spaces)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getStorage, ref, uploadBytes, listAll, deleteObject, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-        import { getConfig } from "./config.js";
+
+        // 🔥 REPLACE WITH YOUR ACTUAL FIREBASE CONFIG
+        const firebaseConfig = { apiKey: "AIzaSyCiG3Tal0dCpBAV1SLS2Rbs6GYOA4zomQE",
+  authDomain: "mirdhuna-4f652.firebaseapp.com",
+  databaseURL: "https://mirdhuna-4f652-default-rtdb.firebaseio.com",
+  projectId: "mirdhuna-4f652",
+  storageBucket: "mirdhuna-4f652.firebasestorage.app",
+  messagingSenderId: "184403369330",
+  appId: "1:184403369330:web:859bcf3162bc2d2ed7d1eb",};
 
         // Initialize Firebase
-        const firebaseConfig = getConfig().firebase;
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
@@ -340,27 +238,20 @@
         const uploadCount = document.getElementById('uploadCount');
         const totalImagesEl = document.getElementById('totalImages');
         const storageUsedEl = document.getElementById('storageUsed');
-
         let currentImages = [];
 
-        // Show message
         function showMessage(text, type) {
             message.textContent = text;
             message.className = `message ${type}`;
-            setTimeout(() => {
-                message.className = 'message';
-            }, 5000);
+            setTimeout(() => { message.className = 'message'; }, 5000);
         }
 
-        // Load images from Firebase Storage
         async function loadImages() {
             try {
                 const folderRef = ref(storage, 'offerslide/');
                 const result = await listAll(folderRef);
-                
                 currentImages = result.items;
                 
-                // Update stats
                 totalImagesEl.textContent = currentImages.length;
                 const totalSize = currentImages.reduce((acc, img) => acc + (img.size || 0), 0);
                 storageUsedEl.textContent = (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
@@ -372,16 +263,14 @@
             }
         }
 
-        // Display images in grid
         function displayImages() {
             if (currentImages.length === 0) {
                 imagesContainer.innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">️</div>
+                        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">🖼️</div>
                         <h3>No images uploaded yet</h3>
                         <p>Upload your first image to get started!</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
@@ -389,45 +278,35 @@
                 <div class="image-grid">
                     ${currentImages.map((img, index) => `
                         <div class="image-card" data-name="${img.name}">
-                            <img src="${img.fullPath}" alt="${img.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                            <img src="" alt="${img.name}" data-path="${img.fullPath}">
                             <div class="image-info">
                                 <div class="image-name">${img.name}</div>
-                                <div class="image-date">Order: ${index + 1}</div>
+                                <div class="image-date">Position: ${index + 1}</div>
                                 <div class="image-actions">
-                                    <button class="btn btn-small btn-danger" onclick="deleteImage('${img.name}')">
-                                        🗑️ Delete
-                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteImage('${img.name}')">🗑️ Delete</button>
                                 </div>
                             </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+                        </div>`).join('')}
+                </div>`;
 
             // Load actual image URLs
-            currentImages.forEach((img, index) => {
+            currentImages.forEach(img => {
                 getDownloadURL(img).then(url => {
-                    const imgElement = document.querySelector(`.image-card[data-name="${img.name}"] img`);
-                    if (imgElement) {
-                        imgElement.src = url;
-                    }
-                }).catch(err => {
-                    console.error('Error getting download URL:', err);
-                });
+                    const imgEl = document.querySelector(`.image-card[data-name="${img.name}"] img`);
+                    if (imgEl) imgEl.src = url;
+                }).catch(err => console.error('URL error:', err));
             });
         }
 
-        // Upload files
         async function uploadFiles(files) {
             if (files.length === 0) return;
-
             uploadProgress.style.display = 'block';
             uploadCount.textContent = `0/${files.length}`;
             
             let uploaded = 0;
             const validFiles = Array.from(files).filter(file => {
                 if (!file.type.startsWith('image/')) {
-                    showMessage(`${file.name} is not an image file`, 'error');
+                    showMessage(`${file.name} is not an image`, 'error');
                     return false;
                 }
                 if (file.size > 10 * 1024 * 1024) {
@@ -458,52 +337,38 @@
             progressBar.style.width = '0%';
             
             if (uploaded > 0) {
-                showMessage(`Successfully uploaded ${uploaded} image(s)!`, 'success');
+                showMessage(`✅ Successfully uploaded ${uploaded} image(s)!`, 'success');
                 await loadImages();
             }
         }
 
-        // Delete image
         window.deleteImage = async function(imageName) {
-            if (!confirm(`Are you sure you want to delete "${imageName}"?`)) {
-                return;
-            }
-
+            if (!confirm(`Delete "${imageName}"?`)) return;
             try {
                 const imageRef = ref(storage, `offerslide/${imageName}`);
                 await deleteObject(imageRef);
-                showMessage(`Deleted "${imageName}" successfully!`, 'success');
+                showMessage(`🗑️ Deleted "${imageName}"`, 'success');
                 await loadImages();
             } catch (error) {
                 console.error('Delete error:', error);
-                showMessage('Error deleting image: ' + error.message, 'error');
+                showMessage('Error: ' + error.message, 'error');
             }
         };
 
         // Event Listeners
         uploadArea.addEventListener('click', () => fileInput.click());
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             uploadFiles(e.dataTransfer.files);
         });
-
         fileInput.addEventListener('change', (e) => {
             uploadFiles(e.target.files);
-            fileInput.value = ''; // Reset input
+            fileInput.value = '';
         });
 
-        // Initial load
         loadImages();
     </script>
 </body>
