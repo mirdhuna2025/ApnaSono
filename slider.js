@@ -1,107 +1,111 @@
+// ✅ Clean imports (no trailing spaces)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// ✅ Firebase Config — Clean, no trailing spaces
+// 🔥 Your Firebase Config for mirdhuna-25542 (cleaned)
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
   authDomain: "mirdhuna-25542.firebaseapp.com",
   databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
   projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.appspot.com",
+  storageBucket: "mirdhuna-25542.firebasestorage.app",
   messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
+  measurementId: "G-YB7LDKHBPV"
 };
 
-// Initialize Firebase
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const storage = getStorage(app);
+// Optional: analytics if you need it
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+// const analytics = getAnalytics(app);
 
-// DOM Elements
-const slider = document.getElementById("slider");
-const nav = document.getElementById("sliderNav");
+// 🔹 Slider DOM Elements
+const slider = document.getElementById("slideSlider");
+const nav = document.getElementById("slideNav");
 let slides = [];
 let index = 0;
 let autoSlideInterval;
 
-// Load slides from Firebase
-onValue(ref(db, 'offerslide'), (snapshot) => {
-  const data = snapshot.val();
-  
-  // Cleanup previous state
+// 🔥 Load slides from Firebase Storage folder 'slideslide/'
+async function loadSlidesFromStorage() {
   if (autoSlideInterval) clearInterval(autoSlideInterval);
-  slider.innerHTML = '';
-  nav.innerHTML = '';
+  slider.innerHTML = "";
+  nav.innerHTML = "";
   slides = [];
 
-  if (!data) return;
-
-  // Create slides
-  Object.values(data).forEach(item => {
-    if (!item.image) return;
+  try {
+    const folderRef = ref(storage, "slideslide/");
+    const result = await listAll(folderRef);
     
-    const div = document.createElement('div');
-    div.classList.add('slide');
-    div.dataset.url = item.url || '';  // Store URL for click handler
-    div.dataset.image = item.image;    // Store image for logging
-    div.style.backgroundImage = `url('${item.image}')`;
-    
-    slider.appendChild(div);
-    slides.push(div);
-  });
+    // Filter for common image file types only
+    const imageFiles = result.items.filter(item => 
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)
+    );
 
-  // Setup slider if we have slides
-  if (slides.length > 0) {
-    setupSlider();
+    // Get public download URLs for each image
+    const imageUrls = await Promise.all(
+      imageFiles.map(item => getDownloadURL(item))
+    );
+
+    // Create slide elements
+    imageUrls.forEach((imageUrl) => {
+      const div = document.createElement("div");
+      div.classList.add("slide-slide");
+      div.dataset.image = imageUrl;
+      div.style.backgroundImage = `url('${imageUrl}')`;
+      slider.appendChild(div);
+      slides.push(div);
+    });
+
+    if (slides.length > 0) {
+      setupslideSlider();
+    }
+  } catch (error) {
+    console.error("❌ Error loading slides from Firebase Storage:", error);
+    slider.innerHTML = `<div style="padding:20px;color:#f5576c">Failed to load images. Check console.</div>`;
   }
-});
+}
 
-function setupSlider() {
+function setupslideSlider() {
   const dots = [];
-  nav.innerHTML = '';
+  nav.innerHTML = "";
 
-  // Create navigation dots
   slides.forEach((slide, i) => {
-    const dot = document.createElement('div');
-    dot.classList.add('slider-dot');
-    if (i === 0) dot.classList.add('active');
-    dot.addEventListener('click', () => goToSlide(i));
+    // Create navigation dots
+    const dot = document.createElement("div");
+    dot.classList.add("slide-dot");
+    if (i === 0) dot.classList.add("active");
+    dot.addEventListener("click", () => goToSlide(i));
     nav.appendChild(dot);
     dots.push(dot);
-
-    // Click handler for slide
-    slide.addEventListener('click', () => {
-      const imgUrl = slide.dataset.image;
-      const url = slide.dataset.url;
-      
-      // Log click to Firebase
-      push(ref(db, 'slideClicks'), {
-        image: imgUrl,
-        url: url,
-        clickedAt: new Date().toISOString()
-      });
-
-      // Open link if exists
-      if (url) window.open(url, '_blank');
-    });
   });
 
   function goToSlide(i) {
     index = i;
     slider.style.transform = `translateX(-${i * 100}%)`;
-    dots.forEach((d, j) => d.classList.toggle('active', i === j));
+    dots.forEach((d, j) => d.classList.toggle("active", i === j));
   }
 
-  // Navigation buttons
-  document.querySelector(".prev").addEventListener("click", () => {
+  // Safe event listener attachment with optional chaining
+  document.querySelector(".prev")?.addEventListener("click", () => {
     goToSlide((index - 1 + slides.length) % slides.length);
   });
 
-  document.querySelector(".next").addEventListener("click", () => {
+  document.querySelector(".next")?.addEventListener("click", () => {
     goToSlide((index + 1) % slides.length);
   });
 
-  // Auto-slide every 5 seconds
+  // Auto-advance slides
   autoSlideInterval = setInterval(() => {
     goToSlide((index + 1) % slides.length);
-  }, 5000);
+  }, 2500);
+}
+
+// ✅ Initial load when page is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadSlidesFromStorage);
+} else {
+  loadSlidesFromStorage();
 }
