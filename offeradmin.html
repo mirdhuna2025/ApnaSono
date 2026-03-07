@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slider Admin Panel</title>
+    <title>Offer Slider Admin Panel</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
         }
 
@@ -23,180 +24,194 @@
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 30px;
+            color: white;
             text-align: center;
-        }
-
-        .upload-section {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
+        .admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        /* Upload Area */
         .upload-area {
-            border: 3px dashed #007bff;
+            border: 3px dashed #667eea;
             border-radius: 10px;
             padding: 40px;
             text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
             cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9fa;
         }
 
-        .upload-area:hover {
-            background: #e9ecef;
-            border-color: #0056b3;
+        .upload-area:hover, .upload-area.dragover {
+            background: #eef0ff;
+            border-color: #764ba2;
+            transform: translateY(-2px);
         }
 
-        .upload-area.dragover {
-            background: #d4edda;
-            border-color: #28a745;
+        .upload-area i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
         }
 
-        .upload-icon {
-            font-size: 48px;
-            color: #007bff;
+        .upload-area p {
+            color: #666;
+            font-size: 1.1rem;
             margin-bottom: 10px;
         }
 
-        .upload-text {
-            color: #666;
-            font-size: 16px;
-        }
-
-        .upload-text strong {
-            color: #007bff;
-        }
-
-        input[type="file"] {
+        .upload-area input[type="file"] {
             display: none;
         }
 
         .btn {
-            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 5px;
+            padding: 12px 30px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 1rem;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             margin: 5px;
         }
 
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
         .btn-danger {
-            background: #dc3545;
-            color: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
         }
 
         .btn-success {
-            background: #28a745;
-            color: white;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
-        .btn-success:hover {
-            background: #218838;
+        .btn-small {
+            padding: 8px 20px;
+            font-size: 0.9rem;
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .progress-container {
-            margin-top: 20px;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e9ecef;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #28a745, #20c997);
-            width: 0%;
-            transition: width 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .slides-grid {
+        /* Image Grid */
+        .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        .slide-card {
+        .image-card {
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .slide-card:hover {
+        .image-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .slide-image {
+        .image-card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            background: #f0f0f0;
+            display: block;
         }
 
-        .slide-info {
+        .image-info {
             padding: 15px;
         }
 
-        .slide-name {
+        .image-name {
             font-weight: 600;
             color: #333;
             margin-bottom: 5px;
             word-break: break-all;
+            font-size: 0.9rem;
         }
 
-        .slide-meta {
-            font-size: 12px;
-            color: #666;
+        .image-date {
+            color: #999;
+            font-size: 0.8rem;
             margin-bottom: 10px;
         }
 
-        .slide-actions {
+        .image-actions {
             display: flex;
             gap: 10px;
         }
 
-        .slide-actions .btn {
-            flex: 1;
-            padding: 8px;
-            font-size: 12px;
+        /* Loading & Messages */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
         }
 
         .stats {
@@ -207,368 +222,289 @@
         }
 
         .stat-card {
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             flex: 1;
-            min-width: 200px;
+            min-width: 150px;
+            text-align: center;
         }
 
-        .stat-label {
-            color: #666;
-            font-size: 14px;
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
             margin-bottom: 5px;
         }
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px;
-            color: #666;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 60px 20px;
+            color: #999;
         }
 
-        .empty-state-icon {
-            font-size: 64px;
+        .empty-state i {
+            font-size: 4rem;
             margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Slider Admin Panel</h1>
+        <h1>🎨 Offer Slider Admin Panel</h1>
+        
+        <div class="admin-panel">
+            <!-- Messages -->
+            <div id="message" class="message"></div>
 
-        <div id="alert" class="alert"></div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-label">Total Slides</div>
-                <div class="stat-value" id="totalSlides">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Storage Used</div>
-                <div class="stat-value" id="storageUsed">0 MB</div>
-            </div>
-        </div>
-
-        <div class="upload-section">
-            <h2 style="margin-bottom: 20px;">Upload Slides</h2>
-            
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">
-                    <strong>Click to upload</strong> or drag and drop<br>
-                    <small>Supports: JPG, PNG, GIF, WebP (Max 10MB each)</small>
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalImages">0</div>
+                    <div class="stat-label">Total Images</div>
                 </div>
-                <input type="file" id="fileInput" multiple accept="image/*">
-            </div>
-
-            <div style="margin-top: 20px; text-align: center;">
-                <button class="btn btn-primary" id="uploadBtn" disabled>
-                    Upload Selected Files
-                </button>
-                <button class="btn btn-success" id="selectAllBtn" style="display:none;">
-                    Select All
-                </button>
-            </div>
-
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill">0%</div>
+                <div class="stat-card">
+                    <div class="stat-number" id="storageUsed">0 MB</div>
+                    <div class="stat-label">Storage Used</div>
                 </div>
-                <div id="uploadStatus" style="text-align: center; color: #666;"></div>
             </div>
-        </div>
 
-        <h2 style="margin-bottom: 20px;">Current Slides</h2>
-        <div id="slidesContainer" class="slides-grid">
-            <div class="empty-state">
-                <div class="empty-state-icon">📭</div>
-                <h3>No slides yet</h3>
-                <p>Upload your first slide to get started!</p>
+            <!-- Upload Section -->
+            <div class="section">
+                <h2 class="section-title">📤 Upload Images</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📁</div>
+                    <p><strong>Click to upload</strong> or drag and drop</p>
+                    <p style="font-size: 0.9rem; color: #999;">Supports: JPG, PNG, GIF, WebP (Max 10MB each)</p>
+                    <input type="file" id="fileInput" multiple accept="image/*">
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">
+                        Choose Files
+                    </button>
+                </div>
+                <div id="uploadProgress" style="margin-top: 20px; display: none;">
+                    <p>Uploading... <span id="uploadCount">0</span> files</p>
+                    <div style="background: #e0e0e0; border-radius: 10px; height: 20px; overflow: hidden; margin-top: 10px;">
+                        <div id="progressBar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Images Section -->
+            <div class="section">
+                <h2 class="section-title">🖼️ Current Slider Images</h2>
+                <div id="imagesContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading images...
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
-        import { getStorage, ref, uploadBytesResumable, listAll, deleteObject, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"
-        import { getConfig } from "./config.js"
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getStorage, ref, uploadBytes, listAll, deleteObject, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+        import { getConfig } from "./config.js";
 
-        const firebaseConfig = getConfig().firebase
-        const app = initializeApp(firebaseConfig)
-        const storage = getStorage(app)
-
-        let selectedFiles = []
-        let allSlides = []
+        // Initialize Firebase
+        const firebaseConfig = getConfig().firebase;
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
 
         // DOM Elements
-        const uploadArea = document.getElementById('uploadArea')
-        const fileInput = document.getElementById('fileInput')
-        const uploadBtn = document.getElementById('uploadBtn')
-        const selectAllBtn = document.getElementById('selectAllBtn')
-        const progressContainer = document.getElementById('progressContainer')
-        const progressFill = document.getElementById('progressFill')
-        const uploadStatus = document.getElementById('uploadStatus')
-        const slidesContainer = document.getElementById('slidesContainer')
-        const alert = document.getElementById('alert')
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagesContainer = document.getElementById('imagesContainer');
+        const message = document.getElementById('message');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const uploadCount = document.getElementById('uploadCount');
+        const totalImagesEl = document.getElementById('totalImages');
+        const storageUsedEl = document.getElementById('storageUsed');
 
-        // Show alert
-        function showAlert(message, type = 'success') {
-            alert.textContent = message
-            alert.className = `alert alert-${type}`
-            alert.style.display = 'block'
+        let currentImages = [];
+
+        // Show message
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
             setTimeout(() => {
-                alert.style.display = 'none'
-            }, 5000)
+                message.className = 'message';
+            }, 5000);
         }
 
-        // Upload area click
-        uploadArea.addEventListener('click', () => fileInput.click())
+        // Load images from Firebase Storage
+        async function loadImages() {
+            try {
+                const folderRef = ref(storage, 'offerslide/');
+                const result = await listAll(folderRef);
+                
+                currentImages = result.items;
+                
+                // Update stats
+                totalImagesEl.textContent = currentImages.length;
+                const totalSize = currentImages.reduce((acc, img) => acc + (img.size || 0), 0);
+                storageUsedEl.textContent = (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+                
+                displayImages();
+            } catch (error) {
+                console.error('Error loading images:', error);
+                showMessage('Error loading images: ' + error.message, 'error');
+            }
+        }
 
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault()
-            uploadArea.classList.add('dragover')
-        })
+        // Display images in grid
+        function displayImages() {
+            if (currentImages.length === 0) {
+                imagesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">️</div>
+                        <h3>No images uploaded yet</h3>
+                        <p>Upload your first image to get started!</p>
+                    </div>
+                `;
+                return;
+            }
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover')
-        })
+            imagesContainer.innerHTML = `
+                <div class="image-grid">
+                    ${currentImages.map((img, index) => `
+                        <div class="image-card" data-name="${img.name}">
+                            <img src="${img.fullPath}" alt="${img.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                            <div class="image-info">
+                                <div class="image-name">${img.name}</div>
+                                <div class="image-date">Order: ${index + 1}</div>
+                                <div class="image-actions">
+                                    <button class="btn btn-small btn-danger" onclick="deleteImage('${img.name}')">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault()
-            uploadArea.classList.remove('dragover')
-            handleFiles(e.dataTransfer.files)
-        })
+            // Load actual image URLs
+            currentImages.forEach((img, index) => {
+                getDownloadURL(img).then(url => {
+                    const imgElement = document.querySelector(`.image-card[data-name="${img.name}"] img`);
+                    if (imgElement) {
+                        imgElement.src = url;
+                    }
+                }).catch(err => {
+                    console.error('Error getting download URL:', err);
+                });
+            });
+        }
 
-        // File input change
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files)
-        })
+        // Upload files
+        async function uploadFiles(files) {
+            if (files.length === 0) return;
 
-        // Handle selected files
-        function handleFiles(files) {
+            uploadProgress.style.display = 'block';
+            uploadCount.textContent = `0/${files.length}`;
+            
+            let uploaded = 0;
             const validFiles = Array.from(files).filter(file => {
                 if (!file.type.startsWith('image/')) {
-                    showAlert(`${file.name} is not an image file`, 'error')
-                    return false
+                    showMessage(`${file.name} is not an image file`, 'error');
+                    return false;
                 }
                 if (file.size > 10 * 1024 * 1024) {
-                    showAlert(`${file.name} exceeds 10MB limit`, 'error')
-                    return false
+                    showMessage(`${file.name} exceeds 10MB limit`, 'error');
+                    return false;
                 }
-                return true
-            })
+                return true;
+            });
 
-            selectedFiles = [...selectedFiles, ...validFiles]
-            updateUploadButton()
-        }
-
-        // Update upload button
-        function updateUploadButton() {
-            if (selectedFiles.length > 0) {
-                uploadBtn.disabled = false
-                uploadBtn.innerHTML = `Upload ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}`
-                selectAllBtn.style.display = 'inline-block'
-            } else {
-                uploadBtn.disabled = true
-                uploadBtn.innerHTML = 'Upload Selected Files'
-                selectAllBtn.style.display = 'none'
-            }
-        }
-
-        // Upload button click
-        uploadBtn.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) return
-
-            progressContainer.style.display = 'block'
-            uploadBtn.disabled = true
-
-            let uploaded = 0
-            let failed = 0
-
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i]
-                const timestamp = Date.now()
-                const randomString = Math.random().toString(36).substring(7)
-                const fileName = `slide_${timestamp}_${randomString}${file.name.substring(file.name.lastIndexOf('.'))}`
-                const storageRef = ref(storage, `slides/${fileName}`)
+            for (let i = 0; i < validFiles.length; i++) {
+                const file = validFiles[i];
+                const timestamp = Date.now();
+                const uniqueName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+                const storageRef = ref(storage, `offerslide/${uniqueName}`);
 
                 try {
-                    const uploadTask = uploadBytesResumable(storageRef, file)
-
-                    await new Promise((resolve, reject) => {
-                        uploadTask.on('state_changed',
-                            (snapshot) => {
-                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                                const totalProgress = ((uploaded + (progress / 100)) / selectedFiles.length) * 100
-                                progressFill.style.width = `${totalProgress}%`
-                                progressFill.textContent = `${Math.round(totalProgress)}%`
-                                uploadStatus.textContent = `Uploading ${file.name}...`
-                            },
-                            (error) => reject(error),
-                            () => resolve()
-                        )
-                    })
-
-                    uploaded++
-                    showAlert(`Uploaded ${file.name} successfully!`, 'success')
+                    await uploadBytes(storageRef, file);
+                    uploaded++;
+                    uploadCount.textContent = `${uploaded}/${validFiles.length}`;
+                    progressBar.style.width = `${(uploaded / validFiles.length) * 100}%`;
                 } catch (error) {
-                    failed++
-                    console.error('Upload error:', error)
-                    showAlert(`Failed to upload ${file.name}: ${error.message}`, 'error')
+                    console.error('Upload error:', error);
+                    showMessage(`Error uploading ${file.name}: ${error.message}`, 'error');
                 }
             }
 
-            progressContainer.style.display = 'none'
-            uploadBtn.disabled = false
-            selectedFiles = []
-            fileInput.value = ''
-            updateUploadButton()
-            loadSlides()
-
-            showAlert(`Upload complete! ${uploaded} succeeded, ${failed} failed`, failed > 0 ? 'error' : 'success')
-        })
-
-        // Load all slides
-        async function loadSlides() {
-            try {
-                const storageRef = ref(storage, 'slides/')
-                const result = await listAll(storageRef)
-                
-                allSlides = []
-                
-                for (const itemRef of result.items) {
-                    try {
-                        const url = await getDownloadURL(itemRef)
-                        const metadata = await itemRef.getMetadata()
-                        
-                        allSlides.push({
-                            ref: itemRef,
-                            name: itemRef.name,
-                            url: url,
-                            size: metadata.size,
-                            timeCreated: metadata.timeCreated
-                        })
-                    } catch (err) {
-                        console.error('Error getting slide:', err)
-                    }
-                }
-
-                updateStats()
-                renderSlides()
-            } catch (error) {
-                console.error('Error loading slides:', error)
-                showAlert('Error loading slides: ' + error.message, 'error')
-            }
-        }
-
-        // Update statistics
-        function updateStats() {
-            document.getElementById('totalSlides').textContent = allSlides.length
+            uploadProgress.style.display = 'none';
+            progressBar.style.width = '0%';
             
-            const totalBytes = allSlides.reduce((sum, slide) => sum + slide.size, 0)
-            const totalMB = (totalBytes / (1024 * 1024)).toFixed(2)
-            document.getElementById('storageUsed').textContent = `${totalMB} MB`
-        }
-
-        // Render slides grid
-        function renderSlides() {
-            if (allSlides.length === 0) {
-                slidesContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3>No slides yet</h3>
-                        <p>Upload your first slide to get started!</p>
-                    </div>
-                `
-                return
+            if (uploaded > 0) {
+                showMessage(`Successfully uploaded ${uploaded} image(s)!`, 'success');
+                await loadImages();
             }
-
-            slidesContainer.innerHTML = allSlides.map((slide, index) => `
-                <div class="slide-card">
-                    <img src="${slide.url}" alt="${slide.name}" class="slide-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22300%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EImage not available%3C/text%3E%3C/svg%3E'">
-                    <div class="slide-info">
-                        <div class="slide-name">${slide.name}</div>
-                        <div class="slide-meta">
-                            ${(slide.size / 1024).toFixed(2)} KB | 
-                            ${new Date(slide.timeCreated).toLocaleDateString()}
-                        </div>
-                        <div class="slide-actions">
-                            <button class="btn btn-primary" onclick="window.open('${slide.url}', '_blank')">
-                                👁 View
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteSlide('${slide.name}', ${index})">
-                                🗑 Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('')
         }
 
-        // Delete slide
-        window.deleteSlide = async function(fileName, index) {
-            if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return
+        // Delete image
+        window.deleteImage = async function(imageName) {
+            if (!confirm(`Are you sure you want to delete "${imageName}"?`)) {
+                return;
+            }
 
             try {
-                const slideRef = ref(storage, `slides/${fileName}`)
-                await deleteObject(slideRef)
-                
-                allSlides.splice(index, 1)
-                updateStats()
-                renderSlides()
-                showAlert(`Deleted ${fileName} successfully!`, 'success')
+                const imageRef = ref(storage, `offerslide/${imageName}`);
+                await deleteObject(imageRef);
+                showMessage(`Deleted "${imageName}" successfully!`, 'success');
+                await loadImages();
             } catch (error) {
-                console.error('Delete error:', error)
-                showAlert('Error deleting slide: ' + error.message, 'error')
+                console.error('Delete error:', error);
+                showMessage('Error deleting image: ' + error.message, 'error');
             }
-        }
+        };
+
+        // Event Listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            uploadFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            uploadFiles(e.target.files);
+            fileInput.value = ''; // Reset input
+        });
 
         // Initial load
-        loadSlides()
+        loadImages();
     </script>
 </body>
 </html>
