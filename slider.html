@@ -17,8 +17,6 @@
   box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
 
-/* slider */
-
 .slide-slider{
   display:flex;
   height:100%;
@@ -30,16 +28,15 @@
   height:100%;
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
 
-  opacity:.6;
-  transform:scale(1.05);
+  opacity:.9;
 
-  transition:opacity .8s ease, transform .8s ease;
+  transition: opacity .6s ease;
 }
 
 .slide-slide.active{
   opacity:1;
-  transform:scale(1);
 }
 
 /* dark gradient overlay */
