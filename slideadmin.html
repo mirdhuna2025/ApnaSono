@@ -199,7 +199,12 @@
                 </div>
             </div>
             <div class="section">
-                <h2 class="section-title">🖼️ Current Slider Images</h2>
+              <h2 class="section-title">🖼️ Current Slider Images</h2>
+
+<div style="margin-bottom:15px;">
+    <button class="btn btn-danger btn-small" onclick="deleteSelected()">🗑️ Delete Selected</button>
+    <button class="btn btn-danger btn-small" onclick="deleteAll()">🔥 Delete All</button>
+</div>
                 <div id="imagesContainer">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -277,6 +282,9 @@
                 <div class="image-grid">
                     ${currentImages.map((img, index) => `
                         <div class="image-card" data-name="${img.name}">
+    <div style="position:absolute;padding:10px;">
+        <input type="checkbox" class="selectImage" value="${img.name}">
+    </div>
                             <img src="" alt="${img.name}" data-path="${img.fullPath}">
                             <div class="image-info">
                                 <div class="image-name">${img.name}</div>
@@ -288,6 +296,56 @@
                         </div>`).join('')}
                 </div>`;
 
+window.deleteSelected = async function() {
+
+    const selected = document.querySelectorAll('.selectImage:checked');
+
+    if (selected.length === 0) {
+        alert("No images selected!");
+        return;
+    }
+
+    if (!confirm(`Delete ${selected.length} selected images?`)) return;
+
+    for (const checkbox of selected) {
+
+        const name = checkbox.value;
+        const imageRef = ref(storage, `slideslide/${name}`);
+
+        try {
+            await deleteObject(imageRef);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    showMessage(`Deleted ${selected.length} images`, 'success');
+    loadImages();
+}
+
+window.deleteAll = async function() {
+
+    if (!confirm("⚠️ Delete ALL images? This cannot be undone.")) return;
+
+    for (const img of currentImages) {
+
+        const imageRef = ref(storage, `slideslide/${img.name}`);
+
+        try {
+            await deleteObject(imageRef);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    showMessage("🔥 All images deleted!", "success");
+    loadImages();
+}
+            
+
+
+
+            
             // Load actual image URLs
             currentImages.forEach(img => {
                 getDownloadURL(img).then(url => {
