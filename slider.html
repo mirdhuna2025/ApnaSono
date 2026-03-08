@@ -24,7 +24,23 @@
   height:100%;
 animation: slider 10s linear infinite;
 }
-
+@keyframes slider{
+  0%{
+    transform: translateX(0%);
+  }
+  25%{
+    transform: translateX(-100%);
+  }
+  50%{
+    transform: translateX(-200%);
+  }
+  75%{
+    transform: translateX(-300%);
+  }
+  100%{
+    transform: translateX(0%);
+  }
+}
 /* slide */
 
 .slide-slide{
@@ -122,7 +138,7 @@ animation: slider 10s linear infinite;
 .slide-btn.prev{left:14px;}
 .slide-btn.next{ right:14px;}
 .slide-btn:hover { background: rgba(255,255,255,0.4);}
- .slide-btn:hover { background: rgba(255,255,255,0.4);  }
+ 
   
   </style>
 </head>
