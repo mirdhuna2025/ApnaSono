@@ -1,269 +1,255 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Premium Slider</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>slides</title>
+  <style>
+ /* container */
 
-<style>
-
-body{
-margin:0;
-background:#0f172a;
-display:flex;
-align-items:center;
-justify-content:center;
-height:100vh;
-font-family:sans-serif;
-overflow:hidden;
+.slide-slider-container{
+  position:relative;
+  top:20px;
+  height:45vh;
+  overflow:hidden;
+  border-radius:18px;
+  background:#111;
+  box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
 
 /* slider */
 
-.slider{
-width:900px;
-height:460px;
-position:relative;
-perspective:1400px;
+.slide-slider{
+  display:flex;
+  height:100%;
+  transition:transform .7s cubic-bezier(.77,0,.18,1);
 }
 
-/* blurred background layer */
+/* slide */
 
-.bg-blur{
-position:absolute;
-inset:0;
-z-index:0;
-filter:blur(80px);
-opacity:.5;
-transition:1s;
-background-size:cover;
-background-position:center;
+.slide-slide{
+  min-width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  position:relative;
+
+  opacity:.6;
+  transform:scale(1.05);
+  transition:all .8s ease;
 }
 
-/* carousel */
+/* active slide */
 
-.carousel{
-position:absolute;
-width:100%;
-height:100%;
-display:flex;
-align-items:center;
-justify-content:center;
-transform-style:preserve-3d;
-transition:transform 1s cubic-bezier(.77,0,.18,1);
+.slide-slide.active{
+  opacity:1;
+  transform:scale(1);
 }
 
-/* slides */
+/* dark gradient overlay */
 
-.slide{
-position:absolute;
-width:70%;
-height:80%;
-border-radius:20px;
-overflow:hidden;
-box-shadow:0 40px 80px rgba(0,0,0,.6);
-transition:1s;
+.slide-slide::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,.5),
+    rgba(0,0,0,0)
+  );
 }
 
-/* image */
+/* navigation dots */
 
-.slide img{
-width:100%;
-height:100%;
-object-fit:cover;
-pointer-events:none;
+.slide-nav{
+  position:absolute;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
 }
 
-/* dynamic light */
+.slide-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:rgba(255,255,255,.4);
+  cursor:pointer;
+  transition:.35s;
+}
 
-.light{
-position:absolute;
-inset:0;
-background:radial-gradient(circle at center,
-rgba(255,255,255,.25),
-transparent 60%);
-mix-blend-mode:overlay;
-pointer-events:none;
+.slide-dot.active{
+  background:#fff;
+  transform:scale(1.5);
+  box-shadow:0 0 10px rgba(255,255,255,.7);
 }
 
 /* buttons */
 
-.btn{
-position:absolute;
-top:50%;
-transform:translateY(-50%);
-width:46px;
-height:46px;
-border:none;
-border-radius:50%;
-background:rgba(255,255,255,.2);
-backdrop-filter:blur(10px);
-color:white;
-font-size:20px;
-cursor:pointer;
-z-index:5;
+.slide-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:50%;
+
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(8px);
+
+  color:white;
+  font-size:1rem;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:.3s;
 }
 
-.prev{left:-60px}
-.next{right:-60px}
+/* button hover */
 
-.btn:hover{
-background:rgba(255,255,255,.4);
+.slide-btn:hover{
+  background:rgba(255,255,255,.35);
+  transform:translateY(-50%) scale(1.1);
 }
 
-/* dots */
+/* button positions */
 
-.dots{
-position:absolute;
-bottom:-40px;
-left:50%;
-transform:translateX(-50%);
-display:flex;
-gap:8px;
-}
-
-.dot{
-width:10px;
-height:10px;
-border-radius:50%;
-background:#aaa;
-cursor:pointer;
-}
-
-.dot.active{
-background:white;
-transform:scale(1.4);
-}
-
-</style>
-
+.slide-btn.prev{left:14px;}
+.slide-btn.next{ right:14px;}
+.slide-btn:hover { background: rgba(255,255,255,0.4);}
+ .slide-btn:hover { background: rgba(255,255,255,0.4);  }
+  
+  </style>
 </head>
-
 <body>
 
-<div class="slider">
+<section class="slide-section">
+  <div class="slide-slider-container">
+    <div class="slide-slider" id="slideSlider"></div>
+    <button class="slide-btn prev">&#10094;</button>
+    <button class="slide-btn next">&#10095;</button>
+    <div class="slide-nav" id="slideNav"></div>
+  </div>
+</section>
 
-<div class="bg-blur" id="bg"></div>
-
-<div class="carousel" id="carousel">
-
-<div class="slide"><img src="https://picsum.photos/id/1015/900/500"></div>
-<div class="slide"><img src="https://picsum.photos/id/1016/900/500"></div>
-<div class="slide"><img src="https://picsum.photos/id/1018/900/500"></div>
-<div class="slide"><img src="https://picsum.photos/id/1020/900/500"></div>
-<div class="slide"><img src="https://picsum.photos/id/1024/900/500"></div>
-
-</div>
-
-<button class="btn prev">❮</button> <button class="btn next">❯</button>
-
-<div class="dots" id="dots"></div>
-
-</div>
-
-<script>
-
-const carousel=document.getElementById("carousel")
-const slides=[...document.querySelectorAll(".slide")]
-const prev=document.querySelector(".prev")
-const next=document.querySelector(".next")
-const bg=document.getElementById("bg")
-const dotsContainer=document.getElementById("dots")
-
-let index=0
-let startX=0
-let dragging=false
-
-/* create dots */
-
-slides.forEach((_,i)=>{
-let d=document.createElement("div")
-d.className="dot"
-if(i==0)d.classList.add("active")
-dotsContainer.appendChild(d)
-
-d.onclick=()=>go(i)
-})
-
-const dots=[...document.querySelectorAll(".dot")]
-
-/* arrange slides in 3D */
-
-function render(){
-
-slides.forEach((slide,i)=>{
-
-let offset=i-index
-
-slide.style.transform=
-`rotateY(${offset*40}deg) translateZ(380px) translateX(${offset*60}px)`
-
-slide.style.opacity=Math.abs(offset)>2?0:.8
-})
-
-bg.style.backgroundImage=
-`url(${slides[index].querySelector("img").src})`
-
-dots.forEach(d=>d.classList.remove("active"))
-dots[index].classList.add("active")
-}
-
-function go(i){
-
-index=(i+slides.length)%slides.length
-render()
-}
-
-render()
-
-/* buttons */
-
-next.onclick=()=>go(index+1)
-prev.onclick=()=>go(index-1)
-
-/* swipe / drag */
-
-carousel.addEventListener("pointerdown",e=>{
-dragging=true
-startX=e.clientX
-})
-
-window.addEventListener("pointerup",e=>{
-if(!dragging)return
-
-let diff=e.clientX-startX
-
-if(diff>80)go(index-1)
-if(diff<-80)go(index+1)
-
-dragging=false
-})
-
-/* dynamic lighting */
-
-slides.forEach(slide=>{
-
-let light=document.createElement("div")
-light.className="light"
-slide.appendChild(light)
-
-slide.addEventListener("mousemove",e=>{
-
-const rect=slide.getBoundingClientRect()
-
-let x=(e.clientX-rect.left)/rect.width*100
-let y=(e.clientY-rect.top)/rect.height*100
-
-light.style.background=
-`radial-gradient(circle at ${x}% ${y}%,
-rgba(255,255,255,.35),
-transparent 60%)`
-})
-
-})
-
-</script>
 <script type="module" src="slide.js"></script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>slides</title>
+  <style>
+    .slide-slider-container {
+      position: relative; top: 20px;
+      height: 45vh;
+      overflow: hidden;
+      border-radius: 15px 15px 15px 15px;
+      background: #2c3e50;
+    }
+    .slide-slider {
+      display: flex;
+      height: 100%;
+  
+    }
+   .slide-slide{
+  min-width:100%;
+  height:100%;
+  opacity:0;
+  transform:translateX(40px);
+  transition:all 0.6s ease;
+}
+
+.slide-slide.active{
+  opacity:1;
+  transform:translateX(0);
+}
+    .slide-slide {
+      min-width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-position: center;
+
+      cursor: pointer;
+      opacity: 0.95;
+    }
+    .slide-slide:hover {
+      opacity: 1;
+    }
+    .slide-nav {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+    .slide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .slide-dot.active {
+      background: #fff;
+      transform: scale(1.3);
+    }
+   .slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-btn.prev{
+  left: 10px;
+}
+
+.slide-btn.next{
+  right: 10px;
+}
+
+.slide-btn:hover {
+  background: rgba(255,255,255,0.4);
+}
+    
+    .slide-btn:hover {
+      background: rgba(255,255,255,0.4);
+    }
+  
+  </style>
+</head>
+<body>
+
+<section class="slide-section">
+  <div class="slide-slider-container">
+    <div class="slide-slider" id="slideSlider"></div>
+    <button class="slide-btn prev">&#10094;</button>
+    <button class="slide-btn next">&#10095;</button>
+    <div class="slide-nav" id="slideNav"></div>
+  </div>
+</section>
+
+<script type="module" src="slide.js"></script>
+
 </body>
 </html>
