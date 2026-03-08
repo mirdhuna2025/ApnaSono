@@ -1,8 +1,6 @@
-// ✅ Clean imports (no trailing spaces)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// 🔥 Your Firebase Config for mirdhuna-25542 (cleaned)
 const firebaseConfig = {
   apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
   authDomain: "mirdhuna-25542.firebaseapp.com",
@@ -10,110 +8,105 @@ const firebaseConfig = {
   projectId: "mirdhuna-25542",
   storageBucket: "mirdhuna-25542.firebasestorage.app",
   messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-  measurementId: "G-YB7LDKHBPV"
+  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
 
-// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
-// 🔹 Slider DOM Elements (with null-checks)
 const slider = document.getElementById("slideSlider");
 const nav = document.getElementById("slideNav");
 
-// Guard clause: exit early if required elements are missing
-if (!slider || !nav) {
-  console.warn("⚠️ Slider elements not found. Ensure #slideSlider and #slideNav exist in your HTML.");
-} else {
-  let slides = [];
-  let index = 0;
-  let autoSlideInterval;
+const preview = document.getElementById("imagePreview");
+const previewImg = document.getElementById("previewImg");
+const closePreview = document.getElementById("closePreview");
 
-  // 🔥 Load slides from Firebase Storage folder 'slideslide/'
-  async function loadSlidesFromStorage() {
-    if (autoSlideInterval) clearInterval(autoSlideInterval);
-    slider.innerHTML = "";
-    nav.innerHTML = "";
-    slides = [];
+let slides = [];
+let index = 0;
+let autoSlide;
 
-    try {
-      const folderRef = ref(storage, "slideslide/");
-      const result = await listAll(folderRef);
-      
-      // Filter for common image file types only
-      const imageFiles = result.items.filter(item => 
-        /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)
-      );
+async function loadSlides() {
 
-      if (imageFiles.length === 0) {
-        slider.innerHTML = `<div style="padding:20px;color:#f5576c">No images found in 'slideslide/' folder.</div>`;
-        return;
-      }
+  slider.innerHTML="";
+  nav.innerHTML="";
+  slides=[];
 
-      // Get public download URLs for each image
-      const imageUrls = await Promise.all(
-        imageFiles.map(item => getDownloadURL(item))
-      );
+  const folderRef = ref(storage,"slideslide/");
+  const result = await listAll(folderRef);
 
-      // Create slide elements
-      imageUrls.forEach((imageUrl) => {
-        const div = document.createElement("div");
-        div.classList.add("slide-slide");
-        div.dataset.image = imageUrl;
-        div.style.backgroundImage = `url('${imageUrl}')`;
-        slider.appendChild(div);
-        slides.push(div);
-      });
+  const urls = await Promise.all(
+    result.items.map(item => getDownloadURL(item))
+  );
 
-      if (slides.length > 0) {
-        setupSlideSlider();
-      }
-    } catch (error) {
-      console.error("❌ Error loading slides from Firebase Storage:", error);
-      slider.innerHTML = `<div style="padding:20px;color:#f5576c">Failed to load images. Check console.</div>`;
-    }
-  }
+  urls.forEach((url,i)=>{
 
-  function setupSlideSlider() {
-    const dots = [];
-    nav.innerHTML = "";
+    const div=document.createElement("div");
+    div.className="slide-slide";
+    div.style.backgroundImage=`url('${url}')`;
 
-    slides.forEach((slide, i) => {
-      // Create navigation dots
-      const dot = document.createElement("div");
-      dot.classList.add("slide-dot");
-      if (i === 0) dot.classList.add("active");
-      dot.addEventListener("click", () => goToSlide(i));
-      nav.appendChild(dot);
-      dots.push(dot);
+    // CLICK IMAGE PREVIEW
+    div.addEventListener("click",()=>{
+      preview.style.display="flex";
+      previewImg.src=url;
     });
 
-    function goToSlide(i) {
-      index = i;
-      slider.style.transform = `translateX(-${i * 100}%)`;
-      dots.forEach((d, j) => d.classList.toggle("active", i === j));
-    }
+    slider.appendChild(div);
+    slides.push(div);
 
-    // Safe event listener attachment with optional chaining
-    document.querySelector(".prev")?.addEventListener("click", () => {
-      goToSlide((index - 1 + slides.length) % slides.length);
-    });
+    const dot=document.createElement("div");
+    dot.className="slide-dot";
+    if(i===0) dot.classList.add("active");
 
-    document.querySelector(".next")?.addEventListener("click", () => {
-      goToSlide((index + 1) % slides.length);
-    });
+    dot.onclick=()=>goToSlide(i);
 
-    // Auto-advance slides
-    autoSlideInterval = setInterval(() => {
-      goToSlide((index + 1) % slides.length);
-    }, 2500);
-  }
+    nav.appendChild(dot);
 
-  // ✅ Initial load when page is ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadSlidesFromStorage);
-  } else {
-    loadSlidesFromStorage();
+  });
+
+  startSlider();
+
+}
+
+function goToSlide(i){
+
+  index=i;
+
+  slider.style.transform=`translateX(-${i*100}%)`;
+
+  document.querySelectorAll(".slide-dot").forEach((d,j)=>{
+    d.classList.toggle("active",j===i)
+  });
+
+}
+
+function startSlider(){
+
+  autoSlide=setInterval(()=>{
+    index=(index+1)%slides.length;
+    goToSlide(index);
+  },2500);
+
+}
+
+document.querySelector(".prev").onclick=()=>{
+  index=(index-1+slides.length)%slides.length;
+  goToSlide(index);
+}
+
+document.querySelector(".next").onclick=()=>{
+  index=(index+1)%slides.length;
+  goToSlide(index);
+}
+
+// CLOSE PREVIEW
+closePreview.onclick=()=>{
+  preview.style.display="none";
+}
+
+preview.onclick=(e)=>{
+  if(e.target===preview){
+    preview.style.display="none";
   }
 }
+
+loadSlides();
