@@ -19,42 +19,7 @@
       width: 100%;
     }
     
-    /* Ad Container Styles - Side by Side */
-    .ad-wrapper {
-      display: flex;
-      flex-wrap: wrap; /* Allows stacking on small screens */
-      gap: 10px;
-      padding: 10px;
-      justify-content: center;
-      align-items: flex-start;
-    }
     
-    .ad-column {
-          position: relative;
-    min-width: 300px;
-    max-width: 50%;
-    left: 120px;
-    top: 10px;
-    align-items: center;
-    background: #fff;
-    border-radius: 8px;
-    padding: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      
-    }
-    
-    .ad-column[id^="container-"] {
-      min-height: 250px; /* Prevent layout shift */
-      width: 50%;
-    }
-    
-    /* Responsive: Stack on mobile */
-    @media (max-width: 768px) {
-      .ad-column {
-        max-width: 50%;
-        min-width: 50%;
-      }
-    }
   </style>
 </head>
 <body>
@@ -69,16 +34,6 @@
   <div data-html="slider.html"></div>
 
   <!-- Offer -->
-
-
-  <!-- Ad Script -->
-  <script async src="https://pl28761395.effectivegatecpm.com/10ea823d42f32bdece49fd7e65f0355d/invoke.js"></script>
-
-  <!-- Side-by-Side Ad Columns -->
-  <div class="ad-wrapper">
-    <div class="ad-column" id="container-10ea823d42f32bdece49fd7e65f0355d"></div>
-   
-  </div>
 
   <!-- Sticky Bar -->
   <div data-html="stickybar.html"></div>
