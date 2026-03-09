@@ -185,7 +185,7 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // Load last 5 chat MESSAGES with media support
+    // Load last 5 chat MESSAGES with full media support (images, videos)
     function loadChatMessages() {
       const chatContainer = document.getElementById("chat-container");
       chatContainer.innerHTML = '<p style="text-align:center; color:#999;">Loading messages...</p>';
@@ -208,21 +208,22 @@
           const div = document.createElement("div");
           div.className = "chat-item";
           
-          // Show text, images, or video indicator
-          let content = msg.text?.substring(0, 80) || "";
-          if (msg.imageUrl && !content) content = "🖼️ Image";
-          if (msg.videoUrl && !content) content = "🎥 Video";
-          if (!content) content = "(Media)";
+          // Build message content with media
+          let contentHTML = `<strong>${msg.user || "User"}:</strong> `;
           
-          // Display thumbnail if image exists
           if (msg.imageUrl) {
-            div.innerHTML = `<div><strong>${msg.user || "User"}:</strong> 🖼️ Photo</div><img src="${msg.imageUrl}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; margin-top:5px;">`;
+            contentHTML += `<div style="margin-top:8px;"><img src="${msg.imageUrl}" style="max-width:150px; max-height:150px; border-radius:4px; object-fit:cover;" alt="image" onerror="this.src='https://via.placeholder.com/150?text=Image'" /></div>`;
+            if (msg.text) contentHTML += `<div style="margin-top:5px; font-size:12px;">${msg.text.substring(0, 100)}${msg.text.length > 100 ? '...' : ''}</div>`;
           } else if (msg.videoUrl) {
-            div.innerHTML = `<strong>${msg.user || "User"}:</strong> 🎥 Video`;
+            contentHTML += `<div style="margin-top:8px;"><video style="max-width:150px; max-height:150px; border-radius:4px;" controls><source src="${msg.videoUrl}"></video></div>`;
+            if (msg.text) contentHTML += `<div style="margin-top:5px; font-size:12px;">${msg.text.substring(0, 100)}${msg.text.length > 100 ? '...' : ''}</div>`;
+          } else if (msg.text) {
+            contentHTML += msg.text.substring(0, 150) + (msg.text.length > 150 ? '...' : '');
           } else {
-            div.innerHTML = `<strong>${msg.user || "User"}:</strong> ${content}${msg.text?.length > 80 ? "..." : ""}`;
+            contentHTML += '(Media)';
           }
           
+          div.innerHTML = contentHTML;
           chatContainer.appendChild(div);
         });
       }).catch((error) => {
@@ -292,27 +293,78 @@
         });
     }
 
-    // Load NEWS - using sample news with images
+    // Load first 5 NEWS ITEMS (Google Custom Search Engine results)
     function loadNews() {
       const newsContainer = document.getElementById("news-container");
-      
-      const newsItems = [
-        { title: "Sono Village Update", desc: "Latest news and updates from the region", icon: "📢" },
-        { title: "Weather Forecast", desc: "Today's weather and forecast for tomorrow", icon: "🌤️" },
-        { title: "Business News", desc: "New shops and business opportunities", icon: "🏪" },
-        { title: "Agriculture Update", desc: "Farming tips and current market prices", icon: "🌾" },
-        { title: "Community Events", desc: "Upcoming events and celebrations", icon: "🎉" }
-      ];
+      newsContainer.innerHTML = '<p style="text-align:center; color:#999;">Loading news...</p>';
 
-      newsContainer.innerHTML = "";
-      newsItems.slice(0, 5).forEach((item) => {
-        const div = document.createElement("div");
-        div.className = "news-item";
-        div.innerHTML = `
-          <div class="news-item-title">${item.icon} ${item.title}</div>
-          <div class="news-item-desc">${item.desc}</div>
-        `;
-        newsContainer.appendChild(div);
+      // Try to fetch from Firebase news database
+      firebase.database().ref("news").once("value", (snapshot) => {
+        if (snapshot.exists()) {
+          const newsObj = snapshot.val();
+          const newsItems = Object.entries(newsObj)
+            .map(([key, item]) => ({ ...item, key }))
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+            .slice(0, 5);
+
+          newsContainer.innerHTML = "";
+          newsItems.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "news-item";
+            
+            let contentHTML = `<div class="news-item-title">${item.title}</div>`;
+            
+            if (item.imageUrl) {
+              contentHTML += `<img src="${item.imageUrl}" style="width:100%; max-height:150px; object-fit:cover; border-radius:4px; margin:8px 0;" alt="news" onerror="this.src='https://via.placeholder.com/300x150?text=News'" />`;
+            }
+            
+            contentHTML += `<div class="news-item-desc">${item.description || item.desc || ''}</div>`;
+            
+            div.innerHTML = contentHTML;
+            newsContainer.appendChild(div);
+          });
+        } else {
+          // Fallback: Show sample news if no Firebase data
+          const sampleNews = [
+            { title: "Sono Village Update", desc: "Latest news and updates from the region" },
+            { title: "Weather Alert", desc: "Today's weather forecast for the area" },
+            { title: "Business Opportunities", desc: "New shops and business opening soon" },
+            { title: "Agricultural News", desc: "Farming tips and current market rates" },
+            { title: "Community Events", desc: "Upcoming local events and celebrations" }
+          ];
+
+          newsContainer.innerHTML = "";
+          sampleNews.slice(0, 5).forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "news-item";
+            div.innerHTML = `
+              <div class="news-item-title">${item.title}</div>
+              <div class="news-item-desc">${item.desc}</div>
+            `;
+            newsContainer.appendChild(div);
+          });
+        }
+      }).catch((error) => {
+        console.error("News error:", error);
+        // Show fallback on error
+        const fallbackNews = [
+          { title: "Sono Village Update", desc: "Latest news and updates from the region" },
+          { title: "Weather Alert", desc: "Today's weather forecast for the area" },
+          { title: "Business Opportunities", desc: "New shops and business opening soon" },
+          { title: "Agricultural News", desc: "Farming tips and current market rates" },
+          { title: "Community Events", desc: "Upcoming local events and celebrations" }
+        ];
+        
+        newsContainer.innerHTML = "";
+        fallbackNews.slice(0, 5).forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "news-item";
+          div.innerHTML = `
+            <div class="news-item-title">${item.title}</div>
+            <div class="news-item-desc">${item.desc}</div>
+          `;
+          newsContainer.appendChild(div);
+        });
       });
     }
 
