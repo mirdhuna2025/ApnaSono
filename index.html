@@ -54,9 +54,14 @@ overflow-y:auto;
 }
 
 .chat-item{
-padding:10px;
-border-bottom:1px solid #eee;
-font-size:14px;
+ background: var(--card-bg);
+      padding: 18px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      position: relative;
+      animation: fadeIn 0.4s ease-out;
 }
 
 .chat-item:last-child{
