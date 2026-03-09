@@ -23,15 +23,21 @@ div{width:100%;}
   overflow:hidden;
 }
 
+*{box-sizing:border-box;}
+body{
+font-family:'Inter',sans-serif;
+margin:0;
+background:var(--bg-gradient);
+color:#1e293b;
+}
 
-
-  
+/* ===== CONTAINER SECTIONS ===== */
 .container-section{
 max-width:1200px;
 margin:20px auto;
 padding:0 10px;
 background:white;
-border-radius:8px;
+border-radius:12px;
 box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -45,29 +51,85 @@ border-bottom:2px solid #25D366;
 
 .container-content{
 padding:15px;
-min-height:300px;
+min-height:200px;
 }
 
+/* ===== CHAT PREVIEW ===== */
 #chat-container{
+display:flex;
+flex-direction:column;
+gap:16px;
+padding:10px;
 max-height:500px;
 overflow-y:auto;
 }
 
-.chat-item{
- background: var(--card-bg);
-      padding: 18px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.6);
-      position: relative;
-      animation: fadeIn 0.4s ease-out;
+.message{
+background: var(--card-bg);
+padding:18px;
+border-radius: var(--border-radius);
+box-shadow: var(--shadow-sm);
+backdrop-filter: blur(10px);
+border:1px solid rgba(226,232,240,0.6);
+position: relative;
+animation: fadeIn 0.4s ease-out;
 }
 
-.chat-item:last-child{
-border-bottom:none;
+.message .header{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:10px;
 }
 
+.message img.profile{
+width:44px;
+height:44px;
+border-radius:50%;
+border:2px solid var(--primary);
+flex-shrink:0;
+}
+
+.name-line{
+font-weight:600;
+font-size:15px;
+color:#1e293b;
+}
+
+.meta{
+font-size:12px;
+color:#64748b;
+font-weight:500;
+}
+
+.content{
+font-size:15px;
+color:#334155;
+word-break:break-word;
+line-height:1.5;
+white-space:pre-wrap;
+}
+
+.media-content{
+max-width:100%;
+max-height:190px;
+border-radius:16px;
+margin:10px 0;
+cursor:pointer;
+transition:var(--transition);
+object-fit:cover;
+border:1px solid #e2e8f0;
+}
+
+.media-content:hover{
+transform:scale(1.01);
+box-shadow:0 6px 16px rgba(0,0,0,0.15);
+}
+@keyframes fadeIn {
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
+  
 #sell-container{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
@@ -195,14 +257,11 @@ margin-top: 8px;
 <!-- CHAT -->
 <div class="container-section">
 <div class="container-title">💬 Latest Chat</div>
-
 <div class="container-content">
 <div id="chat-container"></div>
-
 <div class="view-all-link">
 <a href="chat.html">View All Chat →</a>
 </div>
-
 </div>
 </div>
 
@@ -317,130 +376,51 @@ return null;
 /* ===========================
 CHAT LOADER (FIXED MEDIA SUPPORT)
 =========================== */
-
 function loadChatMessages(){
-
 const chatContainer=document.getElementById("chat-container");
-
 chatContainer.innerHTML='<p style="text-align:center;color:#999;">Loading messages...</p>';
 
 firebase.database().ref("messages").once("value")
-.then((snapshot)=>{
-
-if(!snapshot.exists()){
-chatContainer.innerHTML='<p style="text-align:center;color:#999;">No messages yet</p>';
-return;
-}
-
-const messagesObj=snapshot.val();
-
-const messages=Object.entries(messagesObj)
+.then(snapshot=>{
+if(!snapshot.exists()){chatContainer.innerHTML='<p style="text-align:center;color:#999;">No messages yet</p>'; return;}
+const messages=Object.entries(snapshot.val())
 .map(([key,msg])=>({...msg,key}))
 .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
 .slice(0,5)
 .reverse();
 
 chatContainer.innerHTML="";
-
-messages.forEach((msg)=>{
-
+messages.forEach(msg=>{
 const div=document.createElement("div");
-div.className="chat-item";
+div.className="message";
 
-let contentHTML=`<strong>${msg.user||"User"}:</strong> `;
+/* MEDIA */
+const mediaUrl=msg.imageUrl||msg.videoUrl||msg.audioUrl||msg.mediaUrl||msg.fileUrl||null;
+const mediaType=getMediaType(mediaUrl);
 
-/* Get media URL from any possible field */
-const mediaUrl=
-msg.imageUrl||
-msg.videoUrl||
-msg.audioUrl||
-msg.mediaUrl||
-msg.fileUrl||
-msg.image||
-msg.video||
-msg.audio||
-msg.media||
-msg.file||
-null;
+let mediaHTML='';
+if(mediaType==='image') mediaHTML=`<img class="media-content" src="${mediaUrl}" onclick="window.open('${mediaUrl}','_blank')">`;
+else if(mediaType==='video') mediaHTML=`<video class="media-content" controls><source src="${mediaUrl}">Your browser does not support video</video>`;
+else if(mediaType==='audio') mediaHTML=`<audio class="media-content" controls><source src="${mediaUrl}">Your browser does not support audio</audio>`;
+else if(mediaUrl) mediaHTML=`<a href="${mediaUrl}" target="_blank" style="color:#25D366;">📎 View Attachment</a>`;
 
-/* Detect media type using helper function */
-const mediaType = getMediaType(mediaUrl);
-
-/* IMAGE */
-if(mediaType === 'image'){
-contentHTML+=`
-<div class="chat-media-container">
-<img src="${mediaUrl}"
-alt="Chat image"
-onclick="window.open('${mediaUrl}', '_blank')"
-onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-<span style="display:none;color:#999;font-size:12px;">📷 Image failed to load</span>
+/* MESSAGE HTML */
+div.innerHTML=`
+<div class="header">
+<img class="profile" src="https://api.dicebear.com/7.x/thumbs/svg?seed=${msg.user||'User'}">
+<div>
+<div class="name-line">${msg.user||'User'}</div>
+<div class="meta">${new Date(msg.timestamp||Date.now()).toLocaleString()}</div>
 </div>
-`;
-}
-
-/* VIDEO */
-else if(mediaType === 'video'){
-contentHTML+=`
-<div class="chat-media-container">
-<video controls preload="metadata">
-<source src="${mediaUrl}">
-Your browser does not support video playback.
-</video>
 </div>
+<div class="content">${msg.text||''}</div>
+${mediaHTML}
 `;
-}
-
-/* AUDIO */
-else if(mediaType === 'audio'){
-contentHTML+=`
-<div class="chat-media-container">
-<audio controls preload="metadata">
-<source src="${mediaUrl}">
-Your browser does not support audio playback.
-</audio>
-</div>
-`;
-}
-
-/* UNKNOWN MEDIA - Show as link */
-else if(mediaUrl && !mediaType){
-contentHTML+=`
-<div class="chat-media-container">
-<a href="${mediaUrl}" target="_blank" style="color:#25D366;">📎 View Attachment</a>
-</div>
-`;
-}
-
-/* TEXT MESSAGE */
-if(msg.text){
-contentHTML+=`
-<div style="margin-top:5px;font-size:12px;">
-${msg.text.substring(0,150)}
-${msg.text.length>150?'...':''}
-</div>
-`;
-}
-
-/* No content at all */
-if(!msg.text && !mediaUrl){
-contentHTML+="<span style='color:#999;'>(Empty message)</span>";
-}
-
-div.innerHTML=contentHTML;
-
 chatContainer.appendChild(div);
-
 });
-
 })
-.catch((error)=>{
-console.error("Chat error:",error);
-chatContainer.innerHTML='<p style="text-align:center;color:red;">Error loading messages</p>';
-});
-
+.catch(err=>{console.error(err); chatContainer.innerHTML='<p style="text-align:center;color:red;">Error loading messages</p>';});
 }
-
 
 
 /* ===========================
