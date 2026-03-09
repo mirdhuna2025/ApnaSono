@@ -481,7 +481,7 @@ Promise.all(promises)
 const validItems=items
 .filter(Boolean)
 .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
-.slice(0,50);
+.slice(0,4);
 
 if(validItems.length === 0){
 sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>';
