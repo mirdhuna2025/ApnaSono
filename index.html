@@ -191,14 +191,15 @@ max-width: 250px;
 
 </div>
 </div>
-<div class="ad-container" style="text-align:left; margin-top:30px; width:50%; max-width:200px; left: 10px;">
+<div class="ad-container" style="text-align:left; ">
   
   <script>
+   var adWidth = window.innerWidth < 400 ? window.innerWidth - 30 : 180;
     atOptions = {
       'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
       'format' : 'iframe',
       'height' : 60,
-      'width' : window.innerWidth < 200 ? window.innerWidth - 20 : 180,
+      'width' : adWidth,
       'params' : {}
     };
   </script>
