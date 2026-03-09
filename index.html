@@ -5,41 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mirdhuna</title>
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-/* ===== GLOBAL VARIABLES ===== */
-:root{
---primary:#6366f1;
---primary-dark:#4f46e5;
---secondary:#8b5cf6;
---accent:#ec4899;
---bg-gradient:linear-gradient(135deg,#f0f9ff,#e0e7ff);
---card-bg:rgba(255,255,255,0.85);
---shadow-sm:0 4px 12px rgba(0,0,0,0.08);
---shadow-md:0 10px 25px rgba(0,0,0,0.12);
---border-radius:20px;
---transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-
 *{box-sizing:border-box;}
+
 body{
-font-family:'Inter',sans-serif;
 margin:0;
-background:var(--bg-gradient);
-color:#1e293b;
+font-family:Arial,sans-serif;
+background:#FFFFE0;
 }
 
-/* ===== CONTAINER SECTIONS ===== */
+div{width:100%;}
+
+
+.ad-container{
+  width:180px;
+  max-width:100%;
+  overflow:hidden;
+}
+
+
+
+  
 .container-section{
 max-width:1200px;
 margin:20px auto;
 padding:0 10px;
 background:white;
-border-radius:12px;
+border-radius:8px;
 box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -53,87 +45,29 @@ border-bottom:2px solid #25D366;
 
 .container-content{
 padding:15px;
-min-height:200px;
+min-height:300px;
 }
 
-/* ===== CHAT PREVIEW ===== */
 #chat-container{
-display:flex;
-flex-direction:column;
-gap:16px;
-padding:10px;
 max-height:500px;
 overflow-y:auto;
 }
 
-.message{
-background: var(--card-bg);
-padding:18px;
-border-radius: var(--border-radius);
-box-shadow: var(--shadow-sm);
-backdrop-filter: blur(10px);
-border:1px solid rgba(226,232,240,0.6);
-position: relative;
-animation: fadeIn 0.4s ease-out;
+.chat-item{
+ background: var(--card-bg);
+      padding: 18px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      position: relative;
+      animation: fadeIn 0.4s ease-out;
 }
 
-.message .header{
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:10px;
+.chat-item:last-child{
+border-bottom:none;
 }
 
-.message img.profile{
-width:44px;
-height:44px;
-border-radius:50%;
-border:2px solid var(--primary);
-flex-shrink:0;
-}
-
-.name-line{
-font-weight:600;
-font-size:15px;
-color:#1e293b;
-}
-
-.meta{
-font-size:12px;
-color:#64748b;
-font-weight:500;
-}
-
-.content{
-font-size:15px;
-color:#334155;
-word-break:break-word;
-line-height:1.5;
-white-space:pre-wrap;
-}
-
-.media-content{
-max-width:100%;
-max-height:190px;
-border-radius:16px;
-margin:10px 0;
-cursor:pointer;
-transition:var(--transition);
-object-fit:cover;
-border:1px solid #e2e8f0;
-}
-
-.media-content:hover{
-transform:scale(1.01);
-box-shadow:0 6px 16px rgba(0,0,0,0.15);
-}
-
-@keyframes fadeIn {
-from{opacity:0; transform:translateY(10px);}
-to{opacity:1; transform:translateY(0);}
-}
-
-/* ===== OTHER SECTIONS ===== */
 #sell-container{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
@@ -198,49 +132,109 @@ font-size:14px;
 .view-all-link a:hover{
 text-decoration:underline;
 }
+
+/* Media styles */
+.chat-media-container {
+margin-top: 8px;
+}
+
+.chat-media-container img {
+  max-width: 100%;
+      max-height: 150px;
+      border-radius: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: var(--transition);
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+}
+ @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+.chat-media-container video {
+      max-width: 100%;
+      max-height: 190px;
+      border-radius: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: var(--transition);
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+    }
+ @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+.chat-media-container audio {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: var(--transition);
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+    }
+
+    .media-content:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);;
+}
 </style>
 </head>
 
 <body>
-<div data-html="headerlogo.html"></div> 
-<div data-html="weather.html"></div> 
-<div data-html="slider.html"></div> 
+
+<div data-html="headerlogo.html"></div>
+<div data-html="weather.html"></div>
+<div data-html="slider.html"></div>
+
 <div data-html="stickybar.html"></div>
-<!-- ===== CHAT PREVIEW ===== -->
+
+<!-- CHAT -->
 <div class="container-section">
 <div class="container-title">💬 Latest Chat</div>
+
 <div class="container-content">
 <div id="chat-container"></div>
+
 <div class="view-all-link">
 <a href="chat.html">View All Chat →</a>
 </div>
+
 </div>
 </div>
 
-<!-- ===== LISTINGS ===== -->
+<!-- LISTINGS -->
 <div class="container-section">
 <div class="container-title">🛒 Latest Listings</div>
+
 <div class="container-content">
 <div id="sell-container"></div>
+
 <div class="view-all-link">
 <a href="sell.html">View All Listings →</a>
 </div>
+
 </div>
 </div>
 
-<!-- ===== NEWS ===== -->
+<!-- NEWS -->
 <div class="container-section">
 <div class="container-title">📰 Latest News</div>
+
 <div class="container-content">
 <div id="news-container"></div>
+
 <div class="view-all-link">
 <a href="news.html">View All News →</a>
 </div>
-</div>
-</div>
 
-<!-- ===== AD SPACE ===== -->
+</div>
+</div>
 <div class="ad-container">
+
 <script>
 atOptions = {
   'key' : 'cbe6058f5f45274622f5fdeb5dd20c29',
@@ -250,15 +244,19 @@ atOptions = {
   'params' : {}
 };
 </script>
-<script src="//www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
-</div>
 
-<!-- ===== FIREBASE ===== -->
+<script src="//www.highperformanceformat.com/cbe6058f5f45274622f5fdeb5dd20c29/invoke.js"></script>
+
+</div>
+    
+
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <script>
+
 const firebaseConfig={
 apiKey:"AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
 authDomain:"mirdhuna-25542.firebaseapp.com",
@@ -268,119 +266,384 @@ storageBucket:"mirdhuna-25542.firebasestorage.app",
 messagingSenderId:"575924409876",
 appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
+
 firebase.initializeApp(firebaseConfig);
 
-/* ===== HELPER ===== */
-function getMediaType(url){
-if(!url) return null;
-const decoded = decodeURIComponent(url).toLowerCase();
-if(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/.test(decoded)) return 'image';
-if(/\.(mp4|webm|ogg|mov|avi)(\?|$)/.test(decoded)) return 'video';
-if(/\.(mp3|wav|aac|ogg|m4a|flac)(\?|$)/.test(decoded)) return 'audio';
-if(url.includes('image')||url.includes('photo')||url.includes('img')) return 'image';
-if(url.includes('video')||url.includes('vid')) return 'video';
-if(url.includes('audio')||url.includes('voice')||url.includes('recording')) return 'audio';
+
+/* ===========================
+HELPER: Detect media type from URL
+Firebase Storage URLs have extensions INSIDE the path, not at the end
+Example: https://firebasestorage.googleapis.com/v0/b/bucket/o/images%2Fphoto.jpg?alt=media&token=xxx
+=========================== */
+
+function getMediaType(url) {
+if (!url) return null;
+  
+// Decode URL to check for extensions (Firebase encodes paths)
+const decodedUrl = decodeURIComponent(url).toLowerCase();
+  
+// Check for image extensions
+if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(decodedUrl)) {
+return 'image';
+}
+  
+// Check for video extensions
+if (/\.(mp4|webm|ogg|mov|avi)(\?|$)/i.test(decodedUrl)) {
+return 'video';
+}
+  
+// Check for audio extensions
+if (/\.(mp3|wav|aac|ogg|m4a|flac)(\?|$)/i.test(decodedUrl)) {
+return 'audio';
+}
+  
+// Check content type hints in URL if present
+if (url.includes('image') || url.includes('photo') || url.includes('img')) {
+return 'image';
+}
+  
+if (url.includes('video') || url.includes('vid')) {
+return 'video';
+}
+  
+if (url.includes('audio') || url.includes('voice') || url.includes('recording')) {
+return 'audio';
+}
+  
 return null;
 }
 
-/* ===== LOAD CHAT ===== */
+
+/* ===========================
+CHAT LOADER (FIXED MEDIA SUPPORT)
+=========================== */
+
 function loadChatMessages(){
+
 const chatContainer=document.getElementById("chat-container");
+
 chatContainer.innerHTML='<p style="text-align:center;color:#999;">Loading messages...</p>';
 
 firebase.database().ref("messages").once("value")
-.then(snapshot=>{
-if(!snapshot.exists()){chatContainer.innerHTML='<p style="text-align:center;color:#999;">No messages yet</p>'; return;}
-const messages=Object.entries(snapshot.val())
+.then((snapshot)=>{
+
+if(!snapshot.exists()){
+chatContainer.innerHTML='<p style="text-align:center;color:#999;">No messages yet</p>';
+return;
+}
+
+const messagesObj=snapshot.val();
+
+const messages=Object.entries(messagesObj)
 .map(([key,msg])=>({...msg,key}))
 .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
 .slice(0,5)
 .reverse();
 
 chatContainer.innerHTML="";
-messages.forEach(msg=>{
+
+messages.forEach((msg)=>{
+
 const div=document.createElement("div");
-div.className="message";
+div.className="chat-item";
 
-/* MEDIA */
-const mediaUrl=msg.imageUrl||msg.videoUrl||msg.audioUrl||msg.mediaUrl||msg.fileUrl||null;
-const mediaType=getMediaType(mediaUrl);
+let contentHTML=`<strong>${msg.user||"User"}:</strong> `;
 
-let mediaHTML='';
-if(mediaType==='image') mediaHTML=`<img class="media-content" src="${mediaUrl}" onclick="window.open('${mediaUrl}','_blank')">`;
-else if(mediaType==='video') mediaHTML=`<video class="media-content" controls><source src="${mediaUrl}">Your browser does not support video</video>`;
-else if(mediaType==='audio') mediaHTML=`<audio class="media-content" controls><source src="${mediaUrl}">Your browser does not support audio</audio>`;
-else if(mediaUrl) mediaHTML=`<a href="${mediaUrl}" target="_blank" style="color:#25D366;">📎 View Attachment</a>`;
+/* Get media URL from any possible field */
+const mediaUrl=
+msg.imageUrl||
+msg.videoUrl||
+msg.audioUrl||
+msg.mediaUrl||
+msg.fileUrl||
+msg.image||
+msg.video||
+msg.audio||
+msg.media||
+msg.file||
+null;
 
-/* MESSAGE HTML */
-div.innerHTML=`
-<div class="header">
-<img class="profile" src="https://api.dicebear.com/7.x/thumbs/svg?seed=${msg.user||'User'}">
-<div>
-<div class="name-line">${msg.user||'User'}</div>
-<div class="meta">${new Date(msg.timestamp||Date.now()).toLocaleString()}</div>
+/* Detect media type using helper function */
+const mediaType = getMediaType(mediaUrl);
+
+/* IMAGE */
+if(mediaType === 'image'){
+contentHTML+=`
+<div class="chat-media-container">
+<img src="${mediaUrl}"
+alt="Chat image"
+onclick="window.open('${mediaUrl}', '_blank')"
+onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+<span style="display:none;color:#999;font-size:12px;">📷 Image failed to load</span>
 </div>
-</div>
-<div class="content">${msg.text||''}</div>
-${mediaHTML}
 `;
-chatContainer.appendChild(div);
-});
-})
-.catch(err=>{console.error(err); chatContainer.innerHTML='<p style="text-align:center;color:red;">Error loading messages</p>';});
 }
 
-/* ===== LOAD LISTINGS ===== */
+/* VIDEO */
+else if(mediaType === 'video'){
+contentHTML+=`
+<div class="chat-media-container">
+<video controls preload="metadata">
+<source src="${mediaUrl}">
+Your browser does not support video playback.
+</video>
+</div>
+`;
+}
+
+/* AUDIO */
+else if(mediaType === 'audio'){
+contentHTML+=`
+<div class="chat-media-container">
+<audio controls preload="metadata">
+<source src="${mediaUrl}">
+Your browser does not support audio playback.
+</audio>
+</div>
+`;
+}
+
+/* UNKNOWN MEDIA - Show as link */
+else if(mediaUrl && !mediaType){
+contentHTML+=`
+<div class="chat-media-container">
+<a href="${mediaUrl}" target="_blank" style="color:#25D366;">📎 View Attachment</a>
+</div>
+`;
+}
+
+/* TEXT MESSAGE */
+if(msg.text){
+contentHTML+=`
+<div style="margin-top:5px;font-size:12px;">
+${msg.text.substring(0,150)}
+${msg.text.length>150?'...':''}
+</div>
+`;
+}
+
+/* No content at all */
+if(!msg.text && !mediaUrl){
+contentHTML+="<span style='color:#999;'>(Empty message)</span>";
+}
+
+div.innerHTML=contentHTML;
+
+chatContainer.appendChild(div);
+
+});
+
+})
+.catch((error)=>{
+console.error("Chat error:",error);
+chatContainer.innerHTML='<p style="text-align:center;color:red;">Error loading messages</p>';
+});
+
+}
+
+
+
+/* ===========================
+LISTINGS
+=========================== */
+
 function loadListings(){
+
 const sellContainer=document.getElementById("sell-container");
+
 sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">Loading listings...</p>';
 
-firebase.storage().ref("listings").listAll()
-.then(res=>{
-if(res.prefixes.length===0){sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>'; return;}
-const promises=res.prefixes.map(folderRef=>folderRef.child("data.json").getDownloadURL().then(url=>fetch(url).then(r=>r.json())).catch(()=>null));
-Promise.all(promises).then(items=>{
-const valid=items.filter(Boolean).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,4);
-if(valid.length===0){sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>'; return;}
+const storageRef=firebase.storage().ref("listings");
+
+storageRef.listAll()
+.then((res)=>{
+
+if(res.prefixes.length===0){
+sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>';
+return;
+}
+
+const promises=res.prefixes.map((folderRef)=>{
+return folderRef.child("data.json")
+.getDownloadURL()
+.then((url)=>fetch(url).then((r)=>r.json()))
+.catch(()=>null);
+});
+
+Promise.all(promises)
+.then((items)=>{
+
+const validItems=items
+.filter(Boolean)
+.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
+.slice(0,4);
+
+if(validItems.length === 0){
+sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>';
+return;
+}
+
 sellContainer.innerHTML="";
-valid.forEach(item=>{
+
+validItems.forEach((item)=>{
+
 const card=document.createElement("div");
 card.className="sell-item-card";
-const img=item.images?.[0]||"https://via.placeholder.com/150?text=No+Image";
-card.innerHTML=`<img src="${img}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'"><div style="font-weight:bold;">${item.title||'Item'}</div><div style="color:#25D366;font-weight:bold;">₹${item.price||'N/A'}</div><div style="font-size:11px;color:#666;">📍 ${item.location||'Unknown'}</div>`;
+
+const imgSrc=item.images?.[0]||"https://via.placeholder.com/150?text=No+Image";
+
+card.innerHTML=`
+
+<img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+
+<div style="font-weight:bold;">${item.title||"Item"}</div>
+
+<div style="color:#25D366;font-weight:bold;">₹${item.price||"N/A"}</div>
+
+<div style="font-size:11px;color:#666;">📍 ${item.location||"Unknown"}</div>
+
+`;
+
 sellContainer.appendChild(card);
+
 });
+
 });
+
 })
-.catch(err=>{console.error(err); sellContainer.innerHTML='<p style="text-align:center;color:red;grid-column:1/-1;">Error loading listings</p>';});
+.catch((error)=>{
+console.error("Listings error:",error);
+sellContainer.innerHTML='<p style="text-align:center;color:red;grid-column:1/-1;">Error loading listings</p>';
+});
+
 }
 
-/* ===== LOAD NEWS ===== */
+
+
+/* ===========================
+NEWS (FIXED)
+=========================== */
+
 function loadNews(){
+
 const newsContainer=document.getElementById("news-container");
+
 newsContainer.innerHTML='<p style="text-align:center;color:#999;">Loading news...</p>';
+
 firebase.database().ref("news").once("value")
-.then(snapshot=>{
-if(!snapshot.exists()){newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>'; return;}
-const news=Object.entries(snapshot.val()).map(([k,v])=>({...v,k})).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).slice(0,5);
-if(news.length===0){newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>'; return;}
+.then((snapshot)=>{
+
+if(!snapshot.exists()){
+newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>';
+return;
+}
+
+const newsObj=snapshot.val();
+
+const newsItems=Object.entries(newsObj)
+.map(([key,item])=>({...item,key}))
+.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
+.slice(0,5);
+
+if(newsItems.length === 0){
+newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>';
+return;
+}
+
 newsContainer.innerHTML="";
-news.forEach(item=>{
+
+newsItems.forEach((item)=>{
+
 const div=document.createElement("div");
 div.className="news-item";
-div.innerHTML=`<div class="news-item-title">${item.title||'Untitled'}</div><div class="news-item-desc">${item.description||item.content||''}</div>`;
+
+div.innerHTML=`
+<div class="news-item-title">${item.title || 'Untitled'}</div>
+<div class="news-item-desc">${item.description || item.content || ''}</div>
+`;
+
 newsContainer.appendChild(div);
+
 });
+
 })
-.catch(err=>{console.error(err); newsContainer.innerHTML='<p style="text-align:center;color:red;">Error loading news</p>';});
+.catch((error)=>{
+console.error("News error:",error);
+newsContainer.innerHTML='<p style="text-align:center;color:red;">Error loading news</p>';
+});
+
 }
 
-/* ===== INIT ===== */
+
+
+/* ===========================
+LOAD PAGE SECTIONS
+=========================== */
+
+async function loadSection(divElement){
+
+const file=divElement.dataset.html;
+const useJs=divElement.dataset.js!=="false";
+
+try{
+
+const res=await fetch(file);
+const html=await res.text();
+
+const temp=document.createElement("div");
+temp.innerHTML=html;
+
+temp.querySelectorAll("style").forEach(style=>document.head.appendChild(style));
+
+divElement.innerHTML=temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi,'');
+
+if(useJs){
+
+const jsFile=file.replace(".html",".js");
+
+const response=await fetch(jsFile);
+
+if(response.ok){
+
+const script=document.createElement("script");
+script.type="module";
+script.src=jsFile;
+
+document.body.appendChild(script);
+
+}
+
+}
+
+}catch(error){
+
+console.error(`Error loading ${file}:`,error);
+
+}
+
+}
+
+
+
+/* ===========================
+INIT
+=========================== */
+
 document.addEventListener("DOMContentLoaded",()=>{
+
+document.querySelectorAll("[data-html]").forEach(loadSection);
+
+setTimeout(()=>{
+
 loadChatMessages();
 loadListings();
 loadNews();
+
+},1500);
+
 });
+ 
 </script>
+
 </body>
 </html>
