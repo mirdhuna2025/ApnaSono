@@ -1,65 +1,102 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>News Admin</title>
+<title>News Admin Dashboard</title>
 
 <style>
 
 body{
 font-family:Arial;
 background:#f4f4f4;
+margin:0;
 padding:20px;
 }
 
 .container{
-max-width:500px;
+max-width:900px;
 margin:auto;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+.news-card{
 background:white;
-padding:20px;
+padding:15px;
+margin-bottom:12px;
 border-radius:6px;
+border-left:5px solid #25D366;
+}
+
+.news-title{
+font-size:18px;
+font-weight:bold;
+}
+
+.news-date{
+font-size:12px;
+color:#888;
+margin-bottom:6px;
+}
+
+.news-media img,
+.news-media video{
+max-width:100%;
+border-radius:6px;
+margin-top:8px;
+}
+
+.news-media audio{
+width:100%;
+margin-top:8px;
+}
+
+.buttons{
+margin-top:10px;
+}
+
+button{
+padding:6px 12px;
+border:none;
+border-radius:4px;
+cursor:pointer;
+margin-right:6px;
+}
+
+.edit-btn{
+background:#2196F3;
+color:white;
+}
+
+.delete-btn{
+background:#f44336;
+color:white;
+}
+
+.save-btn{
+background:#25D366;
+color:white;
 }
 
 input,textarea{
 width:100%;
-padding:10px;
-margin-bottom:10px;
-border:1px solid #ccc;
-border-radius:4px;
-}
-
-button{
-background:#25D366;
-color:white;
-border:none;
-padding:10px;
-width:100%;
-font-size:16px;
-border-radius:4px;
-cursor:pointer;
-}
-
-button:hover{
-background:#1da851;
+margin-top:5px;
+padding:6px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>📰 Post News</h2>
+<h2>📰 News Admin Dashboard</h2>
 
-<input type="text" id="title" placeholder="News Title">
-
-<textarea id="description" placeholder="News Description"></textarea>
-
-<button onclick="postNews()">Publish News</button>
-
-<p id="msg"></p>
+<div id="newsList">Loading...</div>
 
 </div>
 
@@ -80,34 +117,107 @@ appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 
 firebase.initializeApp(firebaseConfig);
 
-function postNews(){
+const newsList=document.getElementById("newsList");
 
-const title=document.getElementById("title").value.trim();
-const description=document.getElementById("description").value.trim();
+function loadNews(){
 
-if(!title || !description){
-alert("Please fill all fields");
+firebase.database().ref("news").on("value",(snapshot)=>{
+
+if(!snapshot.exists()){
+newsList.innerHTML="No news posted";
 return;
 }
 
-firebase.database().ref("news").push({
+const data=snapshot.val();
 
-title:title,
-description:description,
-timestamp:Date.now()
+const items=Object.entries(data)
+.map(([key,item])=>({...item,key}))
+.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
 
-}).then(()=>{
+newsList.innerHTML="";
 
-document.getElementById("msg").innerText="✅ News Posted";
+items.forEach(item=>{
 
-document.getElementById("title").value="";
-document.getElementById("description").value="";
+const date=new Date(item.timestamp||Date.now()).toLocaleString();
+
+let mediaHTML="";
+
+if(item.mediaType==="image"){
+mediaHTML=`<img src="${item.mediaUrl}">`;
+}
+
+if(item.mediaType==="video"){
+mediaHTML=`<video controls src="${item.mediaUrl}"></video>`;
+}
+
+if(item.mediaType==="audio"){
+mediaHTML=`<audio controls src="${item.mediaUrl}"></audio>`;
+}
+
+const div=document.createElement("div");
+div.className="news-card";
+div.id="news-"+item.key;
+
+div.innerHTML=`
+
+<div class="news-date">${date}</div>
+
+<input id="title-${item.key}" value="${item.title}">
+
+<textarea id="desc-${item.key}">${item.description}</textarea>
+
+<div class="news-media">${mediaHTML}</div>
+
+<div class="buttons">
+
+<button class="save-btn" onclick="updateNews('${item.key}')">
+Save
+</button>
+
+<button class="delete-btn" onclick="deleteNews('${item.key}')">
+Delete
+</button>
+
+</div>
+
+`;
+
+newsList.appendChild(div);
+
+});
 
 });
 
 }
 
+function updateNews(id){
+
+const title=document.getElementById("title-"+id).value;
+const desc=document.getElementById("desc-"+id).value;
+
+firebase.database().ref("news/"+id).update({
+
+title:title,
+description:desc
+
+});
+
+alert("✅ News updated");
+
+}
+
+function deleteNews(id){
+
+if(!confirm("Delete this news?")) return;
+
+firebase.database().ref("news/"+id).remove();
+
+}
+
+loadNews();
+
 </script>
 
 </body>
 </html>
+```
