@@ -338,6 +338,7 @@ atOptions = {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
 
@@ -352,6 +353,9 @@ appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// Initialize auth for status section
+firebase.auth();
 
 
 /* ===========================
@@ -582,6 +586,130 @@ newsContainer.innerHTML='<p style="text-align:center;color:red;">Error loading n
 
 
 /* ===========================
+STATUS LOADER
+=========================== */
+
+function initializeStatus(){
+// Load status stories from Firebase
+const storiesDiv=document.getElementById("stories");
+if(!storiesDiv) return;
+
+firebase.database().ref("status").on("value",snapshot=>{
+if(!snapshot.exists()){
+storiesDiv.innerHTML='<p style="text-align:center;color:#999;padding:20px;">No status stories yet</p>';
+return;
+}
+
+storiesDiv.innerHTML="";
+let count=0;
+
+snapshot.forEach(data=>{
+const status=data.val();
+
+// Remove expired statuses (older than 24 hours)
+if(Date.now()-(status.time||0)>86400000){
+firebase.database().ref("status/"+data.key).remove();
+return;
+}
+
+count++;
+const div=document.createElement("div");
+div.className="story";
+
+const img=document.createElement("img");
+img.src=status.url||"https://via.placeholder.com/70?text=Status";
+img.onerror=()=>img.src="https://via.placeholder.com/70?text=Error";
+
+const name=document.createElement("p");
+name.textContent=(status.name||"User").substring(0,12);
+
+div.appendChild(img);
+div.appendChild(name);
+
+div.onclick=()=>openStatusViewer(status,data.key);
+storiesDiv.appendChild(div);
+});
+
+if(count===0){
+storiesDiv.innerHTML='<p style="text-align:center;color:#999;padding:20px;">No status stories yet</p>';
+}
+});
+}
+
+function openStatusViewer(status,statusKey){
+const viewer=document.getElementById("viewer");
+if(!viewer) return;
+
+const currentUser=firebase.auth().currentUser;
+if(!currentUser){
+alert("Please login to view status");
+return;
+}
+
+viewer.style.display="flex";
+const bar=document.getElementById("bar");
+const viewImg=document.getElementById("viewImg");
+const viewVideo=document.getElementById("viewVideo");
+const seenListDiv=document.getElementById("seenList");
+const likeBtn=document.getElementById("likeBtn");
+const smileBtn=document.getElementById("smileBtn");
+
+bar.style.width="0%";
+let progress=0;
+
+// Mark as seen
+firebase.database().ref("status/"+statusKey+"/seen/"+currentUser.uid).set({
+name:currentUser.displayName||"User"
+});
+
+// Show seen list
+firebase.database().ref("status/"+statusKey+"/seen").on("value",snap=>{
+let names=[];
+snap.forEach(s=>{
+names.push(s.val().name);
+});
+seenListDiv.textContent="Seen: "+names.join(", ");
+});
+
+// Progress bar
+let progressInterval=setInterval(()=>{
+progress+=2;
+bar.style.width=progress+"%";
+if(progress>=100){
+clearInterval(progressInterval);
+viewer.style.display="none";
+}
+},100);
+
+// Show media
+const mediaType=status.type||status.url;
+if(mediaType.includes("image")){
+viewImg.style.display="block";
+viewVideo.style.display="none";
+viewImg.src=status.url;
+}else{
+viewVideo.style.display="block";
+viewImg.style.display="none";
+viewVideo.src=status.url;
+viewVideo.play();
+}
+
+// Reactions
+likeBtn.onclick=()=>addStatusReaction(statusKey,"❤️");
+smileBtn.onclick=()=>addStatusReaction(statusKey,"😊");
+}
+
+function addStatusReaction(statusKey,reaction){
+const currentUser=firebase.auth().currentUser;
+if(!currentUser) return;
+
+firebase.database().ref("status/"+statusKey+"/reactions/"+currentUser.uid).set({
+reaction:reaction,
+time:Date.now()
+});
+}
+
+/* ===========================
 LOAD PAGE SECTIONS
 =========================== */
 
@@ -643,6 +771,7 @@ setTimeout(()=>{
 loadChatMessages();
 loadListings();
 loadNews();
+initializeStatus();
 
 },1500);
 
