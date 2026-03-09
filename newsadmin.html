@@ -1,8 +1,9 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>News Admin Dashboard</title>
+<title>News Admin Panel</title>
 
 <style>
 
@@ -18,55 +19,32 @@ max-width:900px;
 margin:auto;
 }
 
-h2{
-margin-bottom:20px;
-}
-
-.news-card{
+.card{
 background:white;
 padding:15px;
-margin-bottom:12px;
+margin-bottom:20px;
 border-radius:6px;
-border-left:5px solid #25D366;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-.news-title{
-font-size:18px;
-font-weight:bold;
-}
-
-.news-date{
-font-size:12px;
-color:#888;
-margin-bottom:6px;
-}
-
-.news-media img,
-.news-media video{
-max-width:100%;
-border-radius:6px;
-margin-top:8px;
-}
-
-.news-media audio{
+input,textarea{
 width:100%;
-margin-top:8px;
-}
-
-.buttons{
-margin-top:10px;
+padding:8px;
+margin-top:6px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:4px;
 }
 
 button{
-padding:6px 12px;
+padding:8px 14px;
 border:none;
 border-radius:4px;
 cursor:pointer;
-margin-right:6px;
 }
 
-.edit-btn{
-background:#2196F3;
+.post-btn{
+background:#25D366;
 color:white;
 }
 
@@ -76,14 +54,34 @@ color:white;
 }
 
 .save-btn{
-background:#25D366;
+background:#2196F3;
 color:white;
 }
 
-input,textarea{
+.news-card{
+background:white;
+padding:15px;
+margin-bottom:10px;
+border-left:5px solid #25D366;
+border-radius:6px;
+}
+
+.news-media img,
+.news-media video{
+max-width:100%;
+margin-top:8px;
+border-radius:6px;
+}
+
+.news-media audio{
 width:100%;
-margin-top:5px;
-padding:6px;
+margin-top:8px;
+}
+
+.news-date{
+font-size:12px;
+color:#888;
+margin-bottom:5px;
 }
 
 </style>
@@ -93,14 +91,41 @@ padding:6px;
 
 <div class="container">
 
-<h2>📰 News Admin Dashboard</h2>
+<!-- CREATE NEWS -->
+<div class="card">
+
+<h2>📰 Create News</h2>
+
+<input id="title" placeholder="News Title">
+
+<textarea id="description" placeholder="News Description"></textarea>
+
+<input type="file" id="media">
+
+<div id="preview"></div>
+
+<button class="post-btn" onclick="createNews()">Publish News</button>
+
+<p id="msg"></p>
+
+</div>
+
+
+<!-- CURRENT NEWS -->
+<div class="card">
+
+<h2>📋 Current Posted News</h2>
 
 <div id="newsList">Loading...</div>
 
 </div>
 
+</div>
+
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <script>
 
@@ -115,6 +140,79 @@ appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
 
 firebase.initializeApp(firebaseConfig);
+
+const fileInput=document.getElementById("media");
+const preview=document.getElementById("preview");
+
+let file=null;
+
+fileInput.addEventListener("change",()=>{
+
+file=fileInput.files[0];
+preview.innerHTML="";
+
+if(!file) return;
+
+if(file.type.startsWith("image")){
+preview.innerHTML=`<img src="${URL.createObjectURL(file)}" width="200">`;
+}
+
+else if(file.type.startsWith("video")){
+preview.innerHTML=`<video controls width="250" src="${URL.createObjectURL(file)}"></video>`;
+}
+
+else if(file.type.startsWith("audio")){
+preview.innerHTML=`<audio controls src="${URL.createObjectURL(file)}"></audio>`;
+}
+
+});
+
+async function createNews(){
+
+const title=document.getElementById("title").value.trim();
+const description=document.getElementById("description").value.trim();
+
+if(!title || !description){
+alert("Fill all fields");
+return;
+}
+
+let mediaUrl="";
+let mediaType="";
+
+if(file){
+
+const storageRef=firebase.storage().ref("newsMedia/"+Date.now()+"_"+file.name);
+
+await storageRef.put(file);
+
+mediaUrl=await storageRef.getDownloadURL();
+
+if(file.type.startsWith("image")) mediaType="image";
+if(file.type.startsWith("video")) mediaType="video";
+if(file.type.startsWith("audio")) mediaType="audio";
+
+}
+
+await firebase.database().ref("news").push({
+
+title,
+description,
+mediaUrl,
+mediaType,
+timestamp:Date.now()
+
+});
+
+document.getElementById("msg").innerText="✅ News Published";
+
+document.getElementById("title").value="";
+document.getElementById("description").value="";
+fileInput.value="";
+preview.innerHTML="";
+file=null;
+
+}
 
 const newsList=document.getElementById("newsList");
 
@@ -137,7 +235,7 @@ newsList.innerHTML="";
 
 items.forEach(item=>{
 
-const date=new Date(item.timestamp||Date.now()).toLocaleString();
+const date=new Date(item.timestamp).toLocaleString();
 
 let mediaHTML="";
 
@@ -154,8 +252,8 @@ mediaHTML=`<audio controls src="${item.mediaUrl}"></audio>`;
 }
 
 const div=document.createElement("div");
+
 div.className="news-card";
-div.id="news-"+item.key;
 
 div.innerHTML=`
 
@@ -167,17 +265,9 @@ div.innerHTML=`
 
 <div class="news-media">${mediaHTML}</div>
 
-<div class="buttons">
+<button class="save-btn" onclick="updateNews('${item.key}')">Save</button>
 
-<button class="save-btn" onclick="updateNews('${item.key}')">
-Save
-</button>
-
-<button class="delete-btn" onclick="deleteNews('${item.key}')">
-Delete
-</button>
-
-</div>
+<button class="delete-btn" onclick="deleteNews('${item.key}')">Delete</button>
 
 `;
 
@@ -192,16 +282,16 @@ newsList.appendChild(div);
 function updateNews(id){
 
 const title=document.getElementById("title-"+id).value;
-const desc=document.getElementById("desc-"+id).value;
+const description=document.getElementById("desc-"+id).value;
 
 firebase.database().ref("news/"+id).update({
 
-title:title,
-description:desc
+title,
+description
 
 });
 
-alert("✅ News updated");
+alert("News Updated");
 
 }
 
@@ -219,4 +309,4 @@ loadNews();
 
 </body>
 </html>
-
+```
