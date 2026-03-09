@@ -22,7 +22,7 @@ padding:10px;
 .news-card{
 background:white;
 padding:15px;
-margin-bottom:10px;
+margin-bottom:12px;
 border-radius:6px;
 border-left:5px solid #25D366;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
@@ -31,18 +31,37 @@ box-shadow:0 2px 5px rgba(0,0,0,0.1);
 .news-title{
 font-size:20px;
 font-weight:bold;
-margin-bottom:5px;
+margin-bottom:6px;
 }
 
 .news-desc{
 font-size:14px;
 color:#555;
+margin-top:6px;
 }
 
 .news-time{
 font-size:12px;
 color:#999;
-margin-top:5px;
+margin-top:8px;
+}
+
+.news-media{
+margin-top:10px;
+}
+
+.news-media img{
+max-width:100%;
+border-radius:6px;
+}
+
+.news-media video{
+max-width:100%;
+border-radius:6px;
+}
+
+.news-media audio{
+width:100%;
 }
 
 </style>
@@ -99,9 +118,41 @@ div.className="news-card";
 
 const date=new Date(item.timestamp||Date.now());
 
+let mediaHTML="";
+
+/* IMAGE */
+if(item.mediaType==="image"){
+mediaHTML=`
+<div class="news-media">
+<img src="${item.mediaUrl}" onclick="window.open('${item.mediaUrl}','_blank')">
+</div>`;
+}
+
+/* VIDEO */
+else if(item.mediaType==="video"){
+mediaHTML=`
+<div class="news-media">
+<video controls>
+<source src="${item.mediaUrl}">
+</video>
+</div>`;
+}
+
+/* AUDIO */
+else if(item.mediaType==="audio"){
+mediaHTML=`
+<div class="news-media">
+<audio controls>
+<source src="${item.mediaUrl}">
+</audio>
+</div>`;
+}
+
 div.innerHTML=`
 
 <div class="news-title">${item.title}</div>
+
+${mediaHTML}
 
 <div class="news-desc">${item.description}</div>
 
