@@ -78,18 +78,20 @@ body{
   width:0%;
 }
 .upload{
-  position:fixed;
-  top:125px;
-  left:0px;
-  width:60px;
-  height:60px;
-  background:black;
+  position: relative; /* remove fixed */
+  width:70px;
+  height:70px;
+  background:#25D366;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
   cursor:pointer;
+  border:3px solid #fff;
+}
+.upload i{
+  font-size:30px;
+  color:white;
 }
 input{
   display:none;
@@ -123,8 +125,12 @@ input{
   Status
   <button id="loginBtn">Login</button>
 </div>
-
-<div class="story-bar" id="stories"></div>
+<div class="story-bar" id="stories">
+  <label class="story upload">
+    <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
+    <i class="fa fa-plus" style="font-size:30px;color:white;"></i>
+  </label>
+</div>
 
 <div class="viewer" id="viewer">
   <div class="progress"><div class="bar" id="bar"></div></div>
