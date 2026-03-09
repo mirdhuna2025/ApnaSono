@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All News</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f4f4;
+}
+
+.container{
+max-width:900px;
+margin:20px auto;
+padding:10px;
+}
+
+.news-card{
+background:white;
+padding:15px;
+margin-bottom:10px;
+border-radius:6px;
+border-left:5px solid #25D366;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.news-title{
+font-size:20px;
+font-weight:bold;
+margin-bottom:5px;
+}
+
+.news-desc{
+font-size:14px;
+color:#555;
+}
+
+.news-time{
+font-size:12px;
+color:#999;
+margin-top:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📰 Latest News</h2>
+
+<div id="newsList">Loading news...</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+
+const firebaseConfig={
+apiKey:"AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+authDomain:"mirdhuna-25542.firebaseapp.com",
+databaseURL:"https://mirdhuna-25542-default-rtdb.firebaseio.com",
+projectId:"mirdhuna-25542",
+storageBucket:"mirdhuna-25542.firebasestorage.app",
+messagingSenderId:"575924409876",
+appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const newsList=document.getElementById("newsList");
+
+firebase.database().ref("news").on("value",(snapshot)=>{
+
+if(!snapshot.exists()){
+newsList.innerHTML="No news available";
+return;
+}
+
+const data=snapshot.val();
+
+const items=Object.entries(data)
+.map(([key,item])=>({...item,key}))
+.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+
+newsList.innerHTML="";
+
+items.forEach(item=>{
+
+const div=document.createElement("div");
+div.className="news-card";
+
+const date=new Date(item.timestamp||Date.now());
+
+div.innerHTML=`
+
+<div class="news-title">${item.title}</div>
+
+<div class="news-desc">${item.description}</div>
+
+<div class="news-time">
+${date.toLocaleString()}
+</div>
+
+`;
+
+newsList.appendChild(div);
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
