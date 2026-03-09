@@ -117,6 +117,29 @@ font-size:14px;
 .view-all-link a:hover{
 text-decoration:underline;
 }
+
+/* Media styles */
+.chat-media-container {
+margin-top: 8px;
+}
+
+.chat-media-container img {
+max-width: 150px;
+max-height: 150px;
+border-radius: 4px;
+object-fit: cover;
+cursor: pointer;
+}
+
+.chat-media-container video {
+max-width: 200px;
+border-radius: 4px;
+}
+
+.chat-media-container audio {
+width: 100%;
+max-width: 250px;
+}
 </style>
 </head>
 
@@ -189,9 +212,52 @@ appId:"1:575924409876:web:6ba1ed88ce941d9c83b901"
 firebase.initializeApp(firebaseConfig);
 
 
+/* ===========================
+HELPER: Detect media type from URL
+Firebase Storage URLs have extensions INSIDE the path, not at the end
+Example: https://firebasestorage.googleapis.com/v0/b/bucket/o/images%2Fphoto.jpg?alt=media&token=xxx
+=========================== */
+
+function getMediaType(url) {
+if (!url) return null;
+  
+// Decode URL to check for extensions (Firebase encodes paths)
+const decodedUrl = decodeURIComponent(url).toLowerCase();
+  
+// Check for image extensions
+if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(decodedUrl)) {
+return 'image';
+}
+  
+// Check for video extensions
+if (/\.(mp4|webm|ogg|mov|avi)(\?|$)/i.test(decodedUrl)) {
+return 'video';
+}
+  
+// Check for audio extensions
+if (/\.(mp3|wav|aac|ogg|m4a|flac)(\?|$)/i.test(decodedUrl)) {
+return 'audio';
+}
+  
+// Check content type hints in URL if present
+if (url.includes('image') || url.includes('photo') || url.includes('img')) {
+return 'image';
+}
+  
+if (url.includes('video') || url.includes('vid')) {
+return 'video';
+}
+  
+if (url.includes('audio') || url.includes('voice') || url.includes('recording')) {
+return 'audio';
+}
+  
+return null;
+}
+
 
 /* ===========================
-CHAT LOADER (UPDATED MEDIA SUPPORT)
+CHAT LOADER (FIXED MEDIA SUPPORT)
 =========================== */
 
 function loadChatMessages(){
@@ -200,7 +266,8 @@ const chatContainer=document.getElementById("chat-container");
 
 chatContainer.innerHTML='<p style="text-align:center;color:#999;">Loading messages...</p>';
 
-firebase.database().ref("messages").once("value",(snapshot)=>{
+firebase.database().ref("messages").once("value")
+.then((snapshot)=>{
 
 if(!snapshot.exists()){
 chatContainer.innerHTML='<p style="text-align:center;color:#999;">No messages yet</p>';
@@ -224,73 +291,82 @@ div.className="chat-item";
 
 let contentHTML=`<strong>${msg.user||"User"}:</strong> `;
 
-/* detect any media field */
-
+/* Get media URL from any possible field */
 const mediaUrl=
 msg.imageUrl||
 msg.videoUrl||
 msg.audioUrl||
 msg.mediaUrl||
 msg.fileUrl||
+msg.image||
+msg.video||
+msg.audio||
+msg.media||
+msg.file||
 null;
 
+/* Detect media type using helper function */
+const mediaType = getMediaType(mediaUrl);
+
 /* IMAGE */
-
-if(mediaUrl && mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)){
-
+if(mediaType === 'image'){
 contentHTML+=`
-<div style="margin-top:8px;">
+<div class="chat-media-container">
 <img src="${mediaUrl}"
-style="max-width:150px;max-height:150px;border-radius:4px;object-fit:cover;"
-onerror="this.src='https://via.placeholder.com/150?text=Image'">
+alt="Chat image"
+onclick="window.open('${mediaUrl}', '_blank')"
+onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+<span style="display:none;color:#999;font-size:12px;">📷 Image failed to load</span>
 </div>
 `;
-
 }
 
 /* VIDEO */
-
-else if(mediaUrl && mediaUrl.match(/\.(mp4|webm|ogg)$/i)){
-
+else if(mediaType === 'video'){
 contentHTML+=`
-<div style="margin-top:8px;">
-<video controls style="max-width:150px;border-radius:4px;">
+<div class="chat-media-container">
+<video controls preload="metadata">
 <source src="${mediaUrl}">
+Your browser does not support video playback.
 </video>
 </div>
 `;
-
 }
 
 /* AUDIO */
-
-else if(mediaUrl && mediaUrl.match(/\.(mp3|wav|aac)$/i)){
-
+else if(mediaType === 'audio'){
 contentHTML+=`
-<div style="margin-top:8px;">
-<audio controls>
+<div class="chat-media-container">
+<audio controls preload="metadata">
 <source src="${mediaUrl}">
+Your browser does not support audio playback.
 </audio>
 </div>
 `;
+}
 
+/* UNKNOWN MEDIA - Show as link */
+else if(mediaUrl && !mediaType){
+contentHTML+=`
+<div class="chat-media-container">
+<a href="${mediaUrl}" target="_blank" style="color:#25D366;">📎 View Attachment</a>
+</div>
+`;
 }
 
 /* TEXT MESSAGE */
-
 if(msg.text){
-
 contentHTML+=`
 <div style="margin-top:5px;font-size:12px;">
 ${msg.text.substring(0,150)}
 ${msg.text.length>150?'...':''}
 </div>
 `;
-
 }
 
+/* No content at all */
 if(!msg.text && !mediaUrl){
-contentHTML+="(Media)";
+contentHTML+="<span style='color:#999;'>(Empty message)</span>";
 }
 
 div.innerHTML=contentHTML;
@@ -299,12 +375,10 @@ chatContainer.appendChild(div);
 
 });
 
-}).catch((error)=>{
-
+})
+.catch((error)=>{
 console.error("Chat error:",error);
-
 chatContainer.innerHTML='<p style="text-align:center;color:red;">Error loading messages</p>';
-
 });
 
 }
@@ -346,6 +420,11 @@ const validItems=items
 .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
 .slice(0,5);
 
+if(validItems.length === 0){
+sellContainer.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1;">No listings yet</p>';
+return;
+}
+
 sellContainer.innerHTML="";
 
 validItems.forEach((item)=>{
@@ -357,7 +436,7 @@ const imgSrc=item.images?.[0]||"https://via.placeholder.com/150?text=No+Image";
 
 card.innerHTML=`
 
-<img src="${imgSrc}">
+<img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
 
 <div style="font-weight:bold;">${item.title||"Item"}</div>
 
@@ -373,6 +452,10 @@ sellContainer.appendChild(card);
 
 });
 
+})
+.catch((error)=>{
+console.error("Listings error:",error);
+sellContainer.innerHTML='<p style="text-align:center;color:red;grid-column:1/-1;">Error loading listings</p>';
 });
 
 }
@@ -380,7 +463,7 @@ sellContainer.appendChild(card);
 
 
 /* ===========================
-NEWS
+NEWS (FIXED)
 =========================== */
 
 function loadNews(){
@@ -389,9 +472,13 @@ const newsContainer=document.getElementById("news-container");
 
 newsContainer.innerHTML='<p style="text-align:center;color:#999;">Loading news...</p>';
 
-firebase.database().ref("news").once("value",(snapshot)=>{
+firebase.database().ref("news").once("value")
+.then((snapshot)=>{
 
-if(snapshot.exists()){
+if(!snapshot.exists()){
+newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>';
+return;
+}
 
 const newsObj=snapshot.val();
 
@@ -400,25 +487,31 @@ const newsItems=Object.entries(newsObj)
 .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
 .slice(0,5);
 
+if(newsItems.length === 0){
+newsContainer.innerHTML='<p style="text-align:center;color:#999;">No news yet</p>';
+return;
+}
+
 newsContainer.innerHTML="";
 
 newsItems.forEach((item)=>{
 
 const div=document.createElement("div");
-
 div.className="news-item";
 
 div.innerHTML=`
-<div class="news-item-title">${item.title}</div>
-<div class="news-item-desc">${item.description||""}</div>
+<div class="news-item-title">${item.title || 'Untitled'}</div>
+<div class="news-item-desc">${item.description || item.content || ''}</div>
 `;
 
 newsContainer.appendChild(div);
 
 });
 
-}
-
+})
+.catch((error)=>{
+console.error("News error:",error);
+newsContainer.innerHTML='<p style="text-align:center;color:red;">Error loading news</p>';
 });
 
 }
