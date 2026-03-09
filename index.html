@@ -408,7 +408,7 @@ if(!snapshot.exists()){chatContainer.innerHTML='<p style="text-align:center;colo
 const messages=Object.entries(snapshot.val())
 .map(([key,msg])=>({...msg,key}))
 .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-.slice(0,50)
+.slice(0,9)
 .reverse();
 
 chatContainer.innerHTML="";
