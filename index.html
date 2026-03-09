@@ -15,11 +15,114 @@
       background: #FFFFE0;
     }
 
-
-}
- 
     div {width: 100%;}
-      
+
+    /* Container Styling */
+    .container-section {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .container-title {
+      font-size: 24px;
+      font-weight: bold;
+      padding: 15px;
+      color: #333;
+      border-bottom: 2px solid #25D366;
+    }
+
+    .container-content {
+      padding: 15px;
+      min-height: 300px;
+    }
+
+    /* Chat Container */
+    #chat-container {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .chat-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .chat-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Sell/Listings Container */
+    #sell-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .sell-item-card {
+      background: #f9f9f9;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      border: 1px solid #ddd;
+    }
+
+    .sell-item-card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+
+    /* News Container */
+    #news-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .news-item {
+      padding: 12px;
+      background: #f5f5f5;
+      border-left: 4px solid #25D366;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .news-item-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #222;
+    }
+
+    .news-item-desc {
+      color: #666;
+      font-size: 12px;
+    }
+
+    /* View All Link */
+    .view-all-link {
+      text-align: right;
+      padding: 10px 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .view-all-link a {
+      color: #25D366;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .view-all-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -31,10 +134,176 @@
 
   <div data-html="stickybar.html"></div>
 
-  <script>
-    async function loadSection(div) {
-      const file = div.dataset.html;
-      const useJs = div.dataset.js !== "false";
+  <!-- Chat Container (Last 5 Messages) -->
+  <div class="container-section">
+    <div class="container-title">💬 Latest Chat</div>
+    <div class="container-content">
+      <div id="chat-container"></div>
+      <div class="view-all-link">
+        <a href="chat.html">View All Chat →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sell/Listings Container (First 5 Items) -->
+  <div class="container-section">
+    <div class="container-title">🛒 Latest Listings</div>
+    <div class="container-content">
+      <div id="sell-container"></div>
+      <div class="view-all-link">
+        <a href="sell.html">View All Listings →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Container (First 5 News) -->
+  <div class="container-section">
+    <div class="container-title">📰 Latest News</div>
+    <div class="container-content">
+      <div id="news-container"></div>
+      <div class="view-all-link">
+        <a href="news.html">View All News →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase imports -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getDatabase, ref, get, onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+      authDomain: "mirdhuna-25542.firebaseapp.com",
+      databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+      projectId: "mirdhuna-25542",
+      storageBucket: "mirdhuna-25542.firebasestorage.app",
+      messagingSenderId: "575924409876",
+      appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Load last 5 messages from chat
+    async function loadChatMessages() {
+      try {
+        const snapshot = await get(ref(db, "messages"));
+        const chatContainer = document.getElementById("chat-container");
+        chatContainer.innerHTML = "";
+
+        if (snapshot.exists()) {
+          const messages = snapshot.val();
+          const sortedMsgs = Object.entries(messages)
+            .sort((a, b) => b[1].timestamp - a[1].timestamp)
+            .slice(0, 5)
+            .reverse();
+
+          if (sortedMsgs.length === 0) {
+            chatContainer.innerHTML = '<p style="text-align:center; color:#999;">No messages yet</p>';
+            return;
+          }
+
+          sortedMsgs.forEach(([key, msg]) => {
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            const text = msg.text?.substring(0, 100) || "(Media)";
+            div.innerHTML = `<strong>${msg.user || "User"}:</strong> ${text}${msg.text?.length > 100 ? "..." : ""}`;
+            chatContainer.appendChild(div);
+          });
+        } else {
+          chatContainer.innerHTML = '<p style="text-align:center; color:#999;">No messages yet</p>';
+        }
+      } catch (error) {
+        console.error("Error loading chat:", error);
+      }
+    }
+
+    // Load first 5 sell listings
+    async function loadListings() {
+      try {
+        const sellContainer = document.getElementById("sell-container");
+        sellContainer.innerHTML = "";
+
+        // Try to load from Firebase Storage
+        const storageRef = firebase.storage().ref('listings');
+        const res = await storageRef.listAll();
+
+        const items = await Promise.all(
+          res.prefixes.slice(0, 5).map(async (folderRef) => {
+            try {
+              const jsonRef = folderRef.child('data.json');
+              const url = await jsonRef.getDownloadURL();
+              const response = await fetch(url);
+              return await response.json();
+            } catch (e) {
+              return null;
+            }
+          })
+        );
+
+        const validItems = items.filter(Boolean);
+        
+        if (validItems.length === 0) {
+          sellContainer.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1/-1;">No listings yet</p>';
+          return;
+        }
+
+        validItems.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "sell-item-card";
+          const image = item.images?.[0] || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' font-size='12' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+          card.innerHTML = `
+            <img src="${image}" alt="${item.title}" />
+            <div style="font-weight:bold; margin-bottom:3px;">${item.title?.substring(0, 20) || "Item"}...</div>
+            <div style="color:#25D366; font-weight:bold;">₹${item.price || "N/A"}</div>
+            <div style="color:#666; font-size:11px;">📍 ${item.location?.substring(0, 15) || "Unknown"}...</div>
+          `;
+          sellContainer.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error loading listings:", error);
+      }
+    }
+
+    // Load first 5 news items
+    async function loadNews() {
+      try {
+        const newsContainer = document.getElementById("news-container");
+        newsContainer.innerHTML = '<p style="text-align:center; color:#999;">Loading news...</p>';
+
+        // Since news.html uses Google CSE, we'll create a simple demo
+        // In production, you could fetch from an RSS feed or API
+        const newsItems = [
+          { title: "Latest Update in Sono", desc: "Breaking news from Sono region" },
+          { title: "Weather Alert", desc: "Check today's weather forecast" },
+          { title: "Community Event", desc: "Join us for upcoming events" },
+          { title: "Market News", desc: "Check the latest market prices" },
+          { title: "Local Announcement", desc: "Important announcement for residents" }
+        ];
+
+        newsContainer.innerHTML = "";
+        newsItems.slice(0, 5).forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "news-item";
+          div.innerHTML = `
+            <div class="news-item-title">${item.title}</div>
+            <div class="news-item-desc">${item.desc}</div>
+          `;
+          newsContainer.appendChild(div);
+        });
+      } catch (error) {
+        console.error("Error loading news:", error);
+      }
+    }
+
+    // Load sections
+    async function loadSection(divElement) {
+      const file = divElement.dataset.html;
+      const useJs = divElement.dataset.js !== "false";
 
       try {
         const res = await fetch(file);
@@ -48,7 +317,7 @@
         temp.querySelectorAll("style").forEach(style => document.head.appendChild(style));
 
         // Insert content excluding style tags
-        div.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
+        divElement.innerHTML = temp.innerHTML.replace(/<style[\s\S]*?<\/style>/gi, '');
 
         // Load associated JS module if enabled
         if (useJs) {
@@ -63,12 +332,21 @@
         }
       } catch (error) {
         console.error(`Error loading section: ${file}`, error);
-        div.innerHTML = "<p style='color:red;text-align:center;padding:10px;'>Error loading content. Please try again later.</p>";
+        divElement.innerHTML = "<p style='color:red;text-align:center;padding:10px;'>Error loading content. Please try again later.</p>";
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Wait for Firebase to be ready
+    window.addEventListener("DOMContentLoaded", async () => {
+      // Load header, weather, slider, etc
       document.querySelectorAll("[data-html]").forEach(loadSection);
+      
+      // Load custom data
+      setTimeout(() => {
+        loadChatMessages();
+        loadListings();
+        loadNews();
+      }, 1000);
     });
   </script>
 
