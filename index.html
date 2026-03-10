@@ -14,7 +14,7 @@ background: linear-gradient(120deg, #141e30, #243b55); /* dark blue gradient */
 color: #fff; /* make text readable */
 }
 
-
+  div{width:100%;}
   
 :root{
 --primary:#6366f1;
@@ -639,6 +639,11 @@ storiesDiv.innerHTML='<p style="text-align:center;color:#999;padding:20px;">No s
 function openStatusViewer(status,statusKey){
 const viewer=document.getElementById("viewer");
 if(!viewer) return;
+
+const currentUser=firebase.auth().currentUser;
+if(!currentUser){
+alert("Please login to view status");
+return;
 }
 
 viewer.style.display="flex";
@@ -687,11 +692,12 @@ viewVideo.style.display="block";
 viewImg.style.display="none";
 viewVideo.src=status.url;
 viewVideo.play();
-
+}
 
 // Reactions
 likeBtn.onclick=()=>addStatusReaction(statusKey,"❤️");
 smileBtn.onclick=()=>addStatusReaction(statusKey,"😊");
+}
 
 function addStatusReaction(statusKey,reaction){
 const currentUser=firebase.auth().currentUser;
@@ -701,7 +707,7 @@ firebase.database().ref("status/"+statusKey+"/reactions/"+currentUser.uid).set({
 reaction:reaction,
 time:Date.now()
 });
-
+}
 
 /* ===========================
 LOAD PAGE SECTIONS
