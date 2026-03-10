@@ -1,173 +1,167 @@
 <!DOCTYPE html>
 <html>
-
 <head>
- <meta charset="UTF-8">
- <title>Status Stories</title>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<meta charset="UTF-8">
+<title>Status Stories</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
- <style>
-  body{
-    margin:0;
-    font-family:Arial;
-    background:transparent;
-    color:white;
-  }
-  
-  .story-bar{
-    display:flex;
-    overflow-x:auto;
-    padding:15px;
-    background:#1a1a1a;
-  }
-  
-  .story{
-    margin-right:15px;
-    text-align:center;
-    cursor:pointer;
-    position:relative;
-  }
-  
-  .story img{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    border:3px solid #25D366;
-    object-fit:cover;
-  }
-  
-  .story p{
-    font-size:12px;
-    margin-top:5px;
-  }
-  
-  .viewer{
-    position:relative;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:transparent;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-  }
-  
-  .viewer img,
-  .viewer video{
-    max-width:95%;
-    max-height:85%;
-  }
-  
-  .progress{
-    width:90%;
-    height:4px;
-    background:#333;
-    margin-bottom:10px;
-  }
-  
-  .bar{
-    height:4px;
-    background:#25D366;
-    width:0%;
-  }
-  
-  .upload-section{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-    background: #1a1a1a;
-    border-bottom: 1px solid #333;
-  }
-  
-  .upload{ 
-    position: relative;
-    width: 70px;
-    height: 70px;
-    background: black;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 35px;
-    cursor: pointer;
-    border: 3px dashed #25D366;
-    color: #25D366;
-  }
-  
-  .upload-text{
-    font-size: 12px;
-    margin-top: 8px;
-    color: #aaa;
-  }
-  
-  input{
-    display:none;
-  }
-  #uploadFile{
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:transparent;
+  color:white;
+}
+
+.story-bar{
+  display:flex;
+  overflow-x:auto;
+  padding:15px;
+  background:#1a1a1a;
+}
+
+.story{
+  margin-right:15px;
+  text-align:center;
+  cursor:pointer;
+  position:relative;
+}
+
+.story img{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:3px solid #25D366;
+  object-fit:cover;
+}
+
+.story p{
+  font-size:12px;
+  margin-top:5px;
+}
+
+.viewer{
+  position:relative;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:transparent;
   display:none;
-  }
-    
-  .reactions{
-    position:absolute;
-    bottom:10px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:10px;
-  }
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
+.viewer img,
+.viewer video{
+  max-width:95%;
+  max-height:85%;
+}
+
+.progress{
+  width:90%;
+  height:4px;
+  background:#333;
+  margin-bottom:10px;
+}
+
+.bar{
+  height:4px;
+  background:#25D366;
+  width:0%;
+}
+
+.upload-story{
+  flex-shrink: 0;
+}
+
+.upload{ 
+  width: 70px;
+  height: 70px;
+  background: black;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  cursor: pointer;
+  border: 3px dashed #25D366;
+  color: #25D366;
+}
+
+#stories{
+  display: flex;
+}
+
+input{
+  display:none;
+}
+#uploadFile{
+display:none;
+}
   
-  .reactions i{
-    font-size:25px;
-    cursor:pointer;
-  }
-  
-  .seen-list{
-    position:absolute;
-    bottom:50px;
-    right:10px;
-    background:rgba(0,0,0,0.6);
-    padding:5px 10px;
-    border-radius:10px;
-    font-size:12px;
-  }
- </style>
+.reactions{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+}
+
+.reactions i{
+  font-size:25px;
+  cursor:pointer;
+}
+
+.seen-list{
+  position:absolute;
+  bottom:50px;
+  right:10px;
+  background:rgba(0,0,0,0.6);
+  padding:5px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+</style>
 </head>
 
 <body>
 
- <div class="upload-section">
-  <label class="upload">
+<div class="story-bar">
+<div class="story upload-story">
+<label class="upload">
 +
 <input type="file" id="uploadFile">
 </label>
-  <p class="upload-text">Add Status</p>
- </div>
+<p>Add Status</p>
+</div>
+<div id="stories"></div>
+</div>
 
- <div class="story-bar" id="stories"></div>
+<div class="viewer" id="viewer">
 
- <div class="viewer" id="viewer">
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
 
-  <div class="progress">
-   <div class="bar" id="bar"></div>
-  </div>
+<img id="viewImg">
+<video id="viewVideo" controls></video>
 
-  <img id="viewImg">
-  <video id="viewVideo" controls></video>
+<div class="reactions">
+<i class="fa-regular fa-heart" id="likeBtn"></i>
+<i class="fa-regular fa-face-smile" id="smileBtn"></i>
+</div>
 
-  <div class="reactions">
-   <i class="fa-regular fa-heart" id="likeBtn"></i>
-   <i class="fa-regular fa-face-smile" id="smileBtn"></i>
-  </div>
+<div class="seen-list" id="seenList"></div>
 
-  <div class="seen-list" id="seenList"></div>
+</div>
 
- </div>
-
- <script type="module" src="status.js"></script>
+<script type="module" src="status.js"></script>
 
 </body>
-
 </html>
+
