@@ -639,11 +639,6 @@ storiesDiv.innerHTML='<p style="text-align:center;color:#999;padding:20px;">No s
 function openStatusViewer(status,statusKey){
 const viewer=document.getElementById("viewer");
 if(!viewer) return;
-
-const currentUser=firebase.auth().currentUser;
-if(!currentUser){
-alert("Please login to view status");
-return;
 }
 
 viewer.style.display="flex";
