@@ -183,11 +183,7 @@ const url = await getDownloadURL(storageRef);
 
 // ----- Display Stories -----
 onValue(ref(db,"status"),snapshot=>{
-  storiesDiv.innerHTML = `
-<label class="upload">
-  <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
-</label>
-`;
+  storiesDiv.innerHTML = "";
   snapshot.forEach(data=>{
     const status = data.val();
     if(Date.now()-status.time > 86400000){
