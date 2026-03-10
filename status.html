@@ -123,7 +123,15 @@ input{
   Status
 </div>
 
-<div class="story-bar" id="stories"></div>
+<div class="story-bar" id="stories">
+
+  <!-- Upload button first -->
+  <label class="upload">
+    +
+    <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
+  </label>
+
+</div>
 
 <div class="viewer" id="viewer">
   <div class="progress"><div class="bar" id="bar"></div></div>
@@ -135,11 +143,6 @@ input{
   </div>
   <div class="seen-list" id="seenList"></div>
 </div>
-
-<label class="upload">
-  +
-  <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
-</label>
 
 <script type="module">
 
