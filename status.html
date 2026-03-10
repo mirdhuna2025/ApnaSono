@@ -2,128 +2,105 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Status Stories</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>Mirdhuna Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-background:black;
+background:#e5ddd5;
+}
+
+header{
+background:#075e54;
 color:white;
-}
-
-.header{
-padding:20px;
-text-align:center;
-font-size:20px;
-}
-
-.topbar{
+padding:12px;
+font-size:18px;
 display:flex;
+justify-content:space-between;
 align-items:center;
-gap:15px;
-padding:10px 15px;
 }
 
-.upload{
-width:70px;
-height:70px;
-background:#25D366;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-border:3px solid white;
-}
-
-.upload i{
-font-size:30px;
-color:white;
-}
-
-.story-bar{
+#statusBar{
 display:flex;
 overflow-x:auto;
-gap:15px;
+background:white;
+padding:8px;
+gap:10px;
+border-bottom:1px solid #ccc;
 }
 
-.story{
-text-align:center;
-cursor:pointer;
-}
-
-.story img{
+.status{
 width:70px;
-height:70px;
+text-align:center;
+font-size:12px;
+}
+
+.status img{
+width:60px;
+height:60px;
 border-radius:50%;
 border:3px solid #25D366;
 object-fit:cover;
 }
 
-.story p{
-font-size:12px;
-margin-top:5px;
-}
-
-.viewer{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:black;
-display:none;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-}
-
-.viewer img,.viewer video{
-max-width:95%;
-max-height:85%;
-}
-
-.progress{
-width:90%;
-height:4px;
-background:#333;
-margin-bottom:10px;
-}
-
-.bar{
-height:4px;
-background:#25D366;
-width:0%;
-}
-
-.reactions{
-position:absolute;
-bottom:10px;
+#uploadStatus{
+width:60px;
+height:60px;
+border-radius:50%;
+background:#ddd;
 display:flex;
-gap:15px;
-}
-
-.reactions i{
-font-size:25px;
+align-items:center;
+justify-content:center;
+font-size:30px;
 cursor:pointer;
 }
 
-.seen-list{
-position:absolute;
-bottom:50px;
-right:10px;
-background:rgba(0,0,0,0.6);
-padding:5px 10px;
-border-radius:10px;
-font-size:12px;
+#chatBox{
+height:65vh;
+overflow-y:auto;
+padding:10px;
 }
 
-input{
-display:none;
+.msg{
+max-width:70%;
+padding:8px;
+margin:6px;
+border-radius:8px;
+}
+
+.me{
+background:#dcf8c6;
+margin-left:auto;
+}
+
+.other{
+background:white;
+}
+
+#sendBar{
+display:flex;
+padding:10px;
+background:#f0f0f0;
+}
+
+#msgInput{
+flex:1;
+padding:8px;
+border:none;
+border-radius:20px;
+}
+
+button{
+background:#25D366;
+border:none;
+color:white;
+padding:10px 15px;
+border-radius:20px;
+margin-left:8px;
+cursor:pointer;
 }
 
 </style>
@@ -131,228 +108,132 @@ display:none;
 
 <body>
 
-<div class="header">Status</div>
+<header>
+Mirdhuna Chat
+</header>
 
-<div class="topbar">
+<!-- STATUS -->
+<div id="statusBar">
 
-<label class="upload">
-<input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
-<i class="fa fa-plus"></i>
-</label>
+<div class="status">
+<div id="uploadStatus">+</div>
+<div>Your Status</div>
+<input type="file" id="statusFile" hidden>
+</div>
 
-<div class="story-bar" id="stories"></div>
+<div id="statusList" style="display:flex; gap:10px;"></div>
 
 </div>
 
+<!-- CHAT -->
+<div id="chatBox"></div>
 
-<div class="viewer" id="viewer">
-
-<div class="progress">
-<div class="bar" id="bar"></div>
-</div>
-
-<img id="viewImg">
-<video id="viewVideo" controls></video>
-
-<div class="reactions">
-<i class="fa-regular fa-heart" id="likeBtn"></i>
-<i class="fa-regular fa-face-smile" id="smileBtn"></i>
-</div>
-
-<div class="seen-list" id="seenList"></div>
-
+<!-- SEND -->
+<div id="sendBar">
+<input id="msgInput" placeholder="Type message">
+<button onclick="sendMsg()">Send</button>
 </div>
 
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
 
 const firebaseConfig = {
 apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
 authDomain: "mirdhuna-25542.firebaseapp.com",
 databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
 projectId: "mirdhuna-25542",
-storageBucket: "mirdhuna-25542.firebasestorage.app",
+storageBucket: "mirdhuna-25542.appspot.com",
 messagingSenderId: "575924409876",
-appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
+appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
+measurementId: "G-YB7LDKHBPV"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-const upload = document.getElementById("uploadFile");
-const storiesDiv = document.getElementById("stories");
+const user = localStorage.uid || Math.random().toString(36).substr(2);
+localStorage.uid = user;
+
+const chatBox = document.getElementById("chatBox");
+
+function sendMsg(){
+
+let text = document.getElementById("msgInput").value;
+if(!text) return;
+
+push(ref(db,"messages"),{
+user:user,
+msg:text
+});
+
+document.getElementById("msgInput").value="";
+}
+
+onChildAdded(ref(db,"messages"),(data)=>{
+
+let d=data.val();
+
+let div=document.createElement("div");
+div.className="msg "+(d.user==user?"me":"other");
+div.innerText=d.msg;
+
+chatBox.appendChild(div);
+chatBox.scrollTop=chatBox.scrollHeight;
+
+});
 
 
-// UPLOAD STATUS
+// STATUS UPLOAD
 
-upload.addEventListener("change", async ()=>{
+document.getElementById("uploadStatus").onclick=()=>{
+document.getElementById("statusFile").click();
+}
 
-const file = upload.files[0];
+document.getElementById("statusFile").onchange=async(e)=>{
 
+let file=e.target.files[0];
 if(!file) return;
 
-const storageRef = sRef(storage,"status/"+Date.now()+file.name);
+let storageRef=sRef(storage,"status/"+Date.now());
 
 await uploadBytes(storageRef,file);
 
-const url = await getDownloadURL(storageRef);
+let url=await getDownloadURL(storageRef);
 
 push(ref(db,"status"),{
-url:url,
-type:file.type,
-time:Date.now(),
-name:"User",
-reactions:{},
-seen:{}
+img:url,
+user:user
 });
-
-upload.value="";
-
-});
-
-
-// FETCH STORIES
-
-onValue(ref(db,"status"),snapshot=>{
-
-storiesDiv.innerHTML="";
-
-snapshot.forEach(data=>{
-
-const status = data.val();
-
-if(Date.now()-status.time > 86400000){
-remove(ref(db,"status/"+data.key));
-return;
-}
-
-const div=document.createElement("div");
-div.className="story";
-
-const img=document.createElement("img");
-img.src=status.url;
-
-const name=document.createElement("p");
-name.innerText=status.name;
-
-div.appendChild(img);
-div.appendChild(name);
-
-div.onclick=()=>openViewer(status,data.key);
-
-storiesDiv.appendChild(div);
-
-});
-
-});
-
-
-// VIEWER
-
-const viewer=document.getElementById("viewer");
-const img=document.getElementById("viewImg");
-const video=document.getElementById("viewVideo");
-const bar=document.getElementById("bar");
-const seenList=document.getElementById("seenList");
-
-const likeBtn=document.getElementById("likeBtn");
-const smileBtn=document.getElementById("smileBtn");
-
-let progressInterval;
-
-
-function openViewer(status,statusKey){
-
-viewer.style.display="flex";
-
-bar.style.width="0%";
-
-let progress=0;
-
-
-// SEEN LIST
-
-const seenRef = ref(db,"status/"+statusKey+"/seen/"+Date.now());
-
-update(seenRef,{name:"Viewer"});
-
-
-onValue(ref(db,"status/"+statusKey+"/seen"),snap=>{
-
-let names=[];
-
-snap.forEach(s=>{
-names.push(s.val().name);
-});
-
-seenList.innerText="Seen: "+names.join(", ");
-
-});
-
-
-// PROGRESS BAR
-
-clearInterval(progressInterval);
-
-progressInterval=setInterval(()=>{
-
-progress+=2;
-
-bar.style.width=progress+"%";
-
-if(progress>=100){
-
-clearInterval(progressInterval);
-
-viewer.style.display="none";
-
-}
-
-},100);
-
-
-// IMAGE OR VIDEO
-
-if(status.type.startsWith("image")){
-
-img.style.display="block";
-video.style.display="none";
-
-img.src=status.url;
-
-}else{
-
-video.style.display="block";
-img.style.display="none";
-
-video.src=status.url;
-video.play();
 
 }
 
 
-// REACTIONS
+// STATUS LIST
 
-likeBtn.onclick=()=>addReaction(statusKey,"❤️");
-smileBtn.onclick=()=>addReaction(statusKey,"😊");
+const statusList=document.getElementById("statusList");
 
-}
+onChildAdded(ref(db,"status"),(data)=>{
 
+let d=data.val();
 
-// ADD REACTION
+let div=document.createElement("div");
+div.className="status";
 
-function addReaction(statusKey,reaction){
+div.innerHTML=`
+<img src="${d.img}">
+<div>Status</div>
+`;
 
-const reactionRef = ref(db,"status/"+statusKey+"/reactions/"+Date.now());
+statusList.appendChild(div);
 
-update(reactionRef,{reaction});
+});
 
-}
 
 </script>
 
