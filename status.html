@@ -11,22 +11,7 @@ body{
   background:transparent;
   color:white;
 }
-.header{
-  background:transparent;
-  padding:0px;
-  font-size:20px;
-  text-align:center;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.header button{
-  background:none;
-  border:none;
-  color:white;
-  font-size:18px;
-  cursor:pointer;
-}
+
 .story-bar{
   display:flex;
   overflow-x:auto;
@@ -118,18 +103,16 @@ input{
 </head>
 <body>
 
-<div class="header">
-  Status
-</div>
 
-<div class="story-bar" id="stories">
+
+<div class="story-bar">
 
   <!-- Upload button first -->
-  <label class="upload">
+  <label class="upload" id="uploadLabel">
     +
     <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
   </label>
-
+<div id="storiesList"></div>
 </div>
 
 <div class="viewer" id="viewer">
