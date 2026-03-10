@@ -655,9 +655,7 @@ bar.style.width="0%";
 let progress=0;
 
 // Mark as seen
-firebase.database().ref("status/"+statusKey+"/seen/"+currentUser.uid).set({
-name:currentUser.displayName||"User"
-});
+
 
 // Show seen list
 firebase.database().ref("status/"+statusKey+"/seen").on("value",snap=>{
