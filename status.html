@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <title>Status Stories</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
+
 body{
   margin:0;
   font-family:Arial;
@@ -18,12 +20,14 @@ body{
   padding:15px;
   background:#1a1a1a;
 }
+
 .story{
   margin-right:15px;
   text-align:center;
   cursor:pointer;
   position:relative;
 }
+
 .story img{
   width:70px;
   height:70px;
@@ -31,10 +35,12 @@ body{
   border:3px solid #25D366;
   object-fit:cover;
 }
+
 .story p{
   font-size:12px;
   margin-top:5px;
 }
+
 .viewer{
   position:relative;
   top:0;
@@ -47,38 +53,43 @@ body{
   align-items:center;
   flex-direction:column;
 }
-.viewer img,.viewer video{
+
+.viewer img,
+.viewer video{
   max-width:95%;
   max-height:85%;
 }
+
 .progress{
   width:90%;
   height:4px;
   background:#333;
   margin-bottom:10px;
 }
+
 .bar{
   height:4px;
   background:#25D366;
   width:0%;
 }
+
 .upload{ 
-    position: relative;
-    top: 0px;
-    left: 0px;
-    width: 70px;
-    height: 70px;
-    background: black;
-    border-radius: 60%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 85px;
-    cursor: pointer;
-  }
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: black;
+  border-radius: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 85px;
+  cursor: pointer;
+}
+
 input{
   display:none;
 }
+
 .reactions{
   position:absolute;
   bottom:10px;
@@ -87,10 +98,12 @@ input{
   display:flex;
   gap:10px;
 }
+
 .reactions i{
   font-size:25px;
   cursor:pointer;
 }
+
 .seen-list{
   position:absolute;
   bottom:50px;
@@ -100,174 +113,38 @@ input{
   border-radius:10px;
   font-size:12px;
 }
+
 </style>
 </head>
+
 <body>
 
-  <!-- Upload button first -->
 <label class="upload">
 +
 <input type="file" id="uploadFile">
 </label>
-<div class="story-bar" id="stories">
-</div>
+
+<div class="story-bar" id="stories"></div>
+
 <div class="viewer" id="viewer">
-<div class="progress"><div class="bar" id="bar"></div></div>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
 <img id="viewImg">
 <video id="viewVideo" controls></video>
+
 <div class="reactions">
 <i class="fa-regular fa-heart" id="likeBtn"></i>
 <i class="fa-regular fa-face-smile" id="smileBtn"></i>
 </div>
+
 <div class="seen-list" id="seenList"></div>
+
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
-  authDomain: "mirdhuna-25542.firebaseapp.com",
-  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
-  projectId: "mirdhuna-25542",
-  storageBucket: "mirdhuna-25542.firebasestorage.app",
-  messagingSenderId: "575924409876",
-  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-  measurementId: "G-YB7LDKHBPV"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
-
-// Anonymous user ID for tracking reactions/seen
-let anonymousId = localStorage.getItem("anonId");
-if(!anonymousId){
-  anonymousId = "anon_"+Math.random().toString(36).substr(2,9);
-  localStorage.setItem("anonId", anonymousId);
-}
-let anonymousName = "Anonymous";
-
-// ----- Upload Status -----
-
-
-const upload = document.getElementById("uploadFile");
-const storiesDiv = document.getElementById("stories");
-
-upload.addEventListener("change", async () => {
-
-const file = upload.files[0];
-
-const storageRef = sRef(storage,"status/"+Date.now()+file.name);
-
-await uploadBytes(storageRef,file);
-
-const url = await getDownloadURL(storageRef);
-
-  push(ref(db,"status"),{
-    url:url,
-    type:file.type,
-    time:Date.now(),
-    uid:anonymousId,
-    name:anonymousName,
-    reactions:{},
-    seen:{}
-  });
-});
-
-// ----- Display Stories -----
-onValue(ref(db,"status"),snapshot=>{
-  storiesDiv.innerHTML = "";
-  snapshot.forEach(data=>{
-    const status = data.val();
-    if(Date.now()-status.time > 86400000){
-      remove(ref(db,"status/"+data.key));
-      return;
-    }
-
-    const div=document.createElement("div");
-    div.className="story";
-    const img=document.createElement("img");
-    img.src=status.url;
-    const name=document.createElement("p");
-    name.innerText=status.name || "Status";
-
-    div.appendChild(img);
-    div.appendChild(name);
-    div.onclick=()=>openViewer(status,data.key);
-    storiesDiv.appendChild(div);
-  });
-});
-
-// ----- Viewer -----
-const viewer=document.getElementById("viewer");
-const img=document.getElementById("viewImg");
-const video=document.getElementById("viewVideo");
-const bar=document.getElementById("bar");
-const seenListDiv = document.getElementById("seenList");
-const likeBtn = document.getElementById("likeBtn");
-const smileBtn = document.getElementById("smileBtn");
-
-let progressInterval;
-
-function openViewer(status, statusKey){
-  viewer.style.display="flex";
-  bar.style.width="0%";
-  let progress=0;
-
-  // Add current user to seen list
-  const seenRef = ref(db,"status/"+statusKey+"/seen/"+anonymousId);
-  update(seenRef,{name:anonymousName});
-
-  // Display seen list
-  function updateSeenList(){
-    onValue(ref(db,"status/"+statusKey+"/seen"),snap=>{
-      let names = [];
-      snap.forEach(s=>{
-        names.push(s.val().name);
-      });
-      seenListDiv.innerText = "Seen: "+names.join(", ");
-    });
-  }
-  updateSeenList();
-
-  // Progress bar
-  clearInterval(progressInterval);
-  progressInterval = setInterval(()=>{
-    progress+=2;
-    bar.style.width=progress+"%";
-    if(progress>=100){
-      clearInterval(progressInterval);
-      viewer.style.display="none";
-    }
-  },100);
-
-  if(status.type.startsWith("image")){
-    img.style.display="block";
-    video.style.display="none";
-    img.src=status.url;
-  }else{
-    video.style.display="block";
-    img.style.display="none";
-    video.src=status.url;
-    video.play();
-  }
-
-  // Update reactions
-  likeBtn.onclick = ()=>addReaction(statusKey,"❤️");
-  smileBtn.onclick = ()=>addReaction(statusKey,"😊");
-}
-
-// ----- Reactions -----
-function addReaction(statusKey,reaction){
-  const reactionRef = ref(db,"status/"+statusKey+"/reactions/"+anonymousId);
-  update(reactionRef,{reaction});
-}
-
-</script>
+<script type="module" src="status.js"></script>
 
 </body>
 </html>
