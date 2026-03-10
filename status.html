@@ -1,408 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Status Stories</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-.status-container {
-  width: 100%;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f0f0f;
+  color:white;
 }
-
-.status-header {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  padding: 15px;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.header{
+  background:black;
+  padding:0px;
+  font-size:20px;
+  text-align:center;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-.status-header button {
-  background: rgba(255,255,255,0.3);
-  border: none;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s ease;
+.header button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
 }
-
-.status-header button:hover {
-  background: rgba(255,255,255,0.5);
+.story-bar{
+  display:flex;
+  overflow-x:auto;
+  padding:15px;
+  background:#1a1a1a;
 }
-
-.story-bar {
-  display: flex;
-  overflow-x: auto;
-  padding: 15px;
-  background: #f9f9f9;
-  gap: 15px;
-  border-bottom: 1px solid #eee;
+.story{
+  margin-right:15px;
+  text-align:center;
+  cursor:pointer;
+  position:relative;
 }
-
-.story {
-  margin: 0;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
+.story img{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:3px solid #25D366;
+  object-fit:cover;
 }
-
-.story img {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 3px solid #25D366;
-  object-fit: cover;
-  transition: transform 0.2s ease;
+.story p{
+  font-size:12px;
+  margin-top:5px;
 }
-
-.story img:hover {
-  transform: scale(1.05);
+.viewer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
 }
-
-.story p {
-  font-size: 12px;
-  margin: 5px 0 0 0;
-  color: #333;
-  max-width: 80px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.viewer img,.viewer video{
+  max-width:95%;
+  max-height:85%;
 }
-
-.status-content {
-  padding: 20px;
-  min-height: 150px;
-  text-align: center;
-  color: #999;
+.progress{
+  width:90%;
+  height:4px;
+  background:#333;
+  margin-bottom:10px;
 }
-
-.viewer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.95);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 10000;
+.bar{
+  height:4px;
+  background:#25D366;
+  width:0%;
 }
-
-.viewer img,
-.viewer video {
-  max-width: 95%;
-  max-height: 85%;
-  border-radius: 8px;
+.upload{
+  position:fixed;
+  top:125px;
+  left:0px;
+  width:60px;
+  height:60px;
+  background:black;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  cursor:pointer;
 }
-
-.progress {
-  width: 90%;
-  height: 4px;
-  background: #333;
-  margin-bottom: 10px;
-  border-radius: 2px;
+input{
+  display:none;
 }
-
-.bar {
-  height: 4px;
-  background: #25D366;
-  width: 0%;
-  border-radius: 2px;
+.reactions{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
 }
-
-.upload {
-  position: fixed;
-  top: 30px;
-  left: 30px;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(37,211,102,0.3);
-  transition: transform 0.2s ease;
-  border: none;
-  color: white;
-  z-index: 1000;
+.reactions i{
+  font-size:25px;
+  cursor:pointer;
 }
-
-.upload:hover {
-  transform: scale(1.1);
-}
-
-.upload input {
-  display: none;
-}
-
-.reactions {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 15px;
-  font-size: 25px;
-}
-
-.reactions span {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.reactions span:hover {
-  transform: scale(1.2);
-}
-
-.seen-list {
-  position: absolute;
-  bottom: 50px;
-  right: 10px;
-  background: rgba(0,0,0,0.7);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  color: white;
-  max-width: 200px;
-  text-align: right;
-}
-
-@media (max-width: 768px) {
-  .upload { }
-  
-  .story-bar {
-    padding: 10px;
-  }
+.seen-list{
+  position:absolute;
+  bottom:50px;
+  right:10px;
+  background:rgba(0,0,0,0.6);
+  padding:5px 10px;
+  border-radius:10px;
+  font-size:12px;
 }
 </style>
+</head>
+<body>
 
-<div class="status-container">
-  <div class="status-header">
-    📸 Status Stories
-    <button id="statusLoginBtn">Login</button>
-  </div>
-  
-  <div class="story-bar" id="stories"></div>
-  
-  <div class="status-content">
-    <p id="statusMsg">Load stories above...</p>
-  </div>
+<div class="header">
+  Status
+  <button id="loginBtn">Login</button>
 </div>
+
+<div class="story-bar" id="stories"></div>
 
 <div class="viewer" id="viewer">
   <div class="progress"><div class="bar" id="bar"></div></div>
-  <img id="viewImg" style="display:none;">
-  <video id="viewVideo" controls style="display:none;"></video>
+  <img id="viewImg">
+  <video id="viewVideo" controls></video>
   <div class="reactions">
-    <span id="likeBtn" title="Like">❤️</span>
-    <span id="smileBtn" title="React">😊</span>
+    <i class="fa-regular fa-heart" id="likeBtn"></i>
+    <i class="fa-regular fa-face-smile" id="smileBtn"></i>
   </div>
   <div class="seen-list" id="seenList"></div>
 </div>
 
-<label class="upload" id="uploadBtn" title="Add Status">
+<label class="upload">
   +
   <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
 </label>
 
-<script>
-// Use the existing Firebase instance from the parent page
-if (typeof firebase !== 'undefined') {
-  const db = firebase.database();
-  const storage = firebase.storage();
-  const auth = firebase.auth();
-  
-  let currentUser = null;
+<script type="module">
 
-  // Check authentication state
-  if (typeof firebase.auth !== 'undefined') {
-    firebase.auth().onAuthStateChanged(user => {
-      currentUser = user;
-      const loginBtn = document.getElementById('statusLoginBtn');
-      if (user) {
-        loginBtn.innerText = 'Logout (' + user.displayName + ')';
-        loginBtn.onclick = () => firebase.auth().signOut();
-      } else {
-        loginBtn.innerText = 'Login';
-        loginBtn.onclick = () => {
-          if (typeof gapi !== 'undefined') {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider);
-          }
-        };
-      }
-    });
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
+  authDomain: "mirdhuna-25542.firebaseapp.com",
+  databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
+  projectId: "mirdhuna-25542",
+  storageBucket: "mirdhuna-25542.firebasestorage.app",
+  messagingSenderId: "575924409876",
+  appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
+  measurementId: "G-YB7LDKHBPV"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+
+// ----- Login -----
+const loginBtn = document.getElementById("loginBtn");
+loginBtn.addEventListener("click", async () => {
+  if(currentUser){
+    await signOut(auth);
+  }else{
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider);
   }
+});
 
-  // Load stories
-  function loadStatusStories() {
-    const storiesDiv = document.getElementById('stories');
-    const statusMsg = document.getElementById('statusMsg');
-    
-    db.ref('status').on('value', snapshot => {
-      storiesDiv.innerHTML = '';
-      
-      if (!snapshot.exists()) {
-        statusMsg.textContent = 'No status stories yet';
-        return;
-      }
-
-      let count = 0;
-      snapshot.forEach(data => {
-        const status = data.val();
-        
-        // Remove expired statuses (older than 24 hours)
-        if (Date.now() - (status.time || 0) > 86400000) {
-          db.ref('status/' + data.key).remove();
-          return;
-        }
-
-        count++;
-        const div = document.createElement('div');
-        div.className = 'story';
-        
-        const img = document.createElement('img');
-        img.src = status.url || 'https://via.placeholder.com/70?text=Status';
-        img.onerror = () => img.src = 'https://via.placeholder.com/70?text=Error';
-        
-        const name = document.createElement('p');
-        name.textContent = (status.name || 'User').substring(0, 12);
-
-        div.appendChild(img);
-        div.appendChild(name);
-        div.onclick = () => openViewer(status, data.key);
-        storiesDiv.appendChild(div);
-      });
-
-      if (count === 0) {
-        statusMsg.textContent = 'No status stories yet';
-      }
-    });
+onAuthStateChanged(auth, user=>{
+  currentUser = user;
+  if(user){
+    loginBtn.innerText = "Logout";
+  }else{
+    loginBtn.innerText = "Login";
   }
+});
 
-  // Open viewer
-  const viewer = document.getElementById('viewer');
-  const viewImg = document.getElementById('viewImg');
-  const viewVideo = document.getElementById('viewVideo');
-  const bar = document.getElementById('bar');
-  const seenListDiv = document.getElementById('seenList');
-  const likeBtn = document.getElementById('likeBtn');
-  const smileBtn = document.getElementById('smileBtn');
+// ----- Upload Status -----
+const upload = document.getElementById("uploadFile");
+const storiesDiv = document.getElementById("stories");
 
-  let progressInterval;
+upload.addEventListener("change", async () => {
+  if(!currentUser) return alert("Login first!");
 
-  function openViewer(status, statusKey) {
-    if (!currentUser) {
-      alert('Please login to view status');
+  const file = upload.files[0];
+  const storageRef = sRef(storage,"status/"+Date.now()+file.name);
+  await uploadBytes(storageRef,file);
+  const url = await getDownloadURL(storageRef);
+
+  push(ref(db,"status"),{
+    url:url,
+    type:file.type,
+    time:Date.now(),
+    uid:currentUser.uid,
+    name:currentUser.displayName,
+    reactions:{},
+    seen:{}
+  });
+});
+
+// ----- Display Stories -----
+onValue(ref(db,"status"),snapshot=>{
+  storiesDiv.innerHTML="";
+  snapshot.forEach(data=>{
+    const status = data.val();
+    if(Date.now()-status.time > 86400000){
+      remove(ref(db,"status/"+data.key));
       return;
     }
 
-    viewer.style.display = 'flex';
-    bar.style.width = '0%';
-    let progress = 0;
+    const div=document.createElement("div");
+    div.className="story";
+    const img=document.createElement("img");
+    img.src=status.url;
+    const name=document.createElement("p");
+    name.innerText=status.name || "Status";
 
-    // Mark as seen
-    db.ref('status/' + statusKey + '/seen/' + currentUser.uid).set({
-      name: currentUser.displayName
-    });
+    div.appendChild(img);
+    div.appendChild(name);
+    div.onclick=()=>openViewer(status,data.key);
+    storiesDiv.appendChild(div);
+  });
+});
 
-    // Show seen list
-    db.ref('status/' + statusKey + '/seen').on('value', snap => {
+// ----- Viewer -----
+const viewer=document.getElementById("viewer");
+const img=document.getElementById("viewImg");
+const video=document.getElementById("viewVideo");
+const bar=document.getElementById("bar");
+const seenListDiv = document.getElementById("seenList");
+const likeBtn = document.getElementById("likeBtn");
+const smileBtn = document.getElementById("smileBtn");
+
+let progressInterval;
+
+function openViewer(status, statusKey){
+  if(!currentUser) return alert("Login to view status!");
+
+  viewer.style.display="flex";
+  bar.style.width="0%";
+  let progress=0;
+
+  // Add current user to seen list
+  const seenRef = ref(db,"status/"+statusKey+"/seen/"+currentUser.uid);
+  update(seenRef,{name:currentUser.displayName});
+
+  // Display seen list
+  function updateSeenList(){
+    onValue(ref(db,"status/"+statusKey+"/seen"),snap=>{
       let names = [];
-      snap.forEach(s => {
+      snap.forEach(s=>{
         names.push(s.val().name);
       });
-      seenListDiv.textContent = 'Seen: ' + names.join(', ');
-    });
-
-    // Progress bar
-    clearInterval(progressInterval);
-    progressInterval = setInterval(() => {
-      progress += 2;
-      bar.style.width = progress + '%';
-      if (progress >= 100) {
-        clearInterval(progressInterval);
-        viewer.style.display = 'none';
-      }
-    }, 100);
-
-    // Show media
-    const mediaType = status.type || status.url;
-    if (mediaType.includes('image')) {
-      viewImg.style.display = 'block';
-      viewVideo.style.display = 'none';
-      viewImg.src = status.url;
-    } else {
-      viewVideo.style.display = 'block';
-      viewImg.style.display = 'none';
-      viewVideo.src = status.url;
-      viewVideo.play();
-    }
-
-    // Reactions
-    likeBtn.onclick = () => addReaction(statusKey, '❤️');
-    smileBtn.onclick = () => addReaction(statusKey, '😊');
-  }
-
-  function addReaction(statusKey, reaction) {
-    if (!currentUser) return;
-    db.ref('status/' + statusKey + '/reactions/' + currentUser.uid).set({
-      reaction: reaction,
-      time: Date.now()
+      seenListDiv.innerText = "Seen: "+names.join(", ");
     });
   }
+  updateSeenList();
 
-  // Upload status
-  document.getElementById('uploadFile').addEventListener('change', async (e) => {
-    if (!currentUser) {
-      alert('Please login first');
-      return;
+  // Progress bar
+  clearInterval(progressInterval);
+  progressInterval = setInterval(()=>{
+    progress+=2;
+    bar.style.width=progress+"%";
+    if(progress>=100){
+      clearInterval(progressInterval);
+      viewer.style.display="none";
     }
+  },100);
 
-    const file = e.target.files[0];
-    if (!file) return;
+  if(status.type.startsWith("image")){
+    img.style.display="block";
+    video.style.display="none";
+    img.src=status.url;
+  }else{
+    video.style.display="block";
+    img.style.display="none";
+    video.src=status.url;
+    video.play();
+  }
 
-    const storageRef = storage.ref('status/' + Date.now() + '_' + file.name);
-    
-    try {
-      await storageRef.put(file);
-      const url = await storageRef.getDownloadURL();
-      
-      db.ref('status').push({
-        url: url,
-        type: file.type,
-        time: Date.now(),
-        uid: currentUser.uid,
-        name: currentUser.displayName,
-        reactions: {},
-        seen: {}
-      });
-
-      document.getElementById('uploadFile').value = '';
-      alert('Status uploaded!');
-    } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload status');
-    }
-  });
-
-  // Close viewer on click
-  viewer.addEventListener('click', () => {
-    viewer.style.display = 'none';
-  });
-
-  // Initialize
-  loadStatusStories();
-} else {
-  console.warn('Firebase not loaded yet. Status features may not work.');
+  // Update reactions
+  likeBtn.onclick = ()=>addReaction(statusKey,"❤️");
+  smileBtn.onclick = ()=>addReaction(statusKey,"😊");
 }
+
+// ----- Reactions -----
+function addReaction(statusKey,reaction){
+  if(!currentUser) return;
+  const reactionRef = ref(db,"status/"+statusKey+"/reactions/"+currentUser.uid);
+  update(reactionRef,{reaction});
+}
+
 </script>
+
+</body>
+</html>
