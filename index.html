@@ -641,10 +641,7 @@ const viewer=document.getElementById("viewer");
 if(!viewer) return;
 
 const currentUser=firebase.auth().currentUser;
-if(!currentUser){
-alert("Please login to view status");
-return;
-}
+
 
 viewer.style.display="flex";
 const bar=document.getElementById("bar");
