@@ -195,7 +195,11 @@ upload.addEventListener("change", async () => {
 
 // ----- Display Stories -----
 onValue(ref(db,"status"),snapshot=>{
-  storiesDiv.innerHTML="";
+  storiesDiv.innerHTML = `
+<label class="upload">
+  <input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
+</label>
+`;
   snapshot.forEach(data=>{
     const status = data.val();
     if(Date.now()-status.time > 86400000){
