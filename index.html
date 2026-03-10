@@ -590,24 +590,31 @@ newsContainer.innerHTML='<p style="text-align:center;color:red;">Error loading n
 /* ===========================
 STATUS LOADER
 =========================== */
-
 function initializeStatus(){
-// Load status stories from Firebase
+
 const storiesDiv=document.getElementById("stories");
 if(!storiesDiv) return;
 
 firebase.database().ref("status").on("value",snapshot=>{
+
+// keep upload button first
+storiesDiv.innerHTML=`
+<label class="upload">
++
+<input type="file" id="uploadFile" accept="image/*,video/*" capture="environment">
+</label>
+`;
+
 if(!snapshot.exists()){
-storiesDiv.innerHTML='<p style="text-align:center;color:#999;padding:20px;">No status stories yet</p>';
+storiesDiv.innerHTML+=
+'<p style="text-align:center;color:#999;padding:20px;">No status stories yet</p>';
 return;
 }
 
-storiesDiv.innerHTML="";
 let count=0;
 
 snapshot.forEach(data=>{
 const status=data.val();
-
 // Remove expired statuses (older than 24 hours)
 if(Date.now()-(status.time||0)>86400000){
 firebase.database().ref("status/"+data.key).remove();
