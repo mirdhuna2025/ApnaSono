@@ -154,16 +154,22 @@ if(!anonymousId){
 let anonymousName = "Anonymous";
 
 // ----- Upload Status -----
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
 const upload = document.getElementById("uploadFile");
 const storiesDiv = document.getElementById("stories");
 
 upload.addEventListener("change", async () => {
-  const file = upload.files[0];
-  if(!file) return;
-  
-  const storageRef = sRef(storage,"status/"+Date.now()+file.name);
-  await uploadBytes(storageRef,file);
-  const url = await getDownloadURL(storageRef);
+
+const file = upload.files[0];
+
+const storageRef = sRef(storage,"status/"+Date.now()+file.name);
+
+await uploadBytes(storageRef,file);
+
+const url = await getDownloadURL(storageRef);
 
   push(ref(db,"status"),{
     url:url,
