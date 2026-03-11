@@ -600,13 +600,14 @@ card.innerHTML=`
 
 <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
 
-<div style="font-weight:bold;">${item.title||"Item"}</div>
+<div class="sell-title">${item.title||"Item"}</div>
 
-<div style="color:#25D366;font-weight:bold;">₹${item.price||"N/A"}</div>
+<div class="sell-price">₹${item.price||"N/A"}</div>
 
-<div style="font-size:11px;color:#666;">📍 ${item.location||"Unknown"}</div>
+<div class="sell-location">📍 ${item.location||"Unknown"}</div>
 
 `;
+
 
 sellContainer.appendChild(card);
 
