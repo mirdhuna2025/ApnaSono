@@ -198,25 +198,20 @@ box-shadow:0 6px 16px rgba(0,0,0,0.15);
 from{opacity:0; transform:translateY(10px);}
 to{opacity:1; transform:translateY(0);}
 }
-  
-#sell-container{
+  #sell-container{
 display:flex;
-gap:10px;
-flex-direction:row;
+gap:12px;
 padding:10px;
-max-height:500px;
-overflow-y:auto;
+overflow-x:auto;
+}
+.sell-item-card{
+flex:0 0 220px;
+transition:0.3s;
 }
 
-.sell-item-card{
-display:flex;
-flex-direction:column;
-background:#f9f9f9;
-border-radius:8px;
-padding:10px;
-border:1px solid #ddd;
-font-size:13px;
-gap:6px;
+.sell-item-card:hover{
+transform:translateY(-4px);
+box-shadow:0 6px 16px rgba(0,0,0,0.15);
 }
 
 .sell-item-card img{
