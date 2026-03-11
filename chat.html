@@ -607,14 +607,14 @@
 </head>
 <body>
 <!-- ===== AD POPUP ===== -->
-  /*   <div id="adOverlay" style="display:none;">
+  <div id="adOverlay" style="display:none;">
   <div id="adBox">
     <h3>🙏 Support Us</h3>
     <p>Please watch a short ad to continue</p>
     <button id="watchBtn" onclick="watchAd()">▶ Watch Ad</button>
     <p id="adTimer"></p>
   </div>
-</div> */
+</div> 
 
   
   <header>
@@ -723,7 +723,7 @@
 let seconds = 8;
 let timerInterval;
 
-if (!sessionStorage.getItem("adWatched")) {
+/* if (!sessionStorage.getItem("adWatched")) {
   document.getElementById("adOverlay").style.display = "flex";
 }
 
@@ -747,7 +747,7 @@ function watchAd() {
       document.getElementById("adOverlay").style.display = "none";
     }
   }, 1000);
-}
+} */
   </script>
   <script type="module" src="chat.js"></script>
   
