@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Status Panel</title>
+<title>Status Admin Panel</title>
 
 <style>
+
 body{
 font-family:Arial;
-background:#f5f5f5;
+background:#f4f4f4;
 padding:20px;
 }
 
 .container{
-max-width:600px;
+max-width:900px;
 margin:auto;
 background:white;
 padding:20px;
 border-radius:10px;
 }
 
-input,textarea{
-width:100%;
-padding:10px;
-margin:10px 0;
-}
-
-button{
-padding:10px 15px;
-margin:5px;
-cursor:pointer;
-}
-
 .status{
 border:1px solid #ddd;
 padding:10px;
-margin-top:10px;
+margin-top:15px;
 border-radius:8px;
 }
 
-.status img{
-max-width:100%;
+.status img, .status video{
+max-width:200px;
+display:block;
 margin-top:10px;
 }
+
+button{
+padding:6px 10px;
+margin-top:8px;
+margin-right:5px;
+cursor:pointer;
+}
+
 </style>
 </head>
 
@@ -48,19 +46,9 @@ margin-top:10px;
 
 <div class="container">
 
-<h2>Admin Status Upload</h2>
+<h2>Status Admin Panel</h2>
 
-<textarea id="statusText" placeholder="Write status"></textarea>
-
-<input type="file" id="statusImage">
-
-<button onclick="postStatus()">Upload Status</button>
-
-<hr>
-
-<h3>All Status</h3>
-
-<div id="statusContainer"></div>
+<div id="statusList"></div>
 
 </div>
 
@@ -71,18 +59,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { 
 getDatabase,
 ref,
-push,
 onValue,
 remove,
 update
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-import {
-getStorage,
-ref as sRef,
-uploadBytes,
-getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyCPbOZwAZEMiC1LSDSgnSEPmSxQ7-pR2oQ",
@@ -91,109 +71,76 @@ databaseURL: "https://mirdhuna-25542-default-rtdb.firebaseio.com",
 projectId: "mirdhuna-25542",
 storageBucket: "mirdhuna-25542.firebasestorage.app",
 messagingSenderId: "575924409876",
-appId: "1:575924409876:web:6ba1ed88ce941d9c83b901",
-measurementId: "G-YB7LDKHBPV"
+appId: "1:575924409876:web:6ba1ed88ce941d9c83b901"
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getDatabase(app);
 
-const storage = getStorage(app);
+const statusList = document.getElementById("statusList");
 
 const statusRef = ref(db,"status");
 
-const container = document.getElementById("statusContainer");
-
-
-window.postStatus = function(){
-
-const text = document.getElementById("statusText").value;
-const file = document.getElementById("statusImage").files[0];
-
-if(file){
-
-const imageRef = sRef(storage,"statusImages/"+Date.now());
-
-uploadBytes(imageRef,file).then(()=>{
-
-getDownloadURL(imageRef).then((url)=>{
-
-push(statusRef,{
-text:text,
-image:url,
-time:Date.now()
-});
-
-});
-
-});
-
-}else{
-
-push(statusRef,{
-text:text,
-time:Date.now()
-});
-
-}
-
-document.getElementById("statusText").value="";
-document.getElementById("statusImage").value="";
-
-}
-
-
 onValue(statusRef,(snapshot)=>{
 
-container.innerHTML="";
+statusList.innerHTML="";
 
-snapshot.forEach((child)=>{
+snapshot.forEach(data=>{
 
-const data = child.val();
-const id = child.key;
+const status=data.val();
+const id=data.key;
 
-const div = document.createElement("div");
-
+const div=document.createElement("div");
 div.className="status";
 
-div.innerHTML = `
-<p>${data.text || ""}</p>
-${data.image ? `<img src="${data.image}">` : ""}
+let media="";
+
+if(status.type && status.type.startsWith("image")){
+media=`<img src="${status.url}">`;
+}
+else if(status.type && status.type.startsWith("video")){
+media=`<video src="${status.url}" controls></video>`;
+}
+
+div.innerHTML=`
+
+<p><b>User:</b> ${status.name || "Anonymous"}</p>
+<p><b>Time:</b> ${new Date(status.time).toLocaleString()}</p>
+
+${media}
 
 <br>
 
-<button onclick="editStatus('${id}','${data.text || ""}')">Edit</button>
-
 <button onclick="deleteStatus('${id}')">Delete</button>
+
+<button onclick="editName('${id}','${status.name || ""}')">Edit Name</button>
+
 `;
 
-container.appendChild(div);
+statusList.appendChild(div);
 
 });
 
 });
 
+window.deleteStatus=function(id){
 
-window.deleteStatus = function(id){
+if(confirm("Delete this status?")){
 
-const deleteRef = ref(db,"status/"+id);
-
-remove(deleteRef);
+remove(ref(db,"status/"+id));
 
 }
 
+}
 
-window.editStatus = function(id,oldText){
+window.editName=function(id,oldName){
 
-const newText = prompt("Edit Status",oldText);
+const newName=prompt("Edit name",oldName);
 
-if(newText){
+if(newName){
 
-const editRef = ref(db,"status/"+id);
-
-update(editRef,{
-text:newText
+update(ref(db,"status/"+id),{
+name:newName
 });
 
 }
