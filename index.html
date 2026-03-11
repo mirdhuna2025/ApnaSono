@@ -108,10 +108,13 @@ box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 .container-content{
-padding:1px;
-min-height:200px;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    padding: 10px;
+    max-height: 500px;
+    overflow-y: auto;
 }
-
 /* ===== CHAT PREVIEW ===== */
 #chat-container{
 display:flex;
