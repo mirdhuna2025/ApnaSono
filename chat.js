@@ -500,7 +500,15 @@ function formatTimestamp(ts) {
         hour12: true
     }).replace(", ", ", ");
 }
+function linkify(text) {
+    if (!text) return "";
+    
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
 
+    return text.replace(urlPattern, function(url) {
+        return `<a href="${url}" target="_blank" style="color:#4da6ff; text-decoration:underline;">${url}</a>`;
+    });
+}
 /* ===============================
 🎨 RENDER MESSAGES
 ================================ */
@@ -555,7 +563,7 @@ function renderMessages(data) {
                <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
              </div>
            </div>
-          ${msg.text ? `<div class="content" style="margin:5px 0;">${msg.text}</div>` : ''}
+       ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
           ${mediaHTML}
           ${repliesHTML}
            <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
