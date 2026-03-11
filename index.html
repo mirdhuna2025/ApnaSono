@@ -440,7 +440,7 @@ else if(mediaUrl) mediaHTML=`<a href="${mediaUrl}" target="_blank" style="color:
 /* MESSAGE HTML */
 div.innerHTML=`
 <div class="header">
-<img class="profile" src="https://api.dicebear.com/7.x/thumbs/svg?seed=${msg.user||'User'}">
+<img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed='+(msg.user||'user')}">
 <div>
 <div class="name-line">${msg.user||'User'}</div>
 <div class="meta">${new Date(msg.timestamp||Date.now()).toLocaleString()}</div>
