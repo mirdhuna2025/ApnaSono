@@ -88,7 +88,6 @@ const viewer=document.getElementById("viewer");
 const img=document.getElementById("viewImg");
 const video=document.getElementById("viewVideo");
 const bar=document.getElementById("bar");
-const seenListDiv = document.getElementById("seenList");
 const likeBtn = document.getElementById("likeBtn");
 const smileBtn = document.getElementById("smileBtn");
 
