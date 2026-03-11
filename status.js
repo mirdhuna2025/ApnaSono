@@ -70,7 +70,8 @@ div.className="story";
 const img=document.createElement("img");
 img.src=status.url;
 
-
+const name=document.createElement("p");
+name.innerText=status.name || "Status";
 
 div.appendChild(img);
 div.appendChild(name);
