@@ -251,21 +251,37 @@ if (galleryBtn) galleryBtn.onclick = () => galleryInput.click();
 
 function handleFileSelect(file) {
     if (!file) return;
+
     fileToSend = file;
+
     if (previewContent) previewContent.innerHTML = "";
+
     if (file.type.startsWith("image")) {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        if (previewContent) previewContent.appendChild(img);
+        previewContent.appendChild(img);
+
     } else if (file.type.startsWith("video")) {
         const video = document.createElement("video");
         video.src = URL.createObjectURL(file);
         video.controls = true;
-        if (previewContent) previewContent.appendChild(video);
+        video.playsInline = true; // ✅ better mobile support
+        previewContent.appendChild(video);
+
+    } else if (file.type.startsWith("audio")) {
+        const audio = document.createElement("audio");
+        audio.src = URL.createObjectURL(file);
+        audio.controls = true;
+        previewContent.appendChild(audio);
+
+    } else {
+        alert("❌ Unsupported file type");
+        fileToSend = null;
+        return;
     }
+
     if (mediaPreview) mediaPreview.style.display = "block";
 }
-
 if (cameraInput) cameraInput.onchange = (e) => handleFileSelect(e.target.files[0]);
 if (galleryInput) galleryInput.onchange = (e) => handleFileSelect(e.target.files[0]);
 
