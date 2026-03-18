@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -30,7 +30,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 
              'Segoe UI Emoji', 'Noto Color Emoji', 
              'Apple Color Emoji', 'Segoe UI', 
-             sans-serif;  /* ✅ Emoji-friendly fallback chain */
+             sans-serif;
   margin: 0;
   background: var(--bg-gradient);
   display: flex;
@@ -39,41 +39,45 @@
   overflow: hidden;
   color: #1e293b;
 }
-/* Force emoji rendering */
+
 .content, #msg, .reply-inline {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-
-
-
-/* Menu button */
+/* Menu button - positioned right */
 #menuBtn {
-  font-size: 20px;
+  font-size: 24px;
   background: none;
   border: none;
   color: white;
   cursor: pointer;
+  margin-left: auto;
+  padding: 8px 16px;
+  transition: var(--transition);
 }
 
-/* Loaded menu container */
+#menuBtn:hover {
+  transform: scale(1.1);
+}
+
+/* Loaded menu container - transparent overlay */
 #menuContainer {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 280px;
-  height: 100%;
-  background: white;
-  box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+  top: 70px;
+  right: 0px;
+  width: 100%;
+  background: transparent;
   display: none;
   z-index: 9999;
   overflow-y: auto;
+  pointer-events: none;
 }
 
+#menuContainer * {
+  pointer-events: auto;
+}
 
-    
-/* Ensure emojis scale properly */
 .content img.emoji, #msg img.emoji {
   height: 1em;
   width: 1em;
@@ -120,23 +124,11 @@
   font-size: 14px;
 }
 
-
     #logoutBtn:hover {
       transform: scale(1.08);
-      position: fixed;
-  bottom: 150px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  padding: 8px 15px;
-  border-radius: 20px;
-  color: white;
-  font-size: 14px;
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
     }
 
-
-    
     /* ========== HEADER ========== */
     header {
       position: sticky;
@@ -154,7 +146,7 @@
     }
 
     #msg, .content, .reply-inline, .name-line {
-  font-family: inherit;  /* ✅ Inherit emoji-supporting font */
+  font-family: inherit;
 }
 
  #adOverlay {
@@ -194,8 +186,6 @@
       cursor: not-allowed;
     }
 
-
-    
     #chatTitle {
       font-weight: 700;
       font-size: 18px;
@@ -313,8 +303,13 @@
       font-weight: 500;
     }
 
-    
-.content {  font-size: 16px; color: #334155; word-break: break-word; line-height: 1.5; white-space: pre-wrap; }
+    .content {  
+      font-size: 16px; 
+      color: #334155; 
+      word-break: break-word; 
+      line-height: 1.5; 
+      white-space: pre-wrap; 
+    }
 
     .media-content {
       max-width: 100%;
@@ -400,7 +395,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       z-index: 1000;
       transition: all 0.3s ease-in-out;
-    
     }
 
     .media-btn {
@@ -600,9 +594,6 @@
       font-size: 18px;
     }
 
- 
-  
-    
     /* ========== MOBILE OPTIMIZATION ========== */
     @media (max-width: 768px) {
       .composer {
@@ -623,186 +614,37 @@
         font-size: 11px;
       }
     }
+
     /* Hidden file inputs */
-    #cameraInput, #galleryInput,  {display: none;}
+    #cameraInput, #galleryInput {
+      display: none;
+    }
   </style>
-
-
-
-
 </head>
 <body>
 
-
-  
-  
-  <!-- ☰ BUTTON -->
-<header>
-  <button id="menuBtn">☰</button>
-</header>
-<div id="menuContainer"></div>
-
-
-
-<!-- SCRIPT -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const menuBtn = document.getElementById("menuBtn");
-  const container = document.getElementById("menuContainer");
-
-  let loaded = false;
-
-  menuBtn.addEventListener("click", async () => {
-
-   // Inject stickybar CSS (ONLY once)
-if (!document.getElementById("stickybar-style")) {
-  const style = document.createElement("style");
-  style.id = "stickybar-style";
-
-  style.innerHTML = `
-  #stickyBar {
-    position: fixed;
-    top: 0px;
-    right: 0;
-    transform: translateX(-50%);
-    /* width: 85%; */
-    max-width: 600px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    /* display: flex; */
-    justify-content: space-around;
-    padding: 3px 0;
-    border-radius: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transition: all 0.3s ease-in-out;
-}
-    
-  `;
-
-  document.head.appendChild(style);
-}
-    
-    
-    
-    
-    
-    // First time → load file
-    if (!loaded) {
-      try {
-        const res = await fetch("stickybar.html");
-        const html = await res.text();
-        container.innerHTML = html;
-        container.style.display = "block";
-        loaded = true;
-      } catch (err) {
-        console.error("Error loading menu:", err);
-      }
-    } 
-    // Next clicks → toggle
-    else {
-      container.style.display =
-        container.style.display === "none" ? "block" : "none";
-    }
-
-  });
-});
-</script>
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
-  
-  <div data-html="stickybar.html"></div>
-<!-- ===== AD POPUP ===== -->
-  <div id="adOverlay" style="display:none;">
-  <div id="adBox">
-    <h3>🙏 Support Us</h3>
-    <p>Please watch a short ad to continue</p>
-    <button id="watchBtn" onclick="watchAd()">▶ Watch Ad</button>
-    <p id="adTimer"></p>
-  </div>
-</div> 
-
-  
+  <!-- HEADER WITH HAMBURGER MENU BUTTON -->
   <header>
-    
-    <button id="adminBtn" class="header-btn">🔐 </button>
-    <div id="chatTitle"> APNA SONO CHAT <button id="refreshBtn" class="header-btn">🔄 </button></div>
+    <button id="adminBtn" class="header-btn">🔐</button>
+    <div id="chatTitle">APNA SONO CHAT <button id="refreshBtn" class="header-btn">🔄</button></div>
     <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
-    <button id="logoutBtn" style="display:none;">🔓</button>
+    <button id="menuBtn">☰</button>
   </header>
 
+  <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
+  <div id="menuContainer"></div>
 
-
-
-
-
-  <!-- ADD THIS INSIDE profilePopup -->
-
-<div class="popup" id="profilePopup">
-  <div class="popup-content">
-    <span class="closeBtn" id="profileClose">×</span>
-    <h3>👋 Set Your Profile</h3>
-    <input id="name" type="text" placeholder="Your Name" />
-    <input id="photo" type="file" accept="image/*" />
-    <button id="saveProfile">✓ Save Profile</button>
-  </div>
-</div>
-
-
-
-
-  
-  <div class="chat-container">
-    <div class="chat-box" id="chatBox">
-      <div class="message" style="text-align:center; opacity:0.7">
-        <div class="content"> Welcome Chat </div>
-      </div>
-    </div>
-
-    <div class="composer">
-      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
-      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
-      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
-      <button id="send" title="Send message">➤</button>
+  <!-- AD POPUP -->
+  <div id="adOverlay" style="display:none;">
+    <div id="adBox">
+      <h3>🙏 Support Us</h3>
+      <p>Please watch a short ad to continue</p>
+      <button id="watchBtn" onclick="watchAd()">▶ Watch Ad</button>
+      <p id="adTimer"></p>
     </div>
   </div>
 
-<!-- Media Preview Box -->
-<div id="mediaPreview" class="media-preview" style="display:none;">
-  <span id="closePreview" class="close-preview">✖</span>
-  <div id="previewContent"></div>
-</div>
-
-<!-- Upload Progress -->
-<div id="uploadStatus" class="upload-status" style="display:none;">
-  <span id="uploadText">Uploading...</span>
-</div>
-
-
-  
-  <!-- Reply Popup -->
-  <div class="popup" id="replyPopup">
-    <div class="popup-content">
-      <span class="closeBtn" id="replyClose">×</span>
-      <h3>💬 Reply to Message</h3>
-      <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
-      <button id="sendReply">Send Reply</button>
-    </div>
-  </div>
-
-  <!-- Profile Setup -->
+  <!-- PROFILE POPUP -->
   <div class="popup" id="profilePopup">
     <div class="popup-content">
       <span class="closeBtn" id="profileClose">×</span>
@@ -813,7 +655,7 @@ if (!document.getElementById("stickybar-style")) {
     </div>
   </div>
 
-  <!-- Admin Login -->
+  <!-- ADMIN LOGIN -->
   <div class="popup" id="adminPopup">
     <div class="popup-content">
       <span class="closeBtn" id="adminClose">×</span>
@@ -823,53 +665,116 @@ if (!document.getElementById("stickybar-style")) {
     </div>
   </div>
 
-  <!-- Admin Panel (minimal placeholder) -->
+  <!-- ADMIN PANEL -->
   <div id="adminPanel">
     <h4>🛡️ Admin Dashboard</h4>
     <p style="font-size:14px; color:#64748b">You're logged in as Admin.<br>Message moderation & analytics coming soon!</p>
   </div>
 
-  <!-- Media Viewer -->
+  <!-- MEDIA MODAL -->
   <div class="media-modal" id="mediaModal">
     <span class="closeBtn" id="mediaClose">×</span>
     <div id="mediaContent"></div>
   </div>
-<input type="file" id="cameraInput" accept="image/*,video/*" capture hidden>
-<input type="file" id="galleryInput" accept="image/*,video/*" hidden>
-<script>  
-  /* ===== AD LOGIC ===== */
-let seconds = 8;
-let timerInterval;
 
-/* if (!sessionStorage.getItem("adWatched")) {
-  document.getElementById("adOverlay").style.display = "flex";
-}
+  <!-- CHAT CONTAINER -->
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox">
+      <div class="message" style="text-align:center; opacity:0.7">
+        <div class="content">Welcome to APNA SONO CHAT</div>
+      </div>
+    </div>
 
-function watchAd() {
-  // 🔴 PUT YOUR ADSTERRA DIRECT LINK HERE
-  window.open("https://www.effectivegatecpm.com/bc0ad01h8?key=f6d9899d4a69c1635f9a55f29c87371c", "_blank");
+    <!-- MESSAGE COMPOSER -->
+    <div class="composer">
+      <button id="cameraBtn" class="media-btn" title="Take Photo">📷</button>
+      <button id="galleryBtn" class="media-btn" title="Upload Media">🖼️</button>
+      <input id="msg" type="text" placeholder="Type a message…" maxlength="500" />
+      <button id="send" title="Send message">➤</button>
+    </div>
+  </div>
 
-  const btn = document.getElementById("watchBtn");
-  const timer = document.getElementById("adTimer");
+  <!-- MEDIA PREVIEW -->
+  <div id="mediaPreview" class="media-preview" style="display:none;">
+    <span id="closePreview" class="close-preview">✖</span>
+    <div id="previewContent"></div>
+  </div>
 
-  btn.disabled = true;
-  timer.innerText = "Please wait " + seconds + " seconds";
+  <!-- UPLOAD STATUS -->
+  <div id="uploadStatus" class="upload-status" style="display:none;">
+    <span id="uploadText">Uploading...</span>
+  </div>
 
-  timerInterval = setInterval(() => {
-    seconds--;
-    timer.innerText = "Please wait " + seconds + " seconds";
+  <!-- REPLY POPUP -->
+  <div class="popup" id="replyPopup">
+    <div class="popup-content">
+      <span class="closeBtn" id="replyClose">×</span>
+      <h3>💬 Reply to Message</h3>
+      <input id="replyText" type="text" placeholder="Type your reply…" maxlength="300" />
+      <button id="sendReply">Send Reply</button>
+    </div>
+  </div>
 
-    if (seconds <= 0) {
-      clearInterval(timerInterval);
-      sessionStorage.setItem("adWatched", "yes");
-      document.getElementById("adOverlay").style.display = "none";
-    }
-  }, 1000);
-} */
+  <!-- HIDDEN FILE INPUTS -->
+  <input type="file" id="cameraInput" accept="image/*,video/*" capture hidden>
+  <input type="file" id="galleryInput" accept="image/*,video/*" hidden>
+
+  <!-- SCRIPT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuBtn = document.getElementById("menuBtn");
+      const container = document.getElementById("menuContainer");
+
+      let loaded = false;
+
+      menuBtn.addEventListener("click", async () => {
+        // Inject stickybar CSS (only once)
+        if (!document.getElementById("stickybar-style")) {
+          const style = document.createElement("style");
+          style.id = "stickybar-style";
+
+          style.innerHTML = `
+            #stickyBar {
+              position: fixed;
+              top: 70px;
+              right: 0;
+              width: 100%;
+              max-width: 600px;
+              background: linear-gradient(135deg, #6a11cb, #2575fc);
+              display: flex;
+              justify-content: space-around;
+              padding: 12px 20px;
+              border-radius: 0 0 20px 20px;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+              z-index: 10000;
+              transition: all 0.3s ease-in-out;
+            }
+          `;
+
+          document.head.appendChild(style);
+        }
+
+        // First time → load file
+        if (!loaded) {
+          try {
+            const res = await fetch("stickybar.html");
+            const html = await res.text();
+            container.innerHTML = html;
+            container.style.display = "block";
+            loaded = true;
+          } catch (err) {
+            console.error("Error loading stickybar:", err);
+          }
+        } 
+        // Next clicks → toggle
+        else {
+          container.style.display =
+            container.style.display === "none" ? "block" : "none";
+        }
+      });
+    });
   </script>
+
   <script type="module" src="chat.js"></script>
-  
 </body>
 </html>
-
-
