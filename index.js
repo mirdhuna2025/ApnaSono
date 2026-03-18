@@ -690,7 +690,7 @@ function renderMessages(data) {
         mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
     }
 }
-    div.innerHTML = `
+    <div.innerHTML = `
   <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
     <img class="profile" 
          src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" 
@@ -703,7 +703,7 @@ function renderMessages(data) {
         ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
       </div>
 
-     div.innerHTML = `
+    div.innerHTML = `
   <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
     <img class="profile" 
          src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" 
@@ -739,7 +739,6 @@ function renderMessages(data) {
   ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
   ${mediaHTML}
   ${repliesHTML}
-
 `;
     
         chatBox.appendChild(div);
