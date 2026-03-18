@@ -634,7 +634,7 @@
         font-size: 11px;
       }
     }
-
+ .upload-status { display: none; }
     /* ONLY hide the file pickers, NOT the text inputs */
 #cameraInput, #galleryInput, input[type="file"] {
   display: none;
@@ -815,70 +815,7 @@
       }
     });
   </script> 
-  <!-- Place this before the </body> tag -->
-<script>
-  // 1. FETCH STATUS: Function to get data from the status endpoint
-  async function fetchStatus() {
-    try {
-      const response = await fetch('https://apnasono.in/status.html'); // Or your status API endpoint
-      if (response.ok) {
-        const data = await response.text();
-        console.log("Status Fetched:", data);
-        // Update a specific UI element if needed
-      }
-    } catch (error) {
-      console.error("Error fetching status:", error);
-    }
-  }
-
-  // 2. UPLOAD MEDIA: Function to handle file uploads
-  async function uploadMedia(file) {
-    const statusEl = document.querySelector('.upload-status');
-    statusEl.style.display = 'block';
-    statusEl.innerText = 'Uploading...';
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/upload-endpoint', { // Replace with your actual upload URL
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        statusEl.innerText = 'Upload Successful!';
-        setTimeout(() => statusEl.style.display = 'none', 2000);
-      } else {
-        throw new Error('Upload failed');
-      }
-    } catch (error) {
-      statusEl.innerText = 'Error uploading file.';
-      console.error(error);
-    }
-  }
-
-  // 3. EVENT LISTENERS: Connect the UI to the logic
-  document.addEventListener('DOMContentLoaded', () => {
-    // Periodically fetch status
-    fetchStatus();
-    setInterval(fetchStatus, 30000); // Refresh every 30 seconds
-
-    // Setup Media Button for Upload
-    const mediaBtn = document.querySelector('.media-btn');
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*,video/*';
-
-    mediaBtn.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        uploadMedia(e.target.files[0]);
-      }
-    });
-  });
-</script>
+  
 
   <script type="module" src="index.js"></script>
 </body>
