@@ -36,6 +36,9 @@ const storage = getStorage(app);
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 let replyToMsg = null;
 let fileToSend = null;
+let lastTimestamp = null;
+let loadingMore = false;
+const PAGE_SIZE = 20;
 
 // ===== STATUS STATE =====
 let anonymousId = localStorage.getItem("anonId");
