@@ -52,6 +52,11 @@ let anonymousName = user?.name || "Anonymous";
 🖼️ DOM ELEMENTS (Fixed IDs)
 ================================ */
 const chatBox = document.getElementById("chatBox");
+chatBox.addEventListener("scroll", () => {
+    if (chatBox.scrollTop === 0) {
+        loadMoreMessages();
+    }
+});
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const cameraBtn = document.getElementById("cameraBtn");
