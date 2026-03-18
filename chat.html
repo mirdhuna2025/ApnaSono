@@ -46,22 +46,7 @@
 }
 
 
-#stickyBar {
-    position: fixed;
-    top: 0px;
-    right: 0;
-    transform: translateX(-50%);
-    /* width: 85%; */
-    max-width: 600px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    /* display: flex; */
-    justify-content: space-around;
-    padding: 3px 0;
-    border-radius: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transition: all 0.3s ease-in-out;
-}
+
 
 /* Menu button */
 #menuBtn {
@@ -669,6 +654,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   menuBtn.addEventListener("click", async () => {
 
+   // Inject stickybar CSS (ONLY once)
+if (!document.getElementById("stickybar-style")) {
+  const style = document.createElement("style");
+  style.id = "stickybar-style";
+
+  style.innerHTML = `
+  #stickyBar {
+    position: fixed;
+    top: 0px;
+    right: 0;
+    transform: translateX(-50%);
+    /* width: 85%; */
+    max-width: 600px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    /* display: flex; */
+    justify-content: space-around;
+    padding: 3px 0;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+}
+    
+  `;
+
+  document.head.appendChild(style);
+}
+    
+    
+    
+    
+    
     // First time → load file
     if (!loaded) {
       try {
