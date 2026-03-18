@@ -602,7 +602,23 @@
     /* Hidden file inputs */
     #cameraInput, #galleryInput,  {display: none;}
   </style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const elements = document.querySelectorAll("[data-html]");
 
+  elements.forEach(async (el) => {
+    const file = el.getAttribute("data-html");
+
+    try {
+      const res = await fetch(file);
+      const html = await res.text();
+      el.innerHTML = html;
+    } catch (err) {
+      console.error("Error loading:", file, err);
+    }
+  });
+});
+</script>
 
 </head>
 <body>
