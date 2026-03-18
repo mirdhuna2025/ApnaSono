@@ -799,6 +799,18 @@
       });
     });
   </script>
+  <script
+    document.querySelectorAll("[data-html]").forEach(async (el) => {
+  const file = el.getAttribute("data-html");
+  try {
+    const res = await fetch(file);
+    const html = await res.text();
+    el.innerHTML = html;
+  } catch (err) {
+    console.error("Error loading:", file, err);
+  }
+});
+   </script> 
 
   <script type="module" src="index.js"></script>
 </body>
