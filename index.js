@@ -833,11 +833,7 @@ function renderMessages(data) {
 /* ===============================
 🔄 REALTIME LISTENER
 ================================ */
-onValue(ref(db, "messages"), (snapshot) => {
-    renderMessages(snapshot.val());
-}, (error) => {
-    console.error("Firebase sync error:", error);
-});
+
 
 /* ===============================
 🔄 MANUAL REFRESH
