@@ -604,7 +604,7 @@ window.showMedia = (url, type) => {
     if (type?.startsWith("image")) {
         mediaContent.innerHTML = `<img src="${url}" alt="Shared media" style="max-width:100%; max-height:80vh;" />`;
     } else if (type?.startsWith("video")) {
-        mediaContent.innerHTML = `<video src="${url}" controls autoplay playsinline style="max-width:100%; max-height:80vh;"></video>`;
+        mediaContent.innerHTML = ` <video src="${url}" controls autoplay playsinline style="max-width:100%; max-height:80vh;"></video>`;
     } else {
         mediaContent.innerHTML = `<p style="color:white">Unsupported media type</p>`;
     }
