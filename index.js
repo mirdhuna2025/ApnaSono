@@ -6,6 +6,7 @@ import {
 import {
     getStorage, ref as sRef,
     uploadBytesResumable,
+    uploadBytes,
     getDownloadURL,
     deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -33,6 +34,14 @@ const storage = getStorage(app);
 let user = JSON.parse(localStorage.getItem("chatUser")) || null;
 let replyToMsg = null;
 let fileToSend = null;
+
+// ===== STATUS STATE =====
+let anonymousId = localStorage.getItem("anonId");
+if(!anonymousId){
+  anonymousId = "anon_"+Math.random().toString(36).substr(2,9);
+  localStorage.setItem("anonId", anonymousId);
+}
+let anonymousName = user?.name || "Anonymous";
 
 /* ===============================
 🖼️ DOM ELEMENTS (Fixed IDs)
@@ -65,6 +74,136 @@ const uploadText = document.getElementById("uploadText");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearChatBtn = document.getElementById("clearChatBtn");
 const logoutBtn = document.getElementById("logoutBtn"); // ✅ NEW
+
+// ===== STATUS DOM ELEMENTS =====
+const uploadFile = document.getElementById("uploadFile");
+const storiesDiv = document.getElementById("stories");
+const viewer = document.getElementById("viewer");
+const viewImg = document.getElementById("viewImg");
+const viewVideo = document.getElementById("viewVideo");
+const bar = document.getElementById("bar");
+const likeBtn = document.getElementById("likeBtn");
+const smileBtn = document.getElementById("smileBtn");
+const seenListDiv = document.getElementById("seenList");
+
+/* ===============================
+📸 STATUS UPLOAD & FETCH
+================================ */
+if (uploadFile) {
+  uploadFile.addEventListener("change", async () => {
+    const file = uploadFile.files[0];
+    if (!file) return;
+    
+    try {
+      const storageRef = sRef(storage, "status/" + Date.now() + file.name);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      await push(ref(db, "status"), {
+        url: url,
+        type: file.type,
+        time: Date.now(),
+        uid: anonymousId,
+        name: anonymousName,
+        reactions: {},
+        seen: {}
+      });
+      
+      uploadFile.value = "";
+    } catch (err) {
+      console.error("Status upload error:", err);
+      alert("❌ Failed to upload status");
+    }
+  });
+}
+
+// Fetch and display status
+if (storiesDiv) {
+  onValue(ref(db, "status"), (snapshot) => {
+    storiesDiv.innerHTML = "";
+    
+    snapshot.forEach((data) => {
+      const status = data.val();
+      
+      // Remove expired status (24 hours)
+      if (Date.now() - status.time > 86400000) {
+        remove(ref(db, "status/" + data.key));
+        return;
+      }
+      
+      const div = document.createElement("div");
+      div.className = "story";
+      
+      const img = document.createElement("img");
+      img.src = status.url;
+      
+      const name = document.createElement("p");
+      name.innerText = status.name || "Status";
+      
+      div.appendChild(img);
+      div.appendChild(name);
+      
+      div.onclick = () => openStatusViewer(status, data.key);
+      
+      storiesDiv.appendChild(div);
+    });
+  });
+}
+
+let progressInterval;
+
+function openStatusViewer(status, statusKey) {
+  if (!viewer) return;
+  
+  viewer.style.display = "flex";
+  bar.style.width = "0%";
+  
+  let progress = 0;
+  
+  const seenRef = ref(db, "status/" + statusKey + "/seen/" + anonymousId);
+  update(seenRef, { name: anonymousName });
+  
+  onValue(ref(db, "status/" + statusKey + "/seen"), (snap) => {
+    let names = [];
+    snap.forEach((s) => {
+      names.push(s.val().name);
+    });
+    if (seenListDiv) seenListDiv.innerText = "Seen: " + names.join(", ");
+  });
+  
+  clearInterval(progressInterval);
+  
+  progressInterval = setInterval(() => {
+    progress += 2;
+    bar.style.width = progress + "%";
+    
+    if (progress >= 100) {
+      clearInterval(progressInterval);
+      viewer.style.display = "none";
+    }
+  }, 100);
+  
+  if (status.type.startsWith("image")) {
+    if (viewImg) viewImg.style.display = "block";
+    if (viewVideo) viewVideo.style.display = "none";
+    if (viewImg) viewImg.src = status.url;
+  } else {
+    if (viewVideo) viewVideo.style.display = "block";
+    if (viewImg) viewImg.style.display = "none";
+    if (viewVideo) {
+      viewVideo.src = status.url;
+      viewVideo.play();
+    }
+  }
+  
+  if (likeBtn) likeBtn.onclick = () => addStatusReaction(statusKey, "❤️");
+  if (smileBtn) smileBtn.onclick = () => addStatusReaction(statusKey, "😊");
+}
+
+function addStatusReaction(statusKey, reaction) {
+  const reactionRef = ref(db, "status/" + statusKey + "/reactions/" + anonymousId);
+  update(reactionRef, { reaction });
+}
 
 /* ===============================
 🚪 LOGOUT FUNCTION
