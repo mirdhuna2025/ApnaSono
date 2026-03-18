@@ -84,6 +84,26 @@
   margin: 0 .05em 0 .1em;
   vertical-align: -0.1em;
 }
+
+#logoutBtn {
+    cursor: pointer;
+    top: 0px;
+    left: 10px;
+    padding: 6px 12px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+#logoutBtn:hover {
+    background-color: #e60000;
+}
+
+
+
     
     .media-preview {
   position: fixed;
@@ -631,6 +651,9 @@
     <button id="menuBtn">☰</button>
   </header>
 
+<button id="logoutBtn" style="display:none;">Logout</button>
+
+  
   <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
   <div id="menuContainer"></div>
 
