@@ -692,7 +692,7 @@ function renderMessages(data) {
 }
   
 
-    <div>
+   
       div.innerHTML = `
            <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
              <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
