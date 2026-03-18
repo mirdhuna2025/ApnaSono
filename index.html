@@ -642,9 +642,6 @@
   </style>
 </head>
 <body>
- 
- 
-<div data-html="status.html"></div>
   <!-- HEADER WITH HAMBURGER MENU BUTTON -->
   <header>
     <button id="logoutBtn" style="display:none;">Logout</button>
@@ -654,6 +651,8 @@
     <button id="menuBtn">☰</button>
   </header>
 
+  <!-- STATUS SECTION (loads status.html) -->
+  <div id="statusContainer" data-html="status.html" style="z-index: 99;"></div>
   
   <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
   <div id="menuContainer"></div>
@@ -799,15 +798,19 @@
       });
     });
   </script>
-  <script
-  window.onload = function() {
-            document.getElementById('profile-modal').style.display = 'flex';
-            // Simulate upload finish
-            setTimeout(() => {
-                document.getElementById('upload-status').textContent = "";
-            }, 2000);
-        };
-    </script>
+  <script>
+    document.querySelectorAll("[data-html]").forEach(async (el) => {
+      const file = el.getAttribute("data-html");
+      try {
+        const res = await fetch(file);
+        const html = await res.text();
+        el.innerHTML = html;
+      } catch (err) {
+        console.error("Error loading:", file, err);
+      }
+    });
+  </script> 
+
   <script type="module" src="index.js"></script>
 </body>
 </html>
