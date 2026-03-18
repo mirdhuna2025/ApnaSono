@@ -642,6 +642,9 @@
   </style>
 </head>
 <body>
+  <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
+  <div id="statusContainer" data-html="status.html"></div>
+
   <!-- HEADER WITH HAMBURGER MENU BUTTON -->
   <header>
     <button id="logoutBtn" style="display:none;">Logout</button>
@@ -651,9 +654,6 @@
     <button id="menuBtn">☰</button>
   </header>
 
-  <!-- STATUS SECTION (loads status.html) -->
-  <div id="statusContainer" data-html="status.html" style="z-index: 99;"></div>
-  
   <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
   <div id="menuContainer"></div>
 
