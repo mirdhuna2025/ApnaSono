@@ -698,42 +698,30 @@ function renderMessages(data) {
          style="width:40px; height:40px; border-radius:50%;">
 
     <div>
-      <div class="name-line">
-        <strong>${msg.user || 'Anonymous'}</strong>
-        ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
-      </div>
-
-    div.innerHTML = `
-  <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-    <img class="profile" 
-         src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" 
-         alt="${msg.user}" 
-         style="width:40px; height:40px; border-radius:50%;">
-
-    <div>
-      <div class="name-line">
-        <strong>${msg.user || 'Anonymous'}</strong>
-        ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
-      </div>
-
-      <div class="meta" style="font-size:0.8em; color:#666;">
-        ${formatTimestamp(msg.timestamp)}
-      </div>
-
-      <!-- ✅ ACTIONS MOVED HERE -->
-      <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
-        <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
-        <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
-        <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
-
-        ${user?.isAdmin ? `
-          <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
-          <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
-          <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
-        ` : ''}
-      </div>
-
-    </div>
+      div.innerHTML = `
+           <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+             <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
+             <div>
+               <div class="name-line">
+                 <strong>${msg.user || 'Anonymous'}</strong>
+                 ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
+               </div>
+               <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
+             </div>
+           </div>
+       ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
+          ${mediaHTML}
+          ${repliesHTML}
+           <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
+             <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
+             <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
+             <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
+            ${user?.isAdmin ? `
+                <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
+                <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
+                <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
+            ` : ''}
+           
   </div>
 
   ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
