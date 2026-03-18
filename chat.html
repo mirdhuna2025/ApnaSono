@@ -63,29 +63,29 @@
     transition: all 0.3s ease-in-out;
 }
 
-
-    /* Active state */
-.sticky-bar.active {
-  left: 0;
-}
-
-.sticky-content {
-  padding: 20px;
-}
-
-#closeSticky {
-  font-size: 22px;
-  cursor: pointer;
-  float: right;
-}
-
-.sticky-content p {
-  margin: 20px 0;
-  font-size: 16px;
+/* Menu button */
+#menuBtn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
   cursor: pointer;
 }
 
-    
+/* Loaded menu container */
+#menuContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  background: white;
+  box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+  display: none;
+  z-index: 9999;
+  overflow-y: auto;
+}
+
 
     
 /* Ensure emojis scale properly */
@@ -641,52 +641,67 @@
     /* Hidden file inputs */
     #cameraInput, #galleryInput,  {display: none;}
   </style>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const elements = document.querySelectorAll("[data-html]");
 
-  elements.forEach(async (el) => {
-    const file = el.getAttribute("data-html");
-
-    try {
-      const res = await fetch(file);
-      const html = await res.text();
-      el.innerHTML = html;
-    } catch (err) {
-      console.error("Error loading:", file, err);
-    }
-  });
-});
-</script>
-  
-  
-  <script>
-const menuBtn = document.getElementById("menuBtn");
-const stickyBar = document.getElementById("stickyBar");
-const closeSticky = document.getElementById("closeSticky");
-
-menuBtn.onclick = () => {
-  stickyBar.classList.add("active");
-};
-
-closeSticky.onclick = () => {
-  stickyBar.classList.remove("active");
-};
-
-// Optional: click outside to close
-window.addEventListener("click", (e) => {
-  if (e.target === stickyBar) {
-    stickyBar.classList.remove("active");
-  }
-});
-</script>
 
 
 
 </head>
 <body>
-<button id="menuBtn" class="header-btn">☰</button>
 
+
+  
+  
+  <!-- ☰ BUTTON -->
+<header>
+  <button id="menuBtn">☰</button>
+</header>
+<div id="menuContainer"></div>
+
+
+
+<!-- SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const menuBtn = document.getElementById("menuBtn");
+  const container = document.getElementById("menuContainer");
+
+  let loaded = false;
+
+  menuBtn.addEventListener("click", async () => {
+
+    // First time → load file
+    if (!loaded) {
+      try {
+        const res = await fetch("stickybar.html");
+        const html = await res.text();
+        container.innerHTML = html;
+        container.style.display = "block";
+        loaded = true;
+      } catch (err) {
+        console.error("Error loading menu:", err);
+      }
+    } 
+    // Next clicks → toggle
+    else {
+      container.style.display =
+        container.style.display === "none" ? "block" : "none";
+    }
+
+  });
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+  
 
 <div id="stickyBar" class="sticky-bar">
   <div class="sticky-content">
