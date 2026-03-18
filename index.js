@@ -702,7 +702,13 @@ function renderMessages(data) {
                  style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
                         font-size:30px; color:white; pointer-events:auto;">▶️</div>
         </div>`;
-    } else {
+    } else if (msg.mediaType?.startsWith("audio")) {
+        mediaHTML = `
+        <audio controls style="width:200px;">
+            <source src="${msg.mediaUrl}" type="${msg.mediaType}">
+        </audio>`;
+    }
+    else {
         mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
     }
 }
