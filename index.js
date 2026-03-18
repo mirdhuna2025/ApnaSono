@@ -707,27 +707,39 @@ function renderMessages(data) {
         ${formatTimestamp(msg.timestamp)}
       </div>
 
-      <!-- ✅ ACTIONS MOVED HERE -->
-      <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
-        <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
-        <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
-        <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
-
-        ${user?.isAdmin ? `
-          <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
-          <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
-          <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
-        ` : ''}
+      <!-- ✅ LIKE / DISLIKE JUST AFTER META -->
+      <div style="margin-top:4px; display:flex; gap:10px;">
+        <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">
+          👍 ${msg.likes || 0}
+        </button>
+        <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">
+          👎 ${msg.dislikes || 0}
+        </button>
       </div>
 
+      <!-- ✅ REPLY BELOW LIKE/DISLIKE -->
+      <div style="margin-top:4px;">
+        <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">
+          💬 Reply
+        </button>
+      </div>
     </div>
   </div>
 
   ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
   ${mediaHTML}
   ${repliesHTML}
-  
-        `;
+
+  <!-- ✅ ADMIN BUTTONS STAY BELOW -->
+  ${user?.isAdmin ? `
+    <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
+      <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
+      <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
+      <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
+    </div>
+  ` : ''}
+`;
+    
         chatBox.appendChild(div);
     });
     
