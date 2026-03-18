@@ -635,10 +635,15 @@
       }
     }
 
-    /* Hidden file inputs */
-    #cameraInput, #galleryInput {
-      display: none;
-    }
+    /* ONLY hide the file pickers, NOT the text inputs */
+#cameraInput, #galleryInput, input[type="file"] {
+  display: none;
+}
+
+/* Ensure your actual text/photo inputs are visible */
+#name, #photo {
+  display: block; 
+}
   </style>
 </head>
 <body>
