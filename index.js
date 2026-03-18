@@ -1,7 +1,8 @@
 // chat.js — Merged Modern Firebase Chat (With Logout System)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    getDatabase, ref, push, onValue, update, remove, get
+    getDatabase, ref, push, onValue, update, remove, get,
+    query, limitToLast, endBefore, orderByChild
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
     getStorage, ref as sRef,
@@ -10,6 +11,7 @@ import {
     getDownloadURL,
     deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 
 /* ===============================
 🔐 FIREBASE CONFIG
