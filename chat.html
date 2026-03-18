@@ -62,8 +62,28 @@
     z-index: 1000;
     transition: all 0.3s ease-in-out;
 }
-    
 
+
+    /* Active state */
+.sticky-bar.active {
+  left: 0;
+}
+
+.sticky-content {
+  padding: 20px;
+}
+
+#closeSticky {
+  font-size: 22px;
+  cursor: pointer;
+  float: right;
+}
+
+.sticky-content p {
+  margin: 20px 0;
+  font-size: 16px;
+  cursor: pointer;
+}
 
     
 
@@ -638,10 +658,48 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+  
+  
+  <script>
+const menuBtn = document.getElementById("menuBtn");
+const stickyBar = document.getElementById("stickyBar");
+const closeSticky = document.getElementById("closeSticky");
+
+menuBtn.onclick = () => {
+  stickyBar.classList.add("active");
+};
+
+closeSticky.onclick = () => {
+  stickyBar.classList.remove("active");
+};
+
+// Optional: click outside to close
+window.addEventListener("click", (e) => {
+  if (e.target === stickyBar) {
+    stickyBar.classList.remove("active");
+  }
+});
+</script>
+
+
 
 </head>
 <body>
+<button id="menuBtn" class="header-btn">☰</button>
 
+
+<div id="stickyBar" class="sticky-bar">
+  <div class="sticky-content">
+    <span id="closeSticky">✖</span>
+    <h3>Menu</h3>
+    <p>Home</p>
+    <p>Profile</p>
+    <p>Settings</p>
+  </div>
+</div>
+
+
+  
   <div data-html="stickybar.html"></div>
 <!-- ===== AD POPUP ===== -->
   <div id="adOverlay" style="display:none;">
