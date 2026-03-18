@@ -681,7 +681,7 @@ function renderMessages(data) {
         // Video thumbnail container
         mediaHTML = `
         <div class="video-container" style="position:relative; display:inline-block; max-width:200px; cursor:pointer;">
-            <video class="media-content" src="${msg.mediaUrl}" style="width:100%; filter: brightness(50%);"></video>
+          <video class="media-content"   src="${msg.mediaUrl}"  controls  playsinline  style="width:100%;"> </video>
             <div class="play-btn" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType}')" 
                  style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
                         font-size:30px; color:white; pointer-events:auto;">▶️</div>
