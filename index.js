@@ -672,6 +672,76 @@ function linkify(text) {
 /* ===============================
 🎨 RENDER MESSAGES
 ================================ */
+
+function loadInitialMessages() {
+    const messagesQuery = query(
+        ref(db, "messages"),
+        orderByChild("timestamp"),
+        limitToLast(PAGE_SIZE)
+    );
+
+    onValue(messagesQuery, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const sorted = Object.entries(data).sort(
+            (a, b) => a[1].timestamp - b[1].timestamp
+        );
+
+        lastTimestamp = sorted[0][1].timestamp;
+
+        renderMessages(data);
+    });
+}
+
+async function loadMoreMessages() {
+    if (!lastTimestamp || loadingMore) return;
+
+    loadingMore = true;
+
+    const moreQuery = query(
+        ref(db, "messages"),
+        orderByChild("timestamp"),
+        endBefore(lastTimestamp),
+        limitToLast(PAGE_SIZE)
+    );
+
+    const snapshot = await get(moreQuery);
+    const data = snapshot.val();
+
+    if (data) {
+        const sorted = Object.entries(data).sort(
+            (a, b) => a[1].timestamp - b[1].timestamp
+        );
+
+        lastTimestamp = sorted[0][1].timestamp;
+
+        prependMessages(sorted);
+    }
+
+    loadingMore = false;
+}
+
+function prependMessages(sortedMessages) {
+    if (!chatBox) return;
+
+    const currentScrollHeight = chatBox.scrollHeight;
+
+    sortedMessages.forEach(([key, msg]) => {
+        const div = document.createElement("div");
+        div.className = "message";
+
+        div.innerHTML = `
+            <strong>${msg.user}</strong>: ${msg.text || ""}
+        `;
+
+        chatBox.prepend(div);
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight - currentScrollHeight;
+}
+
+
 function renderMessages(data) {
     if (!chatBox) return;
     chatBox.innerHTML = "";
