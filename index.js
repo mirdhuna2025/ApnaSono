@@ -786,3 +786,12 @@ if (user && logoutBtn) {
     logoutBtn.style.display = "block";
 }
 
+
+chatBox.addEventListener("scroll", () => {
+    if (chatBox.scrollTop === 0) {
+        loadMoreMessages();
+    }
+});
+
+
+loadInitialMessages();
