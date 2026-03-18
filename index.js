@@ -717,15 +717,11 @@ function renderMessages(data) {
                 <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
             ` : ''}
            
-  </div>
-
-  ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
-  ${mediaHTML}
-  ${repliesHTML}
-`;
-    
+ </div>
+        `;
         chatBox.appendChild(div);
     });
+        
     
     setTimeout(() => {
         chatBox.scrollTop = chatBox.scrollHeight;
