@@ -871,6 +871,86 @@
   <input type="file" id="cameraInput" accept="image/*,video/*,audio/*">
 
   <!-- SCRIPT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuBtn = document.getElementById("menuBtn");
+      const container = document.getElementById("menuContainer");
+
+      let loaded = false;
+
+      menuBtn.addEventListener("click", async () => {
+        // Inject stickybar CSS (only once)
+        if (!document.getElementById("stickybar-style")) {
+          const style = document.createElement("style");
+          style.id = "stickybar-style";
+
+          style.innerHTML = `
+           #stickyBar {
+      position: fixed;
+      top: 80px;
+      right: 10px;
+      width: auto;
+      max-width: 600px;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 15px;
+      border-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    #stickyBar button, #stickyBar a {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    #stickyBar button:hover, #stickyBar a:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+          `;
+
+          document.head.appendChild(style);
+        }
+
+        // First time → load/create menu
+        if (!loaded) {
+          try {
+            // Create a sticky menu with options
+            const menuHTML = `
+            <div id="stickyBar">
+              <button onclick="document.getElementById('profileSetup').style.display='flex'">👤 Profile</button>
+              <button onclick="document.getElementById('adminPanel').style.display='flex'">⚙️ Admin</button>
+              <button onclick="document.getElementById('logoutBtn').click()">🚪 Logout</button>
+              <button onclick="document.location.reload()">🔄 Refresh</button>
+            </div>
+            `;
+            container.innerHTML = menuHTML;
+            container.style.display = "block";
+            loaded = true;
+          } catch (err) {
+            console.error("Error loading menu:", err);
+          }
+        } 
+        // Next clicks → toggle
+        else {
+          container.style.display =
+            container.style.display === "none" ? "block" : "none";
+        }
+      });
+    });
+  </script>
   <script type="module" src="chating.js"></script>
 </body>
 </html>
