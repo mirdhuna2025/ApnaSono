@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* ========== GLOBAL ========== */
     :root {
@@ -28,192 +27,126 @@
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI', sans-serif;
-      margin: 0;
-      background: var(--bg-gradient);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      color: #1e293b;
-    }
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 
+             'Segoe UI Emoji', 'Noto Color Emoji', 
+             'Apple Color Emoji', 'Segoe UI', 
+             sans-serif;
+  margin: 0;
+  background: var(--bg-gradient);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  color: #1e293b;
+}
 
-    .content, #msg, .reply-inline {
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
+.content, #msg, .reply-inline {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
 
-    /* Menu button - positioned right */
-    #menuBtn {
-      font-size: 24px;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-left: auto;
-      padding: 8px 16px;
-      transition: var(--transition);
-    }
+/* Menu button - positioned right */
+#menuBtn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 8px 16px;
+  transition: var(--transition);
+}
 
-    #menuBtn:hover {
-      transform: scale(1.1);
-    }
+#menuBtn:hover {
+  transform: scale(1.1);
+}
 
-    /* Loaded menu container - transparent overlay */
-    #menuContainer {
-      position: fixed;
-      top: 70px;
-      right: 0px;
-      width: 100%;
-      background: transparent;
-      display: none;
-      z-index: 9999;
-      overflow-y: auto;
-      pointer-events: none;
-    }
+/* Loaded menu container - transparent overlay */
+#menuContainer {
+  position: fixed;
+  top: 70px;
+  right: 0px;
+  width: 100%;
+  background: transparent;
+  display: none;
+  z-index: 9999;
+  overflow-y: auto;
+  pointer-events: none;
+}
 
-    #menuContainer * {
-      pointer-events: auto;
-    }
+#menuContainer * {
+  pointer-events: auto;
+}
 
-    /* ========== STICKY BAR ========== */
-    #stickyBar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 8px 0;
-      z-index: 1000;
-      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
-      animation: float 4s ease-in-out infinite;
-    }
+.content img.emoji, #msg img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
+#logoutBtn {
+    cursor: pointer;
+    top: 0px;
+    left: 10px;
+    padding: 6px 12px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: 0.2s;
+}
 
-    .bar-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #fff;
-      text-decoration: none;
-      font-size: 12px;
-      padding: 10px 16px;
-      position: relative;
-      transition: transform 0.3s, color 0.3s;
-      cursor: pointer;
-    }
+#logoutBtn:hover {
+    background-color: #e60000;
+}
 
-    .bar-btn i {
-      font-size: 22px;
-      margin-bottom: 5px;
-      transition: transform 0.3s, color 0.3s;
-    }
 
-    .bar-btn:hover {
-      color: #fff;
-      transform: translateY(-8px) scale(1.1);
-    }
 
-    .bar-btn:hover i {
-      transform: rotate(15deg) scale(1.3);
-      color: #ffd700;
-    }
+    
+  .media-preview {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  padding: 10px;
+  border-radius: 12px;
+  z-index: 999;
+  text-align: center;
+}
 
-    .bar-btn::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      border-radius: 50px;
-      background: rgba(255, 255, 255, 0.2);
-      opacity: 0;
-      transform: scale(0);
-      transition: transform 0.4s, opacity 0.4s;
-    }
+.media-preview img,
+.media-preview video {
+  max-width: 250px;
+  max-height: 300px;
+  border-radius: 10px;
+}
 
-    .bar-btn:active::after {
-      transform: scale(1.5);
-      opacity: 1;
-      transition: 0s;
-    }
+.close-preview {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  color: red;
+}
 
-    .bar-btn span {
-      transition: transform 0.3s, color 0.3s;
-    }
-
-    .content img.emoji, #msg img.emoji {
-      height: 1em;
-      width: 1em;
-      margin: 0 .05em 0 .1em;
-      vertical-align: -0.1em;
-    }
-
-    #logoutBtn {
-      cursor: pointer;
-      top: 0px;
-      left: 10px;
-      padding: 6px 12px;
-      background-color: #ff4d4d;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      transition: 0.2s;
-    }
+.upload-status {
+  position: fixed;
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
 
     #logoutBtn:hover {
-      background-color: #e60000;
       transform: scale(1.08);
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-    }
-
-    .media-preview {
-      position: fixed;
-      bottom: 90px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #111;
-      padding: 10px;
-      border-radius: 12px;
-      z-index: 999;
-      text-align: center;
-    }
-
-    .media-preview img,
-    .media-preview video {
-      max-width: 250px;
-      max-height: 300px;
-      border-radius: 10px;
-    }
-
-    .close-preview {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      cursor: pointer;
-      color: red;
-    }
-
-    .upload-status {
-      position: fixed;
-      bottom: 150px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      padding: 8px 15px;
-      border-radius: 20px;
-      color: white;
-      font-size: 14px;
-      display: none;
     }
 
     /* ========== HEADER ========== */
@@ -233,10 +166,10 @@
     }
 
     #msg, .content, .reply-inline, .name-line {
-      font-family: inherit;
-    }
+  font-family: inherit;
+}
 
-    #adOverlay {
+ #adOverlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.75);
@@ -291,6 +224,7 @@
       font-size: 14px;
       cursor: pointer;
       transition: var(--transition);
+   
       align-items: center;
       gap: 6px;
     }
@@ -331,117 +265,6 @@
       gap: 16px;
       padding: 16px;
       padding-bottom: 96px;
-    }
-
-    /* ========== STATUS BAR ========== */
-    .story-bar {
-      display: flex;
-      overflow-x: auto;
-      padding: 1px;
-      background: transparent;
-    }
-
-    .story {
-      margin-right: 15px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .story img {
-      width: 70px;
-      height: 70px;
-      border-radius: 30%;
-      border: 3px solid #25D366;
-      object-fit: cover;
-    }
-
-    .story p {
-      font-size: 12px;
-      margin-top: 5px;
-    }
-
-    .viewer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 2000;
-    }
-
-    .viewer img,
-    .viewer video {
-      max-width: 95%;
-      max-height: 85%;
-    }
-
-    .progress {
-      width: 90%;
-      height: 4px;
-      background: #333;
-      margin-bottom: 10px;
-    }
-
-    .bar {
-      height: 4px;
-      background: #25D366;
-      width: 0%;
-    }
-
-    .upload-story {
-      flex-shrink: 0;
-    }
-
-    .upload {
-      width: 70px;
-      height: 70px;
-      background: black;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      cursor: pointer;
-      border: 3px dashed #25D366;
-      color: #25D366;
-    }
-
-    #stories {
-      display: flex;
-    }
-
-    #uploadFile {
-      display: none;
-    }
-
-    .reactions {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-    }
-
-    .reactions i {
-      font-size: 25px;
-      cursor: pointer;
-    }
-
-    .seen-list {
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 12px;
-      text-align: center;
     }
 
     /* ========== MESSAGE ========== */
@@ -500,17 +323,17 @@
       font-weight: 500;
     }
 
-    .content {
-      font-size: 16px;
-      color: #334155;
-      word-break: break-word;
-      line-height: 1.5;
-      white-space: pre-wrap;
+    .content {  
+      font-size: 16px; 
+      color: #334155; 
+      word-break: break-word; 
+      line-height: 1.5; 
+      white-space: pre-wrap; 
     }
 
     .media-content {
-      width: 150px !important;
-      height: 100px !important;
+     width: 150px !important;
+    height: 100px !important;
       border-radius: 16px;
       margin: 10px 0;
       cursor: pointer;
@@ -565,7 +388,7 @@
       justify-content: center;
       gap: 4px;
     }
-
+    
     .reply-btn { background: #dbeafe; color: #1d4ed8; }
     .like-btn { background: #dcfce7; color: #16a34a; }
     .dislike-btn { background: #fee2e2; color: #dc2626; }
@@ -578,7 +401,7 @@
 
     /* ========== COMPOSER ========== */
     .composer {
-      position: fixed;
+     position: fixed;
       bottom: 2px;
       left: 50%;
       transform: translateX(-50%);
@@ -598,7 +421,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: transparent;
+      background:transparent;
       border: none;
       font-size: 20px;
       cursor: pointer;
@@ -811,17 +634,22 @@
         font-size: 11px;
       }
     }
+ .upload-status { display: none; }
+    /* ONLY hide the file pickers, NOT the text inputs */
+#cameraInput, #galleryInput, input[type="file"] {
+  display: none;
+}
 
-    #cameraInput, #galleryInput, input[type="file"] {
-      display: none;
-    }
-
-    #name, #photo {
-      display: block;
-    }
+/* Ensure your actual text/photo inputs are visible */
+#name, #photo {
+  display: block; 
+}
   </style>
 </head>
 <body>
+  <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
+ 
+
   <!-- HEADER WITH HAMBURGER MENU BUTTON -->
   <header>
     <button id="logoutBtn" style="display:none;">Logout</button>
@@ -830,34 +658,9 @@
     <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
     <button id="menuBtn">☰</button>
   </header>
-
-  <!-- STATUS SECTION -->
-  <div style="background: white; padding: 8px; border-bottom: 1px solid #e2e8f0; overflow-x: auto;">
-    <div class="story-bar">
-      <div class="story upload-story">
-        <label class="upload">
-          +
-          <input type="file" id="uploadFile">
-        </label>
-        <p>Add Status</p>
-      </div>
-      <div id="stories"></div>
-    </div>
-  </div>
-
-  <!-- STATUS VIEWER -->
-  <div class="viewer" id="viewer">
-    <div class="progress">
-      <div class="bar" id="bar"></div>
-    </div>
-    <img id="viewImg" style="display:none;">
-    <video id="viewVideo" controls style="display:none;"></video>
-    <div class="reactions">
-      <i class="fa-regular fa-heart" id="likeBtn"></i>
-      <i class="fa-regular fa-face-smile" id="smileBtn"></i>
-    </div>
-    <div class="seen-list" id="seenList"></div>
-  </div>
+<div data-html="status.html"></div>
+  <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
+  <div id="menuContainer"></div>
 
   <!-- AD POPUP -->
   <div id="adOverlay" style="display:none;">
@@ -926,7 +729,7 @@
   </div>
 
   <!-- UPLOAD STATUS -->
-  <div id="uploadStatus" class="upload-status">
+  <div id="uploadStatus" class="upload-status" style="display:none;">
     <span id="uploadText">Uploading...</span>
   </div>
 
@@ -941,62 +744,11 @@
   </div>
 
   <!-- HIDDEN FILE INPUTS -->
-  <input type="file" id="galleryInput" accept="image/*,video/*,audio/*">
-  <input type="file" id="cameraInput" accept="image/*,video/*,audio/*">
-
-  <!-- STICKY BAR NAVIGATION -->
-  <nav id="stickyBar">
-    <a href="#" class="bar-btn" id="homeBtn" onclick="console.log('Home clicked')">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" class="bar-btn" id="newsBtn" onclick="console.log('News clicked')">
-      <i class="fa-regular fa-newspaper"></i>
-      <span>News</span>
-    </a>
-    <a href="#" class="bar-btn" id="chatsBtn" onclick="console.log('Chat clicked')">
-      <i class="fas fa-message"></i>
-      <span>Chat</span>
-    </a>
-    <a href="#" class="bar-btn" id="socialBtn" onclick="console.log('Social clicked')">
-      <i class="fa-brands fa-meta"></i>
-      <span>Social</span>
-    </a>
-    <a href="#" class="bar-btn" id="sellBtn" onclick="console.log('Sell clicked')">
-      <i class="fas fa-tags"></i>
-      <span>Sell</span>
-    </a>
-  </nav>
+<input type="file" id="galleryInput" accept="image/*,video/*,audio/*">
+<input type="file" id="cameraInput" accept="image/*,video/*,audio/*">
 
   <!-- SCRIPT -->
   <script>
-    // Stickybar Button Interactions
-    document.getElementById("homeBtn").addEventListener("click", function(e) {
-      e.preventDefault();
-      console.log("[v0] Home button clicked");
-    });
-
-    document.getElementById("newsBtn").addEventListener("click", function(e) {
-      e.preventDefault();
-      console.log("[v0] News button clicked");
-    });
-
-    document.getElementById("chatsBtn").addEventListener("click", function(e) {
-      e.preventDefault();
-      console.log("[v0] Chat button clicked");
-    });
-
-    document.getElementById("socialBtn").addEventListener("click", function(e) {
-      e.preventDefault();
-      console.log("[v0] Social button clicked");
-    });
-
-    document.getElementById("sellBtn").addEventListener("click", function(e) {
-      e.preventDefault();
-      console.log("[v0] Sell button clicked");
-    });
-
-    // Hamburger Menu Button Functionality
     document.addEventListener("DOMContentLoaded", () => {
       const menuBtn = document.getElementById("menuBtn");
       const container = document.getElementById("menuContainer");
@@ -1004,47 +756,43 @@
       let loaded = false;
 
       menuBtn.addEventListener("click", async () => {
-        // Inject menu CSS (only once)
-        if (!document.getElementById("menu-style")) {
+        // Inject stickybar CSS (only once)
+        if (!document.getElementById("stickybar-style")) {
           const style = document.createElement("style");
-          style.id = "menu-style";
+          style.id = "stickybar-style";
 
           style.innerHTML = `
-            #stickyBar {
-              position: fixed;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-              display: flex;
-              justify-content: space-around;
-              align-items: center;
-              padding: 8px 0;
-              z-index: 1000;
-              box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
-            }
+           #stickyBar {
+      position: fixed;
+     
+      right: 0px;
+      transform: translateX(-50%);
+      width: 1%;
+      max-width: 600px;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: table;
+      justify-content: space-around;
+      padding: 3px 0;
+      border-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transition: all 0.3s ease-in-out;
+    }
           `;
 
           document.head.appendChild(style);
         }
 
-        // First time → load/create menu
+        // First time → load file
         if (!loaded) {
           try {
-            // Create a menu with options
-            const menuHTML = `
-            <div style="position: fixed; top: 70px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; padding: 10px 0; min-width: 180px;">
-              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="document.getElementById('profilePopup').style.display='flex'">👤 Profile</button>
-              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="document.getElementById('adminPopup').style.display='flex'">⚙️ Admin</button>
-              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="logoutUser()">🚪 Logout</button>
-              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px;" onclick="location.reload()">🔄 Refresh</button>
-            </div>
-            `;
-            container.innerHTML = menuHTML;
+            const res = await fetch("stickybar.html");
+            const html = await res.text();
+            container.innerHTML = html;
             container.style.display = "block";
             loaded = true;
           } catch (err) {
-            console.error("Error loading menu:", err);
+            console.error("Error loading stickybar:", err);
           }
         } 
         // Next clicks → toggle
@@ -1055,6 +803,22 @@
       });
     });
   </script>
-  <script type="module" src="chating.js"></script>
+<script>
+    document.querySelectorAll("[data-html]").forEach(async (el) => {
+      const file = el.getAttribute("data-html");
+      try {
+        const res = await fetch(file);
+        const html = await res.text();
+        el.innerHTML = html;
+      } catch (err) {
+        console.error("Error loading:", file, err);
+      }
+    });
+  </script> 
+  
+
+  <script type="module" src="index.js"></script>
+
+  
 </body>
 </html>
