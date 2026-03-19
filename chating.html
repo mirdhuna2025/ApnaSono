@@ -648,7 +648,33 @@
 </head>
 <body>
   <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
- 
+ <!-- STATUS SECTION -->
+  <div style="background: white; padding: 8px; border-bottom: 1px solid #e2e8f0; overflow-x: auto;">
+    <div class="story-bar">
+      <div class="story upload-story">
+        <label class="upload">
+          +
+          <input type="file" id="uploadFile">
+        </label>
+        <p>Add Status</p>
+      </div>
+      <div id="stories"></div>
+    </div>
+  </div>
+
+  <!-- STATUS VIEWER -->
+  <div class="viewer" id="viewer">
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+    <img id="viewImg" style="display:none;">
+    <video id="viewVideo" controls style="display:none;"></video>
+    <div class="reactions">
+      <i class="fa-regular fa-heart" id="likeBtn"></i>
+      <i class="fa-regular fa-face-smile" id="smileBtn"></i>
+    </div>
+    <div class="seen-list" id="seenList"></div>
+  </div>
 
   <!-- HEADER WITH HAMBURGER MENU BUTTON -->
   <header>
@@ -817,7 +843,7 @@
   </script> 
   
 
-  <script type="module" src="index.js"></script>
+  <script type="module" src="chating.js"></script>
 
   
 </body>
