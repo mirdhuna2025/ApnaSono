@@ -803,20 +803,22 @@
       });
     });
   </script>
-  <script>
-    document.querySelectorAll("[data-html]").forEach(async (el) => {
-      const file = el.getAttribute("data-html");
-      try {
-        const res = await fetch(file);
-        const html = await res.text();
-        el.innerHTML = html;
-      } catch (err) {
-        console.error("Error loading:", file, err);
-      }
-    });
-  </script> 
-  
+  <script type="module">
+  async function loadApp() {
+    try {
+      console.log("Loading Status Feature...");
+      await import('./status.js');
+      
+      console.log("Loading Main Chat Feature...");
+      await import('./index.js');
+      
+      console.log("All systems ready!");
+    } catch (err) {
+      console.error("Critical boot error:", err);
+    }
+  }
 
-  <script type="module" src="index.js"></script>
+  loadApp();
+</script>
 </body>
 </html>
