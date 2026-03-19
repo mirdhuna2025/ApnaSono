@@ -52,11 +52,7 @@ let anonymousName = user?.name || "Anonymous";
 🖼️ DOM ELEMENTS (Fixed IDs)
 ================================ */
 const chatBox = document.getElementById("chatBox");
-chatBox.addEventListener("scroll", () => {
-    if (chatBox.scrollTop === 0) {
-        loadMoreMessages();
-    }
-});
+// Scroll listener will be added after loadInitialMessages()
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const cameraBtn = document.getElementById("cameraBtn");
@@ -700,50 +696,115 @@ function loadInitialMessages() {
 }
 
 async function loadMoreMessages() {
-    if (!lastTimestamp || loadingMore) return;
-
-    loadingMore = true;
-
-    const moreQuery = query(
-        ref(db, "messages"),
-        orderByChild("timestamp"),
-        endBefore(lastTimestamp),
-        limitToLast(PAGE_SIZE)
-    );
-
-    const snapshot = await get(moreQuery);
-    const data = snapshot.val();
-
-    if (data) {
-        const sorted = Object.entries(data).sort(
-            (a, b) => a[1].timestamp - b[1].timestamp
-        );
-
-        lastTimestamp = sorted[0][1].timestamp;
-
-        prependMessages(sorted);
+    if (!lastTimestamp || loadingMore) {
+        console.log("[v0] Already loading or no timestamp set");
+        return;
     }
 
-    loadingMore = false;
+    loadingMore = true;
+    console.log("[v0] Loading more messages with lastTimestamp:", lastTimestamp);
+
+    try {
+        const moreQuery = query(
+            ref(db, "messages"),
+            orderByChild("timestamp"),
+            endBefore(lastTimestamp),
+            limitToLast(PAGE_SIZE)
+        );
+
+        const snapshot = await get(moreQuery);
+        const data = snapshot.val();
+
+        console.log("[v0] Loaded older messages:", data ? Object.keys(data).length : 0);
+
+        if (data) {
+            const sorted = Object.entries(data).sort(
+                (a, b) => a[1].timestamp - b[1].timestamp
+            );
+
+            lastTimestamp = sorted[0][1].timestamp;
+            console.log("[v0] Updated lastTimestamp to:", lastTimestamp);
+
+            prependMessages(sorted);
+        } else {
+            console.log("[v0] No older messages found");
+        }
+    } catch (err) {
+        console.error("[v0] Error loading more messages:", err);
+    } finally {
+        loadingMore = false;
+    }
 }
 
 function prependMessages(sortedMessages) {
     if (!chatBox) return;
 
     const currentScrollHeight = chatBox.scrollHeight;
+    const scrollHeightBefore = chatBox.scrollHeight;
 
     sortedMessages.forEach(([key, msg]) => {
         const div = document.createElement("div");
         div.className = "message";
 
+        let repliesHTML = "";
+        if (msg.replies && Object.keys(msg.replies).length > 0) {
+            repliesHTML = `<div class="replies-section" style="margin-left:20px; border-left:2px solid #ccc; padding-left:10px;"><strong>Replies:</strong>`;
+            Object.entries(msg.replies).forEach(([rKey, r]) => {
+                repliesHTML += `
+                    <div class="reply-inline" style="font-size:0.9em; margin-top:5px;">
+                        <strong>${r.user}</strong>: ${r.text}
+                        ${user?.isAdmin ? `<button onclick="deleteReply('${key}','${rKey}')" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>` : ""}
+                    </div>`;
+            });
+            repliesHTML += `</div>`;
+        }
+
+        let mediaHTML = "";
+        if (msg.mediaUrl) {
+            if (msg.mediaType?.startsWith("video")) {
+                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" controls playsinline style="max-width:200px;"></video>`;
+            } else if (msg.mediaType?.startsWith("audio")) {
+                mediaHTML = `<audio controls style="width:200px;"><source src="${msg.mediaUrl}" type="${msg.mediaType}"></audio>`;
+            } else {
+                mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
+            }
+        }
+
         div.innerHTML = `
-            <strong>${msg.user}</strong>: ${msg.text || ""}
+            <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
+                <div>
+                    <div class="name-line">
+                        <strong>${msg.user || 'Anonymous'}</strong>
+                        ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
+                    </div>
+                    <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
+                </div>
+            </div>
+            ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
+            ${mediaHTML}
+            ${repliesHTML}
+            <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
+                <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
+                <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
+                <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
+                ${user?.isAdmin ? `
+                    <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
+                    <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
+                ` : ''}
+            </div>
         `;
 
         chatBox.prepend(div);
     });
 
-    chatBox.scrollTop = chatBox.scrollHeight - currentScrollHeight;
+    // Maintain scroll position - keep user at approximately the same visual position
+    const scrollHeightAfter = chatBox.scrollHeight;
+    const heightAdded = scrollHeightAfter - scrollHeightBefore;
+    chatBox.scrollTop = heightAdded;
+    
+    console.log("[v0] Prepended", sortedMessages.length, "messages. New scrollTop:", chatBox.scrollTop);
 }
 
 
@@ -861,11 +922,30 @@ if (user && logoutBtn) {
 }
 
 
-chatBox.addEventListener("scroll", () => {
-    if (chatBox.scrollTop === 0) {
-        loadMoreMessages();
-    }
-});
+function setupScrollListener() {
+    if (!chatBox) return;
+    
+    chatBox.addEventListener("scroll", () => {
+        // Trigger load when scrollTop is close to 0 (within 100px threshold)
+        if (chatBox.scrollTop < 100 && !loadingMore) {
+            console.log("[v0] Loading more messages... scrollTop:", chatBox.scrollTop);
+            loadMoreMessages();
+        }
+    }, { passive: true });
+}
 
+// Setup real-time listener for new messages
+function setupRealtimeListener() {
+    const messagesRef = ref(db, "messages");
+    onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // Update messages in real-time
+            renderMessages(data);
+        }
+    });
+}
 
 loadInitialMessages();
+setupScrollListener();
+setupRealtimeListener();
