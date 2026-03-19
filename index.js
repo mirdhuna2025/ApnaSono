@@ -690,7 +690,7 @@ function loadInitialMessages() {
         );
 
         lastTimestamp = sorted[0][1].timestamp;
-
+window.latestTimestamp = sorted[sorted.length - 1][1].timestamp;
         renderMessages(data);
     });
 }
