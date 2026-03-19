@@ -982,4 +982,4 @@ function setupScrollListener() {
 
 loadInitialMessages();
 setupScrollListener();
-
+listenForNewMessages();
