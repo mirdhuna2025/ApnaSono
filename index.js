@@ -948,4 +948,4 @@ function setupRealtimeListener() {
 
 loadInitialMessages();
 setupScrollListener();
-setupRealtimeListener();
+
