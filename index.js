@@ -934,17 +934,7 @@ function setupScrollListener() {
     }, { passive: true });
 }
 
-// Setup real-time listener for new messages
-function setupRealtimeListener() {
-    const messagesRef = ref(db, "messages");
-    onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            // Update messages in real-time
-            renderMessages(data);
-        }
-    });
-}
+
 
 loadInitialMessages();
 setupScrollListener();
