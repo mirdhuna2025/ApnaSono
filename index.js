@@ -890,11 +890,55 @@ function renderMessages(data) {
         chatBox.scrollTop = chatBox.scrollHeight;
     }, 100);
 }
+function appendSingleMessage(key, msg) {
+    if (!chatBox) return;
+
+    const div = document.createElement("div");
+    div.className = "message";
+
+    let mediaHTML = "";
+    if (msg.mediaUrl) {
+        if (msg.mediaType?.startsWith("video")) {
+            mediaHTML = `<video src="${msg.mediaUrl}" controls style="max-width:200px;"></video>`;
+        } else {
+            mediaHTML = `<img src="${msg.mediaUrl}" style="max-width:200px;" />`;
+        }
+    }
+
+    div.innerHTML = `
+        <strong>${msg.user}</strong>
+        <div>${msg.text || ""}</div>
+        ${mediaHTML}
+    `;
+
+    chatBox.appendChild(div);
+
+    // auto scroll if near bottom
+    if (chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+
 
 /* ===============================
 🔄 REALTIME LISTENER
 ================================ */
+function listenForNewMessages() {
+    const messagesRef = query(
+        ref(db, "messages"),
+        orderByChild("timestamp")
+    );
 
+    onChildAdded(messagesRef, (snapshot) => {
+        const msg = snapshot.val();
+        const key = snapshot.key;
+
+        // prevent duplicate loading of old messages
+        if (msg.timestamp > (window.latestTimestamp || 0)) {
+            appendSingleMessage(key, msg);
+        }
+    });
+}
 
 /* ===============================
 🔄 MANUAL REFRESH
