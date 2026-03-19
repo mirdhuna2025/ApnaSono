@@ -807,78 +807,6 @@ function prependMessages(sortedMessages) {
     console.log("[v0] Prepended", sortedMessages.length, "messages. New scrollTop:", chatBox.scrollTop);
 }
 
-// Append NEW messages to the bottom (for realtime updates)
-function appendMessages(sortedMessages) {
-    if (!chatBox || !sortedMessages.length) return;
-
-    const wasAtBottom = chatBox.scrollTop >= chatBox.scrollHeight - chatBox.clientHeight - 50;
-
-    sortedMessages.forEach(([key, msg]) => {
-        const div = document.createElement("div");
-        div.className = "message";
-
-        let repliesHTML = "";
-        if (msg.replies && Object.keys(msg.replies).length > 0) {
-            repliesHTML = `<div class="replies-section" style="margin-left:20px; border-left:2px solid #ccc; padding-left:10px;"><strong>Replies:</strong>`;
-            Object.entries(msg.replies).forEach(([rKey, r]) => {
-                repliesHTML += `
-                    <div class="reply-inline" style="font-size:0.9em; margin-top:5px;">
-                        <strong>${r.user}</strong>: ${r.text}
-                        ${user?.isAdmin ? `<button onclick="deleteReply('${key}','${rKey}')" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>` : ""}
-                    </div>`;
-            });
-            repliesHTML += `</div>`;
-        }
-
-        let mediaHTML = "";
-        if (msg.mediaUrl) {
-            if (msg.mediaType?.startsWith("video")) {
-                mediaHTML = `<video class="media-content" src="${msg.mediaUrl}" controls playsinline style="max-width:200px;"></video>`;
-            } else if (msg.mediaType?.startsWith("audio")) {
-                mediaHTML = `<audio controls style="width:200px;"><source src="${msg.mediaUrl}" type="${msg.mediaType}"></audio>`;
-            } else {
-                mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
-            }
-        }
-
-        div.innerHTML = `
-            <div class="header" style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                <img class="profile" src="${msg.photo || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + (msg.user || 'user')}" alt="${msg.user}" style="width:40px; height:40px; border-radius:50%;">
-                <div>
-                    <div class="name-line">
-                        <strong>${msg.user || 'Anonymous'}</strong>
-                        ${msg.isAdmin ? '<span class="admin-tag" style="background:red; color:white; padding:2px 5px; border-radius:3px; font-size:0.7em;">Admin</span>' : ''}
-                    </div>
-                    <div class="meta" style="font-size:0.8em; color:#666;">${formatTimestamp(msg.timestamp)}</div>
-                </div>
-            </div>
-            ${msg.text ? `<div class="content" style="margin:5px 0;">${linkify(msg.text)}</div>` : ''}
-            ${mediaHTML}
-            ${repliesHTML}
-            <div class="actions" style="margin-top:5px; display:flex; gap:10px;">
-                <button class="reply-btn" onclick="replyMessage('${key}')" style="cursor:pointer;">💬 Reply</button>
-                <button class="like-btn" onclick="likeMessage('${key}')" style="cursor:pointer;">👍 ${msg.likes || 0}</button>
-                <button class="dislike-btn" onclick="dislikeMessage('${key}')" style="cursor:pointer;">👎 ${msg.dislikes || 0}</button>
-                ${user?.isAdmin ? `
-                    <button class="edit-btn" onclick="editMessage('${key}', \`${msg.text || ''}\`)" style="cursor:pointer;">✏️ Edit</button>
-                    <button class="delete-btn" onclick="deleteMessage('${key}')" style="cursor:pointer; color:red;">🗑️ Delete</button>
-                    <button class="ban-btn" onclick="banUser('${msg.user}')" style="cursor:pointer; color:orange;">🚫 Ban</button>
-                ` : ''}
-            </div>
-        `;
-
-        chatBox.append(div);
-        lastTimestamp = msg.timestamp; // Update last timestamp
-    });
-
-    // Auto-scroll to bottom if user was already at bottom
-    if (wasAtBottom) {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    console.log("[v0] Appended", sortedMessages.length, "new messages");
-}
-
 
 function renderMessages(data) {
     if (!chatBox) return;
@@ -1008,31 +936,14 @@ function setupScrollListener() {
 
 // Setup real-time listener for new messages
 function setupRealtimeListener() {
-    // Only listen for NEW messages after the last loaded timestamp
-    // This prevents reloading ALL messages from the database
-    if (!lastTimestamp) {
-        console.log("[v0] No messages loaded yet, skipping realtime listener");
-        return;
-    }
-
     const messagesRef = ref(db, "messages");
-    const newMessagesQuery = query(
-        messagesRef,
-        orderByChild("timestamp"),
-        endBefore(lastTimestamp + 1) // Listen only for messages AFTER last loaded
-    );
-
-    onValue(newMessagesQuery, (snapshot) => {
+    onValue(messagesRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            console.log("[v0] New realtime messages detected:", Object.keys(data).length);
-            // Only append NEW messages (not render all)
-            const newMessages = Object.entries(data).sort(
-                (a, b) => a[1].timestamp - b[1].timestamp
-            );
-            appendMessages(newMessages);
+            // Update messages in real-time
+            renderMessages(data);
         }
-    }, { onlyOnce: false });
+    });
 }
 
 loadInitialMessages();
