@@ -647,7 +647,20 @@
   </style>
 </head>
 <body>
-  
+  <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
+ <!-- STATUS SECTION -->
+  <div style="background: white; padding: 8px; border-bottom: 1px solid #e2e8f0; overflow-x: auto;">
+    <div class="story-bar">
+      <div class="story upload-story">
+        <label class="upload">
+          +
+          <input type="file" id="uploadFile">
+        </label>
+        <p>Add Status</p>
+      </div>
+      <div id="stories"></div>
+    </div>
+  </div>
 
   <!-- STATUS VIEWER -->
   <div class="viewer" id="viewer">
@@ -671,7 +684,7 @@
     <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
     <button id="menuBtn">☰</button>
   </header>
-
+<div data-html="status.html"></div>
   <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
   <div id="menuContainer"></div>
 
@@ -718,21 +731,6 @@
     <div id="mediaContent"></div>
   </div>
 
-  <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
- <!-- STATUS SECTION -->
-  
-  
-    <div class="story-bar">
-      <div class="story upload-story">
-        <label class="upload">
-          +
-          <input type="file" id="uploadFile">
-        </label>
-        <p>Add Status</p>
-      </div>
-      <div id="stories"></div>
-    </div>
-  </div>
   <!-- CHAT CONTAINER -->
   <div class="chat-container">
     <div class="chat-box" id="chatBox">
