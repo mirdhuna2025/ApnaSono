@@ -124,37 +124,51 @@ if (uploadFile) {
 }
 
 // Fetch and display status
-if (storiesDiv) {
-  onValue(ref(db, "status"), (snapshot) => {
-    storiesDiv.innerHTML = "";
-    
-    snapshot.forEach((data) => {
-      const status = data.val();
-      
-      // Remove expired status (24 hours)
-      if (Date.now() - status.time > 86400000) {
-        remove(ref(db, "status/" + data.key));
-        return;
-      }
-      
-      const div = document.createElement("div");
-      div.className = "story";
-      
-      const img = document.createElement("img");
-      img.src = status.url;
-      
-      const name = document.createElement("p");
-      name.innerText = status.name || "Status";
-      
-      div.appendChild(img);
-      div.appendChild(name);
-      
-      div.onclick = () => openStatusViewer(status, data.key);
-      
-      storiesDiv.appendChild(div);
-    });
+/* ===============================
+📸 STATUS UPLOAD & FETCH
+================================ */
+
+function loadStatusFirst() {
+  return new Promise((resolve) => {
+    const statusRef = ref(db, "status");
+
+    onValue(statusRef, (snapshot) => {
+      if (!storiesDiv) return;
+
+      storiesDiv.innerHTML = "";
+
+      snapshot.forEach((data) => {
+        const status = data.val();
+
+        if (Date.now() - status.time > 86400000) {
+          remove(ref(db, "status/" + data.key));
+          return;
+        }
+
+        const div = document.createElement("div");
+        div.className = "story";
+
+        const img = document.createElement("img");
+        img.src = status.url;
+
+        const name = document.createElement("p");
+        name.innerText = status.name || "Status";
+
+        div.appendChild(img);
+        div.appendChild(name);
+
+        div.onclick = () => openStatusViewer(status, data.key);
+
+        storiesDiv.appendChild(div);
+      });
+
+      resolve(); // ✅ important
+    }, { onlyOnce: true });
   });
-}
+} 
+
+
+
 
 let progressInterval;
 
@@ -980,6 +994,14 @@ function setupScrollListener() {
 
 
 
-loadInitialMessages();
-setupScrollListener();
-listenForNewMessages();
+async function initApp() {
+    console.log("⏳ Loading status first...");
+    await loadStatusFirst();
+
+    console.log("💬 Loading chat...");
+    loadInitialMessages();
+    setupScrollListener();
+    listenForNewMessages();
+}
+
+initApp();
