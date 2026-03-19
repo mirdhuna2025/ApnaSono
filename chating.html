@@ -76,6 +76,80 @@
       pointer-events: auto;
     }
 
+    /* ========== STICKY BAR ========== */
+    #stickyBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0;
+      z-index: 1000;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .bar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 10px 16px;
+      position: relative;
+      transition: transform 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+
+    .bar-btn i {
+      font-size: 22px;
+      margin-bottom: 5px;
+      transition: transform 0.3s, color 0.3s;
+    }
+
+    .bar-btn:hover {
+      color: #fff;
+      transform: translateY(-8px) scale(1.1);
+    }
+
+    .bar-btn:hover i {
+      transform: rotate(15deg) scale(1.3);
+      color: #ffd700;
+    }
+
+    .bar-btn::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      transform: scale(0);
+      transition: transform 0.4s, opacity 0.4s;
+    }
+
+    .bar-btn:active::after {
+      transform: scale(1.5);
+      opacity: 1;
+      transition: 0s;
+    }
+
+    .bar-btn span {
+      transition: transform 0.3s, color 0.3s;
+    }
+
     .content img.emoji, #msg img.emoji {
       height: 1em;
       width: 1em;
@@ -870,8 +944,59 @@
   <input type="file" id="galleryInput" accept="image/*,video/*,audio/*">
   <input type="file" id="cameraInput" accept="image/*,video/*,audio/*">
 
+  <!-- STICKY BAR NAVIGATION -->
+  <nav id="stickyBar">
+    <a href="#" class="bar-btn" id="homeBtn" onclick="console.log('Home clicked')">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="bar-btn" id="newsBtn" onclick="console.log('News clicked')">
+      <i class="fa-regular fa-newspaper"></i>
+      <span>News</span>
+    </a>
+    <a href="#" class="bar-btn" id="chatsBtn" onclick="console.log('Chat clicked')">
+      <i class="fas fa-message"></i>
+      <span>Chat</span>
+    </a>
+    <a href="#" class="bar-btn" id="socialBtn" onclick="console.log('Social clicked')">
+      <i class="fa-brands fa-meta"></i>
+      <span>Social</span>
+    </a>
+    <a href="#" class="bar-btn" id="sellBtn" onclick="console.log('Sell clicked')">
+      <i class="fas fa-tags"></i>
+      <span>Sell</span>
+    </a>
+  </nav>
+
   <!-- SCRIPT -->
   <script>
+    // Stickybar Button Interactions
+    document.getElementById("homeBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("[v0] Home button clicked");
+    });
+
+    document.getElementById("newsBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("[v0] News button clicked");
+    });
+
+    document.getElementById("chatsBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("[v0] Chat button clicked");
+    });
+
+    document.getElementById("socialBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("[v0] Social button clicked");
+    });
+
+    document.getElementById("sellBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("[v0] Sell button clicked");
+    });
+
+    // Hamburger Menu Button Functionality
     document.addEventListener("DOMContentLoaded", () => {
       const menuBtn = document.getElementById("menuBtn");
       const container = document.getElementById("menuContainer");
@@ -879,46 +1004,25 @@
       let loaded = false;
 
       menuBtn.addEventListener("click", async () => {
-        // Inject stickybar CSS (only once)
-        if (!document.getElementById("stickybar-style")) {
+        // Inject menu CSS (only once)
+        if (!document.getElementById("menu-style")) {
           const style = document.createElement("style");
-          style.id = "stickybar-style";
+          style.id = "menu-style";
 
           style.innerHTML = `
-           #stickyBar {
-      position: fixed;
-      top: 80px;
-      right: 10px;
-      width: auto;
-      max-width: 600px;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 15px;
-      border-radius: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      z-index: 1000;
-      transition: all 0.3s ease-in-out;
-    }
-    
-    #stickyBar button, #stickyBar a {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 8px 16px;
-      margin: 0 5px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    #stickyBar button:hover, #stickyBar a:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-    }
+            #stickyBar {
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              padding: 8px 0;
+              z-index: 1000;
+              box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            }
           `;
 
           document.head.appendChild(style);
@@ -927,13 +1031,13 @@
         // First time → load/create menu
         if (!loaded) {
           try {
-            // Create a sticky menu with options
+            // Create a menu with options
             const menuHTML = `
-            <div id="stickyBar">
-              <button onclick="document.getElementById('profileSetup').style.display='flex'">👤 Profile</button>
-              <button onclick="document.getElementById('adminPanel').style.display='flex'">⚙️ Admin</button>
-              <button onclick="document.getElementById('logoutBtn').click()">🚪 Logout</button>
-              <button onclick="document.location.reload()">🔄 Refresh</button>
+            <div style="position: fixed; top: 70px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; padding: 10px 0; min-width: 180px;">
+              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="document.getElementById('profilePopup').style.display='flex'">👤 Profile</button>
+              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="document.getElementById('adminPopup').style.display='flex'">⚙️ Admin</button>
+              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px; border-bottom: 1px solid #eee;" onclick="logoutUser()">🚪 Logout</button>
+              <button style="width: 100%; padding: 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 15px;" onclick="location.reload()">🔄 Refresh</button>
             </div>
             `;
             container.innerHTML = menuHTML;
@@ -951,6 +1055,6 @@
       });
     });
   </script>
-  <script type="module" src="chating.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
