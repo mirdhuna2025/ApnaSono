@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Status Stories</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:transparent;
+  color:black;
+}
+
+.story-bar{
+  display:flex;
+  overflow-x:auto;
+  padding:1px;
+  background:transparent;
+}
+
+.story{
+  margin-right:15px;
+  text-align:center;
+  cursor:pointer;
+  position:relative;
+}
+
+.story img{
+  width:70px;
+  height:70px;
+  border-radius:30%;
+  border:3px solid #25D366;
+  object-fit:cover;
+}
+
+.story p{
+  font-size:12px;
+  margin-top:5px;
+  display:none;
+}
+
+.viewer{
+  position:relative;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:transparent;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
+.viewer img,
+.viewer video{
+  max-width:95%;
+  max-height:85%;
+}
+
+.progress{
+  width:90%;
+  height:4px;
+  background:#333;
+  margin-bottom:10px;
+}
+
+.bar{
+  height:4px;
+  background:#25D366;
+  width:0%;
+}
+
+.upload-story{
+  flex-shrink: 0;
+}
+
+.upload{ 
+  width: 70px;
+  height: 70px;
+  background: black;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  cursor: pointer;
+  border: 3px dashed #25D366;
+  color: #25D366;
+}
+
+#stories{
+  display: flex;
+}
+
+
+#uploadFile{
+display:none;
+}
+  
+.reactions{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+}
+
+.reactions i{
+  font-size:25px;
+  cursor:pointer;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<div class="story-bar">
+<div class="story upload-story">
+<label class="upload">
++
+<input type="file" id="uploadFile">
+</label>
+<p>Add Status</p>
+</div>
+<div id="stories"></div>
+</div>
+
+<div class="viewer" id="viewer">
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+<img id="viewImg">
+<video id="viewVideo" controls></video>
+
+<div class="reactions">
+<i class="fa-regular fa-heart" id="likeBtn"></i>
+<i class="fa-regular fa-face-smile" id="smileBtn"></i>
+</div>
+
+<div class="seen-list" id="seenList"></div>
+
+</div>
+
+<script type="module" src="status.js"></script>
+
+</body>
+</html>
+
