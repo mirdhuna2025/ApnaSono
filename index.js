@@ -746,7 +746,7 @@ function prependMessages(sortedMessages) {
             } else if (msg.mediaType?.startsWith("audio")) {
                 mediaHTML = `<audio controls style="width:200px;"><source src="${msg.mediaUrl}" type="${msg.mediaType}"></audio>`;
             } else {
-                mediaHTML = `<img class="media-content" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
+                mediaHTML = `<img class="media-content" loading="lazy" src="${msg.mediaUrl}" alt="Shared" onclick="showMedia('${msg.mediaUrl}', '${msg.mediaType || 'image'}')" style="max-width:200px; cursor:pointer;" />`;
             }
         }
 
