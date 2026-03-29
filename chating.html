@@ -751,9 +751,18 @@ display:none;
   </style>
 </head>
 <body>
-  <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
+ 
+  <!-- HEADER WITH HAMBURGER MENU BUTTON -->
+  <header>
+    <button id="logoutBtn" style="display:none;">Logout</button>
+    <button id="adminBtn" class="header-btn">🔐</button>
+    <div id="chatTitle">APNA SONO CHAT <button id="refreshBtn" class="header-btn">🔄</button></div>
+    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
+    <button id="menuBtn">☰</button>
+  </header>
+ <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
  <!-- STATUS SECTION -->
-  <div style="background: white; padding: 8px; border-bottom: 1px solid #e2e8f0; overflow-x: auto;">
+  <div style="background: white; padding: 0px; border-bottom: 0px solid #e2e8f0; overflow-x: auto;">
     <div class="story-bar">
       <div class="story upload-story">
         <label class="upload">
@@ -779,15 +788,6 @@ display:none;
     </div>
     <div class="seen-list" id="seenList"></div>
   </div>
-
-  <!-- HEADER WITH HAMBURGER MENU BUTTON -->
-  <header>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-    <button id="adminBtn" class="header-btn">🔐</button>
-    <div id="chatTitle">APNA SONO CHAT <button id="refreshBtn" class="header-btn">🔄</button></div>
-    <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
-    <button id="menuBtn">☰</button>
-  </header>
 
   <!-- STICKY BAR CONTAINER (loads stickybar.html) -->
   <div id="menuContainer"></div>
