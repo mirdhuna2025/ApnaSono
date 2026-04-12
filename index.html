@@ -40,63 +40,7 @@
   color: #1e293b;
 }
 
- .bar-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #fff;
-      text-decoration: none;
-      font-size: 12px;
-      padding: 10px 16px;
-      position: relative;
-      transition: transform 0.3s, color 0.3s;
-    }
-
-    /* Icon animation */
-    .bar-btn i {
-      font-size: 22px;
-      margin-bottom: 5px;
-      transition: transform 0.3s, color 0.3s;
-    }
-
-    /* Hover effect */
-    .bar-btn:hover {
-      color: #fff;
-      transform: translateY(-8px) scale(1.1);
-    }
-
-    .bar-btn:hover i {
-      transform: rotate(15deg) scale(1.3);
-      color: #ffd700; /* golden highlight */
-    }
-
-    /* Ripple effect on click */
-    .bar-btn::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.2);
-      opacity: 0;
-      transform: scale(0);
-      transition: transform 0.4s, opacity 0.4s;
-    }
-
-    .bar-btn:active::after {
-      transform: scale(1.5);
-      opacity: 1;
-      transition: 0s;
-    }
-
-  
-    .bar-btn span {
-      transition: transform 0.3s, color 0.3s;
-    }
-
-
+ 
 
 
 
