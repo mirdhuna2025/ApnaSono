@@ -756,7 +756,7 @@ display:none;
   <header>
 <img id="profileBtn" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Profile" />
 <button id="menuBtn">☰</button>
-<button id="logoutBtn" style="display:none; background: transparent; border: none; cursor: pointer;"><i class="fas fa-sign-out-alt"></i></button>
+<button id="logoutBtn"  class="header-btn"style="display:none;">📴</button>
 <div id="chatTitle"></div>
 <button id="adminBtn" class="header-btn">🔐</button>
 <button id="refreshBtn" class="header-btn">🔄</button>
@@ -765,18 +765,13 @@ display:none;
 <button id="chatsBtn"class="header-btn" onclick="location.href='https://apnasono.in'">💬</button>
 <button id="socialBtn"class="header-btn" onclick="location.href='https://apnasono.in/social'">🧸</button>
 <button id="sellBtn"class="header-btn" onclick="location.href='/sell'">🛍️</button>
+</header>
 
-    
-  </header>
- <!-- STATUS SECTION (loads status.html) ABOVE ALL -->
  <!-- STATUS SECTION -->
   <div style="background: white; padding: 0px; border-bottom: 0px solid #e2e8f0; overflow-x: auto;">
     <div class="story-bar">
       <div class="story upload-story">
-        <label class="upload">
-          +
-          <input type="file" id="uploadFile">
-        </label>
+        <label class="upload"> + <input type="file" id="uploadFile">  </label>
         <p>Add Status</p>
       </div>
       <div id="stories"></div>
@@ -883,15 +878,6 @@ display:none;
   <!-- HIDDEN FILE INPUTS -->
 <input type="file" id="galleryInput" accept="image/*,video/*,audio/*">
 <input type="file" id="cameraInput" accept="image/*,video/*,audio/*">
-
-
-
-
-
-
-  
-
-
 
 
   
